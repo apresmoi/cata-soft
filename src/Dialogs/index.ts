@@ -1,0 +1,7 @@
+export * from "./NewPatientDialog";
+export * from "./EvolucionDialog";
+export * from "./InterconsultaDialog";
+export * from "./AntropometriaDialog";
+export * from "./HospitalizacionDialog";
+export * from "./CloseWithoutSavingDialog";
+export * from "./ArchivoAdjuntoDialog";

@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  text-transform: uppercase;
+}
+
+.react-datepicker-popper.custom-styles .react-datepicker {
+  background-color: rgb(87 83 78 / var(--tw-bg-opacity, 1)) !important;
+
+  user-select: none;
+}
+
+.react-datepicker-popper.custom-styles .react-datepicker__current-month,
+.react-datepicker-popper.custom-styles .react-datepicker__day-name,
+.react-datepicker-popper.custom-styles .react-datepicker__day {
+  color: rgb(245 245 244 / var(--tw-text-opacity, 1));
+}
+
+.react-datepicker-popper.custom-styles .react-datepicker__day:hover {
+  background-color: rgb(41 37 36 / var(--tw-bg-opacity, 1));
+}
+
+.react-datepicker-popper.custom-styles .react-datepicker__day--selected {
+  background-color: rgb(41 37 36 / var(--tw-bg-opacity, 1)) !important;
+}
+
+.react-datepicker__header {
+  background-color: rgb(87 83 78 / var(--tw-bg-opacity, 1)) !important;
+}

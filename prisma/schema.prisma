@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Pacientes {
+  id String @id @default(cuid())
+
+  nombre    String
+  documento String @unique
+
+  telefono  String?
+  direccion String?
+  email     String?
+
+  fechaNacimiento DateTime @default(now())
+
+  obraSocial       String?
+  numeroObraSocial String?
+
+  antecedentes       String?
+  medicacionHabitual String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  evoluciones       Evoluciones[]
+  archivos          ArchivosAdjuntos[]
+  antropometrias    Antropometrias[]
+  hospitalizaciones Hospitalizaciones[]
+  interconsultas    Interconsultas[]
+}
+
+model Evoluciones {
+  id String @id @default(cuid())
+
+  pacienteId String
+  paciente   Pacientes @relation(fields: [pacienteId], references: [id])
+
+  fecha DateTime @default(now())
+
+  motivo       String?
+  examenFisico String?
+  plan         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Antropometrias {
+  id String @id @default(cuid())
+
+  pacienteId String
+  paciente   Pacientes @relation(fields: [pacienteId], references: [id])
+
+  fecha DateTime @default(now())
+
+  peso  Float
+  talla Float
+  imc   Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Hospitalizaciones {
+  id String @id @default(cuid())
+
+  pacienteId String
+  paciente   Pacientes @relation(fields: [pacienteId], references: [id])
+
+  fechaIngreso DateTime
+  fechaEgreso  DateTime?
+
+  motivo String
+  notas  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Interconsultas {
+  id String @id @default(cuid())
+
+  pacienteId String
+  paciente   Pacientes @relation(fields: [pacienteId], references: [id])
+
+  fecha DateTime @default(now())
+
+  motivo String
+  notas  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ArchivosAdjuntos {
+  id String @id @default(cuid())
+
+  pacienteId String
+  paciente   Pacientes @relation(fields: [pacienteId], references: [id])
+
+  tipo   String
+  nombre String
+  notas  String?
+  path   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
