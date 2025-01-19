@@ -43,6 +43,8 @@ import {
   HistoriaMedicaDialog,
 } from "../Dialogs";
 import React from "react";
+import { DeleteDialog } from "../Dialogs/DeleteDialog";
+import { ThrashCanIcon } from "../components/Icons/ThrashCanIcon";
 
 const searchKeys = [
   "type",
@@ -59,7 +61,9 @@ export function PatientScreen() {
   const [isClosingWithoutSaving, setIsClosingWithoutSaving] =
     React.useState(false);
 
-  const { isModified, data, update, save } = usePaciente(params.id as string);
+  const { isModified, data, update, save, remove } = usePaciente(
+    params.id as string
+  );
   const { data: history } = usePacienteHistorial(params.id as string);
 
   const [historyId, setHistoryId] = React.useState<string | null>(null);
@@ -72,6 +76,11 @@ export function PatientScreen() {
     if (back) {
       window.history.back();
     }
+  };
+
+  const handleDelete = () => {
+    remove();
+    window.history.back();
   };
 
   const handleHistoryClick = (id: string) => {
@@ -224,9 +233,17 @@ export function PatientScreen() {
             </NewHospitalizacionDialogDialog>
           </Tooltip>
           <Tooltip tooltip="RESUMEN DE HISTORIA CLINICA">
-            <HistoriaMedicaDialog patient={data} history={history}>
+            <HistoriaMedicaDialog patientId={params.id as string}>
               <SideToolbarButton variant="info">R</SideToolbarButton>
             </HistoriaMedicaDialog>
+          </Tooltip>
+          <div className="grow" />
+          <Tooltip tooltip="ELIMINAR PACIENTE">
+            <DeleteDialog onDelete={handleDelete}>
+              <SideToolbarButton variant="danger">
+                <ThrashCanIcon />
+              </SideToolbarButton>
+            </DeleteDialog>
           </Tooltip>
         </SideToolbar>
         <div className="flex-1 flex flex-col">

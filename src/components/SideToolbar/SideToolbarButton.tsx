@@ -17,7 +17,7 @@ export function SideToolbarButton(
           "border-purple-600 text-purple-600 hover:bg-purple-800 hover:text-gray-200",
 
         props.variant === "danger" &&
-          "border-orange-600 text-orange-600 hover:bg-orange-800 hover:text-gray-200",
+          "border-red-600 text-red-600 hover:bg-red-800 hover:text-gray-200",
 
         props.variant === "warning" &&
           "border-yellow-600 text-yellow-600 hover:bg-yellow-800 hover:text-gray-200",

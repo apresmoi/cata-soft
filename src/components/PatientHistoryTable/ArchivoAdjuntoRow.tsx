@@ -1,7 +1,17 @@
 import { ArchivosAdjuntos } from "@prisma/client";
-import { TableRow, TableCol } from "../Table";
+import { TableRow, TableCol, TableActionButton } from "../Table";
+import { Tooltip } from "../Tooltip";
+import { DeleteDialog } from "../../Dialogs/DeleteDialog";
+import { ThrashCanIcon } from "../Icons/ThrashCanIcon";
+import { useDeleteArchivoAdjunto } from "../../hooks";
 
 export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
+  const { remove } = useDeleteArchivoAdjunto(props.id);
+
+  const handleRemove = () => {
+    remove();
+  };
+
   return (
     <TableRow
       onClick={() => {
@@ -17,6 +27,17 @@ export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
       </TableCol>
       <TableCol>{"ARCHIVO ADJUNTO"}</TableCol>
       <TableCol>{`${props.nombre}`}</TableCol>
+      <TableCol>
+        <Tooltip tooltip="Eliminar">
+          <DeleteDialog asChild onDelete={handleRemove}>
+            <span onClick={(e) => e.stopPropagation()}>
+              <TableActionButton>
+                <ThrashCanIcon />
+              </TableActionButton>
+            </span>
+          </DeleteDialog>
+        </Tooltip>
+      </TableCol>
     </TableRow>
   );
 }

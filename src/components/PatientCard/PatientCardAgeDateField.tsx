@@ -43,7 +43,7 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
 
   return (
     <div className={cx("w-[100%] flex flex-col gap-2", props.className)}>
-      <div className={cx("flex items-center gap-2")}>
+      <div className={cx("flex items-center gap-2  select-none")}>
         {props.icon} {props.label}
       </div>
       <div className="w-full">

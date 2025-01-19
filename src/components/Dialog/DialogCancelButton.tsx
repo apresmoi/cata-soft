@@ -3,7 +3,7 @@ import { DialogButton } from "./DialogButton";
 
 export function DialogCancelButton() {
   return (
-    <RadixDialog.Trigger asChild>
+    <RadixDialog.Trigger asChild className="select-none">
       <span>
         <DialogButton>CANCELAR</DialogButton>
       </span>

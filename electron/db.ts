@@ -36,6 +36,9 @@ export async function getPacientes() {
       fechaNacimiento: true,
       email: true,
     },
+    orderBy: {
+      nombre: "asc",
+    },
   });
 
   return pacientes.map((paciente) => ({

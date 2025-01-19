@@ -7,6 +7,7 @@ import {
   Pacientes,
 } from "@prisma/client";
 import {
+  useCommonDeleteRegistry,
   useCommonNewRegistry,
   useCommonRegistry,
   useCommonRegistryList,
@@ -173,5 +174,40 @@ export function useNewArchivoAdjunto(patientId: string) {
       invalidateQueries: [["historial"]],
     },
     patientId
+  );
+}
+
+export function useDeleteAntropometria(id: string) {
+  return useCommonDeleteRegistry(
+    { endpointKey: "antropometria", invalidateQueries: [["historial"]] },
+    id
+  );
+}
+
+export function useDeleteEvolucion(id: string) {
+  return useCommonDeleteRegistry(
+    { endpointKey: "evolucion", invalidateQueries: [["historial"]] },
+    id
+  );
+}
+
+export function useDeleteInterconsulta(id: string) {
+  return useCommonDeleteRegistry(
+    { endpointKey: "interconsulta", invalidateQueries: [["historial"]] },
+    id
+  );
+}
+
+export function useDeleteHospitalizacion(id: string) {
+  return useCommonDeleteRegistry(
+    { endpointKey: "hospitalizacion", invalidateQueries: [["historial"]] },
+    id
+  );
+}
+
+export function useDeleteArchivoAdjunto(id: string) {
+  return useCommonDeleteRegistry(
+    { endpointKey: "archivoadjunto", invalidateQueries: [["historial"]] },
+    id
   );
 }

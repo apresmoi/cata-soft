@@ -1,14 +1,23 @@
 import React from "react";
 
-import { DownloadIcon } from "@radix-ui/react-icons";
+import {
+  DownloadIcon,
+  ListBulletIcon,
+  ReaderIcon,
+} from "@radix-ui/react-icons";
 import { Toolbar } from "../components/Toolbar";
 import { ToolbarSearch } from "../components/ToolbarSearch";
-import { AppContainer } from "../components";
-import { NewPatientDialog } from "../Dialogs";
+import { AppContainer, Tooltip } from "../components";
+import { HistoriaMedicaDialog, NewPatientDialog } from "../Dialogs";
 import { Pacientes } from "@prisma/client";
 import { useNavigate } from "react-router-dom";
 import { usePacientes } from "../hooks";
-import { Table, TableCol, TableRow } from "../components/Table";
+import {
+  Table,
+  TableActionButton,
+  TableCol,
+  TableRow,
+} from "../components/Table";
 
 const searchKeys = [
   "nombre",
@@ -98,9 +107,15 @@ export function HomeScreen() {
                   {paciente.obraSocial} ({paciente.numeroObraSocial})
                 </TableCol>
                 <TableCol className="w-[100px] text-center">
-                  <button className="hover:bg-green-900 p-2 flex items-center gap-2 rounded-lg">
-                    <DownloadIcon />
-                  </button>
+                  <Tooltip tooltip="Descargar Historial">
+                    <HistoriaMedicaDialog patientId={paciente.id} asChild>
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <TableActionButton>
+                          <ReaderIcon />
+                        </TableActionButton>
+                      </span>
+                    </HistoriaMedicaDialog>
+                  </Tooltip>
                 </TableCol>
               </TableRow>
             ))}

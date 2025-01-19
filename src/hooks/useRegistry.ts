@@ -183,11 +183,51 @@ export function useCommonRegistry<T>(
     };
   };
 
+  const remove = async () => {
+    try {
+      await window.ipcRenderer.invoke("delete-" + options.endpointKey, ...args);
+      if (options.invalidateQueries)
+        await Promise.all(
+          options.invalidateQueries.map((queryKey) => {
+            queryClient.invalidateQueries({
+              queryKey,
+            });
+          })
+        );
+    } catch (e) {}
+  };
+
   return {
     data,
     isFetching,
     update,
     save,
     isModified,
+    remove,
+  };
+}
+
+export function useCommonDeleteRegistry(
+  options: UseCommonRegistryOptions,
+  ...args: string[]
+) {
+  const queryClient = useQueryClient();
+
+  const remove = async () => {
+    try {
+      await window.ipcRenderer.invoke("delete-" + options.endpointKey, ...args);
+      if (options.invalidateQueries)
+        await Promise.all(
+          options.invalidateQueries.map((queryKey) => {
+            queryClient.invalidateQueries({
+              queryKey,
+            });
+          })
+        );
+    } catch (e) {}
+  };
+
+  return {
+    remove,
   };
 }

@@ -11,7 +11,7 @@ export function PatientHistoryTable(props: {
   onClick: (id: string) => void;
 }) {
   return (
-    <div className="flex-1 flex flex-col overflow-hidden relative">
+    <div className="flex-1 flex flex-col overflow-hidden relative  select-none">
       <div className="pr-4 z-10 bg-stone-900">
         <table className="w-full">
           <thead className="border-b border-stone-600">
@@ -19,6 +19,7 @@ export function PatientHistoryTable(props: {
               <TableCol className="text-left w-[100px]">Fecha</TableCol>
               <TableCol className="text-left w-[150px]">Tipo</TableCol>
               <TableCol className="text-left">Contenido</TableCol>
+              <TableCol className="text-left w-[50px]"></TableCol>
             </tr>
           </thead>
         </table>
@@ -30,6 +31,7 @@ export function PatientHistoryTable(props: {
               <TableCol className="text-left w-[100px]">Fecha</TableCol>
               <TableCol className="text-left w-[150px]">Tipo</TableCol>
               <TableCol className="text-left">Contenido</TableCol>
+              <TableCol className="text-left w-[50px]"></TableCol>
             </tr>
           </thead>
           <tbody className="">

@@ -21,7 +21,7 @@ export function ToolbarButton(
   return (
     <button
       className={classNames(
-        "p-2 flex items-center gap-2 rounded-lg",
+        "p-2 flex items-center gap-2 rounded-lg select-none",
 
         !props.variant && "hover:bg-stone-900",
 

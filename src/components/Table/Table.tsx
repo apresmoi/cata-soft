@@ -3,7 +3,7 @@ export function Table(props: {
   tableBody: React.ReactNode;
 }) {
   return (
-    <div className="flex-1 flex flex-col overflow-hidden relative">
+    <div className="flex-1 flex flex-col overflow-hidden relative select-none">
       <div className="pr-4 z-10 bg-stone-900">
         <table className="w-full">
           <thead className="border-b border-stone-600">

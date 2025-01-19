@@ -83,7 +83,9 @@ export function NewPatientDialog() {
             />
           </div>
 
-          <div className="mt-4 font-bold w-full border-b">CONTACTO</div>
+          <div className="mt-4 font-bold w-full border-b select-none">
+            CONTACTO
+          </div>
 
           <PatientCardField
             icon={<HomeIcon />}
@@ -107,7 +109,9 @@ export function NewPatientDialog() {
             />
           </div>
 
-          <div className="mt-4 font-bold w-full border-b">OBRA SOCIAL</div>
+          <div className="mt-4 font-bold w-full border-b select-none">
+            OBRA SOCIAL
+          </div>
 
           <div className="w-full flex gap-2">
             <PatientCardField

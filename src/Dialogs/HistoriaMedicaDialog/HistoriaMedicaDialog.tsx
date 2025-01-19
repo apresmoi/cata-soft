@@ -15,7 +15,11 @@ import {
   DialogTrigger,
 } from "../../components/Dialog";
 import { getTemplate } from "./template";
-import { PacienteHistoryItem, usePaciente } from "../../hooks";
+import {
+  PacienteHistoryItem,
+  usePaciente,
+  usePacienteHistorial,
+} from "../../hooks";
 
 const tipos = [
   { value: "evolucion", label: "Evoluciones" },
@@ -26,12 +30,16 @@ const tipos = [
 
 export function HistoriaMedicaDialog(
   props: React.PropsWithChildren<{
-    patient: ReturnType<typeof usePaciente>["data"];
-    history?: PacienteHistoryItem[];
+    patientId: string;
+
+    asChild?: boolean;
   }>
 ) {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [open, setOpen] = React.useState(false);
+
+  const { data: patient } = usePaciente(props.patientId);
+  const { data: history } = usePacienteHistorial(props.patientId);
 
   const [selectedPeriod, setSelectedPeriod] = React.useState("ultimos-5");
 
@@ -59,7 +67,7 @@ export function HistoriaMedicaDialog(
     iframeRef.current?.contentWindow?.print();
   };
 
-  const filteredHistory = props.history
+  const filteredHistory = history
     ?.filter((item) => {
       if (!selectedTypes[item.type as keyof typeof selectedTypes]) return false;
 
@@ -118,7 +126,7 @@ export function HistoriaMedicaDialog(
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger>{props.children}</DialogTrigger>
+      <DialogTrigger asChild={props.asChild}>{props.children}</DialogTrigger>
       <DialogContainer className="min-w-[80vw] max-w-[80vw] ">
         <DialogTitle>DESCARGAR RESUMEN DE HISTORIA</DialogTitle>
 
@@ -166,7 +174,7 @@ export function HistoriaMedicaDialog(
             <iframe
               ref={iframeRef}
               className="h-full w-full"
-              srcDoc={getTemplate(props.patient, filteredHistory || [])}
+              srcDoc={getTemplate(patient, filteredHistory || [])}
               title="Historia Medica"
             ></iframe>
           </div>
