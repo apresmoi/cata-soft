@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html {
+        max-width: 100vw;
+      }
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        margin: 0;
+        padding: 10px;
+        width: 100vw;
+        overflow-x: hidden;
+      }
+      .header {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      .header-title {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: left;
+        text-transform: uppercase;
+      }
+      .header-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+      .header-item {
+        display: flex;
+        flex-direction: column;
+      }
+      .label {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 3px;
+      }
+      .divider {
+        border-top: 1px solid #ccc;
+        grid-column: span 3;
+      }
+      .value {
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+
+      /* Medical History Section */
+      .medical-history {
+        margin-top: 20px;
+      }
+      .section-title {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #888;
+        padding-bottom: 5px;
+      }
+      .history-item {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+      .history-item-header {
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+      .history-field {
+        margin-bottom: 10px;
+      }
+      .history-label {
+        font-weight: bold;
+        color: #333;
+        display: inline-block;
+        margin-right: 5px;
+      }
+      .history-value {
+        display: inline-block;
+        color: #000;
+      }
+
+      .history-item.flex {
+        display: flex;
+        justify-content: space-between;
+        padding-right: 10%;
+      }
+      .history-item.flex .history-field {
+        margin-bottom: 0;
+      }
+      .history-item.flex .history-item-header {
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header Section -->
+    <div class="header">
+      <div class="header-title">INFORMACION DEL PACIENTE</div>
+      <div class="header-grid">
+        <div class="header-item">
+          <span class="label">Nombre y Apellido:</span>
+          <div class="value">Juan Cruz Fortunatti</div>
+        </div>
+        <div class="header-item">
+          <span class="label">DNI:</span>
+          <div class="value">36327904</div>
+        </div>
+        <div class="header-item">
+          <span class="label">Edad:</span>
+          <div class="value">34</div>
+        </div>
+        <div class="header-item">
+          <span class="label">Dirección:</span>
+          <div class="value">Lainez 1594, Bahía Blanca</div>
+        </div>
+        <div class="header-item">
+          <span class="label">Teléfono:</span>
+          <div class="value">2914130879</div>
+        </div>
+        <div class="header-item">
+          <span class="label">Email:</span>
+          <div class="value">juancfortunatti@gmail.com</div>
+        </div>
+        <div class="header-item">
+          <span class="label">Obra Social:</span>
+          <div class="value">OSDE</div>
+        </div>
+        <div class="header-item">
+          <span class="label">Número:</span>
+          <div class="value">139128384U08</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medical History Section -->
+    <div class="medical-history">
+      <div class="section-title">HISTORIA CLÍNICA</div>
+
+      <!-- Evolucion -->
+      <div class="history-item">
+        <div class="history-item-header">Evolución - 12/01/2023</div>
+        <div class="history-field">
+          <span class="history-label">Motivo:</span>
+          <span class="history-value"
+            >Paciente presenta dolores en la zona lumbar.</span
+          >
+        </div>
+        <div class="history-field">
+          <span class="history-label">Examen Físico:</span>
+          <span class="history-value"
+            >Dolor localizado, sin hinchazón visible.</span
+          >
+        </div>
+        <div class="history-field">
+          <span class="history-label">Plan:</span>
+          <span class="history-value"
+            >Reposo y realizar estudios de imágenes.</span
+          >
+        </div>
+      </div>
+
+      <!-- Interconsulta -->
+      <div class="history-item">
+        <div class="history-item-header">Interconsulta - 15/01/2023</div>
+        <div class="history-field">
+          <span class="history-label">Motivo:</span>
+          <span class="history-value">Consulta con traumatología.</span>
+        </div>
+        <div class="history-field">
+          <span class="history-label">Notas:</span>
+          <span class="history-value"
+            >Especialista recomienda sesiones de fisioterapia.</span
+          >
+        </div>
+      </div>
+
+      <!-- Antropometria -->
+      <div class="history-item flex">
+        <div class="history-item-header">Antropometría - 01/02/2023</div>
+        <div class="history-field">
+          <span class="history-label">Peso:</span>
+          <span class="history-value">70 kg</span>
+        </div>
+        <div class="history-field">
+          <span class="history-label">Talla:</span>
+          <span class="history-value">1.75 m</span>
+        </div>
+        <div class="history-field">
+          <span class="history-label">IMC:</span>
+          <span class="history-value">22.9</span>
+        </div>
+      </div>
+
+      <!-- Hospitalización -->
+      <div class="history-item">
+        <div class="history-item-header">
+          Hospitalización - Ingreso: 20/01/2023 | Egreso: 25/01/2023
+        </div>
+        <div class="history-field">
+          <span class="history-label">Motivo:</span>
+          <span class="history-value"
+            >Internación por cuadro de dolor agudo.</span
+          >
+        </div>
+        <div class="history-field">
+          <span class="history-label">Notas:</span>
+          <span class="history-value"
+            >Paciente responde favorablemente al tratamiento.</span
+          >
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

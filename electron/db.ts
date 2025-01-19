@@ -302,6 +302,8 @@ export async function getHistorial(id: string) {
           fecha: true,
           motivo: true,
           createdAt: true,
+          examenFisico: true,
+          plan: true,
         },
       },
       antropometrias: {
@@ -321,6 +323,7 @@ export async function getHistorial(id: string) {
           fechaEgreso: true,
           motivo: true,
           createdAt: true,
+          notas: true,
         },
       },
       interconsultas: {
@@ -329,6 +332,7 @@ export async function getHistorial(id: string) {
           fecha: true,
           motivo: true,
           createdAt: true,
+          notas: true,
         },
       },
       archivos: {
@@ -364,7 +368,13 @@ export async function getHistorial(id: string) {
       ...archivo,
       type: "archivoadjunto",
     })) || []),
-  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  ].sort((a, b) => {
+    if ("fecha" in a && "fecha" in b)
+      return b.fecha.getTime() - a.fecha.getTime();
+    if ("fecha" in a) return b.createdAt.getTime() - a.fecha.getTime();
+    if ("fecha" in b) return b.fecha.getTime() - a.createdAt.getTime();
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  });
 }
 
 export async function getArchivosAdjuntos(pacienteId: string) {

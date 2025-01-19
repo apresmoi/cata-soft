@@ -40,6 +40,7 @@ import {
   NewHospitalizacionDialogDialog,
   NewInterconsultaDialog,
   NewArchivoAdjuntoDialog,
+  HistoriaMedicaDialog,
 } from "../Dialogs";
 import React from "react";
 
@@ -223,7 +224,9 @@ export function PatientScreen() {
             </NewHospitalizacionDialogDialog>
           </Tooltip>
           <Tooltip tooltip="RESUMEN DE HISTORIA CLINICA">
-            <SideToolbarButton variant="info">R</SideToolbarButton>
+            <HistoriaMedicaDialog patient={data} history={history}>
+              <SideToolbarButton variant="info">R</SideToolbarButton>
+            </HistoriaMedicaDialog>
           </Tooltip>
         </SideToolbar>
         <div className="flex-1 flex flex-col">

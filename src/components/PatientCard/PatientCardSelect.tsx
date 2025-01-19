@@ -1,6 +1,6 @@
 import cx from "classnames";
 
-interface PatientCardFieldProps<T> {
+interface PatientCardSelectProps<T> {
   icon: React.ReactNode;
   label: string;
 
@@ -9,13 +9,13 @@ interface PatientCardFieldProps<T> {
 
   className?: string;
 
-  align?: "left" | "center" | "right";
-
   disabled?: boolean;
+
+  options?: { value: string; label: string }[];
 }
 
-export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+export function PatientCardSelect<T>(props: PatientCardSelectProps<T>) {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (props.onChange) {
       props.onChange(event.target.value as T);
     }
@@ -27,16 +27,18 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
         {props.icon} {props.label}
       </div>
       <div className="w-full">
-        <input
-          className={cx(
-            "w-full bg-stone-600 outline-0 p-2 rounded-lg",
-            props.align === "center" && "text-center",
-            props.align === "right" && "text-right"
-          )}
+        <select
+          className={cx("w-full bg-stone-600 outline-0 p-2 rounded-lg")}
           onChange={handleChange}
           value={props.value as string}
           disabled={props.disabled}
-        />
+        >
+          {props.options?.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );
