@@ -1,10 +1,6 @@
 import React from "react";
 
-import {
-  DownloadIcon,
-  ListBulletIcon,
-  ReaderIcon,
-} from "@radix-ui/react-icons";
+import { ReaderIcon } from "@radix-ui/react-icons";
 import { Toolbar } from "../components/Toolbar";
 import { ToolbarSearch } from "../components/ToolbarSearch";
 import { AppContainer, Tooltip } from "../components";

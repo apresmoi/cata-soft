@@ -29,32 +29,36 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   : RENDERER_DIST;
 
 let win: BrowserWindow | null;
+let loadingScreen: BrowserWindow | null;
 
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().bounds;
 
+  loadingScreen = new BrowserWindow({
+    width: 125,
+    height: 125,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    alwaysOnTop: true,
+    icon: path.join(process.env.VITE_PUBLIC, "icon.png"),
+    skipTaskbar: true,
+  });
+
+  loadingScreen.loadFile(path.join(__dirname, "loading.html"));
+
   win = new BrowserWindow({
+    show: false,
     x: 0,
     y: 0,
     width,
     height,
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    icon: path.join(process.env.VITE_PUBLIC, "icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
     },
   });
-
-  // Test active push message to Renderer-process.
-  win.webContents.on("did-finish-load", () => {
-    win?.webContents.send("main-process-message", new Date().toLocaleString());
-  });
-
-  win.maximize();
-
-  win.setMenuBarVisibility(false);
-
-  win.resizable = false;
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
@@ -63,12 +67,25 @@ function createWindow() {
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
   }
 
-  win.webContents.openDevTools();
+  // win.webContents.openDevTools();
 
   const uploadsDir = path.join(__dirname, "uploads");
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
   }
+
+  win.once("ready-to-show", () => {
+    setTimeout(() => {
+      loadingScreen?.close();
+
+      if (win) {
+        win.setMenuBarVisibility(false);
+        win.resizable = false;
+        win.show();
+        win.maximize();
+      }
+    }, 2500);
+  });
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common

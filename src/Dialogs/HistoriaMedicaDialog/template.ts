@@ -3,7 +3,6 @@ import {
   Evoluciones,
   Hospitalizaciones,
   Interconsultas,
-  Pacientes,
 } from "@prisma/client";
 import { PacienteHistoryItem, usePaciente } from "../../hooks";
 

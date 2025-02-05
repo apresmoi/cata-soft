@@ -244,13 +244,19 @@ export function registerIpcHandlers() {
     try {
       const { file, fileName, fileType, ...rest } = data;
 
-      const uploadsDir = path.join(__dirname, "uploads", pacienteId);
+      //how do I get the current directory without using __Dirname?
+      //answer: use process.cwd()
+
+      const dirname = process.cwd();
+
+      const uploadsDir = path.join(dirname, "uploads", pacienteId);
+      console.log({ uploadsDir });
       if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
       const dateStr = new Date().toISOString().replace(/:/g, "-");
 
       const filePath = path.join(
-        __dirname,
+        dirname,
         "uploads",
         pacienteId,
         dateStr + "-" + fileName
@@ -265,7 +271,7 @@ export function registerIpcHandlers() {
       });
     } catch (error) {
       console.error("Error saving file:", error);
-      throw error;
+      return error;
     }
   });
 

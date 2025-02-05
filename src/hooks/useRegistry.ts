@@ -21,11 +21,15 @@ export function useCommonNewRegistry<T>(
 
   const save = async () => {
     try {
+      console.log("create-" + options.endpointKey);
+      console.log(data, ...args);
       const result = (await window.ipcRenderer.invoke(
         "create-" + options.endpointKey,
         data,
         ...args
       )) as T;
+
+      console.log(" result", result);
 
       await queryClient.invalidateQueries({
         queryKey: [options.endpointKey, ...args],
