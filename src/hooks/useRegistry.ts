@@ -173,7 +173,10 @@ export function useCommonRegistry<T>(
   };
 
   const update = <K extends keyof Omit<T, "id" | "createAt" | "updateAt">>(
-    key: K
+    key: K,
+    updateOptions?: {
+      uppercase?: boolean;
+    }
   ) => {
     return (value: T[K]) => {
       setHasChanged(true);
@@ -181,7 +184,9 @@ export function useCommonRegistry<T>(
         if (!oldData) return oldData;
         return {
           ...oldData,
-          [key]: value,
+          [key]: updateOptions?.uppercase
+            ? (value as string).toUpperCase()
+            : value,
         };
       });
     };

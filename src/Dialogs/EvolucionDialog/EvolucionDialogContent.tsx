@@ -5,6 +5,7 @@ import {
 } from "../../components";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useEvolution, useNewEvolution } from "../../hooks";
+import { Tab, TabsContainer } from "../../components/Tabs";
 
 interface EvolucionDialogContentProps {
   update: ReturnType<typeof useEvolution>["update"];
@@ -26,25 +27,34 @@ export function EvolucionDialogContent(
         onChange={update("fecha")}
         value={data?.fecha}
         className="max-w-[200px]"
+        inline
       />
-      <PatientCardTextAreaField
-        label="MOTIVO"
-        onChange={update("motivo")}
-        value={data?.motivo || ""}
-        className="flex-1"
-      />
-      <PatientCardTextAreaField
-        label="EXAMEN FISICO"
-        onChange={update("examenFisico")}
-        value={data?.examenFisico || ""}
-        className="flex-1"
-      />
-      <PatientCardTextAreaField
-        label="PLAN"
-        onChange={update("plan")}
-        value={data?.plan || ""}
-        className="flex-1"
-      />
+      <TabsContainer>
+        <Tab name="MOTIVO">
+          <PatientCardTextAreaField
+            // label="MOTIVO"
+            onChange={update("motivo")}
+            value={data?.motivo || ""}
+            className="flex-1"
+          />
+        </Tab>
+        <Tab name="EXAMEN FISICO">
+          <PatientCardTextAreaField
+            // label="EXAMEN FISICO"
+            onChange={update("examenFisico")}
+            value={data?.examenFisico || ""}
+            className="flex-1"
+          />
+        </Tab>
+        <Tab name="PLAN">
+          <PatientCardTextAreaField
+            // label="PLAN"
+            onChange={update("plan")}
+            value={data?.plan || ""}
+            className="flex-1"
+          />
+        </Tab>
+      </TabsContainer>
     </div>
   );
 }

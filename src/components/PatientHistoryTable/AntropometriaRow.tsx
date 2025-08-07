@@ -25,7 +25,11 @@ export function AntropometriaRow(props: RowProps<Antropometrias>) {
           day: "numeric",
         })}
       </TableCol>
-      <TableCol>{"ANTROPOMETRIA"}</TableCol>
+      <TableCol>
+        <div className="flex items-center gap-2 bg-green-800 px-2 py-1 rounded-lg justify-center">
+          {"ANTROPOMETRIA"}
+        </div>
+      </TableCol>
       <TableCol>{`Peso ${props.peso} - Talla ${props.talla} - IMC ${props.imc}`}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">

@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  text-transform: uppercase;
-}
-
 .react-datepicker-popper.custom-styles .react-datepicker {
   background-color: rgb(87 83 78 / var(--tw-bg-opacity, 1)) !important;
 

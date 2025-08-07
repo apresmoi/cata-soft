@@ -1,5 +1,4 @@
 import {
-  ArchiveIcon,
   ArrowLeftIcon,
   ChatBubbleIcon,
   ClockIcon,
@@ -45,6 +44,8 @@ import {
 import React from "react";
 import { DeleteDialog } from "../Dialogs/DeleteDialog";
 import { ThrashCanIcon } from "../components/Icons/ThrashCanIcon";
+import { SlPrinter } from "react-icons/sl";
+import { ImAttachment } from "react-icons/im";
 
 const searchKeys = [
   "type",
@@ -138,14 +139,14 @@ export function PatientScreen() {
             icon={<PersonIcon />}
             label="NOMBRE Y APELLIDO"
             value={data?.nombre || ""}
-            onChange={update("nombre")}
+            onChange={update("nombre", { uppercase: true })}
             className="flex-1"
           />
           <PatientCardField
             icon={<IdCardIcon />}
             label="DNI"
             value={data?.documento || ""}
-            onChange={update("documento")}
+            onChange={update("documento", { uppercase: true })}
             className="w-[200px]"
           />
           <PatientCardAgeDateField
@@ -168,14 +169,14 @@ export function PatientScreen() {
             icon={<HomeIcon />}
             label="DIRECCION"
             value={data?.direccion || ""}
-            onChange={update("direccion")}
+            onChange={update("direccion", { uppercase: true })}
             className="flex-1"
           />
           <PatientCardField
             icon={<ChatBubbleIcon />}
             label="TELEFONO"
             value={data?.telefono || ""}
-            onChange={update("telefono")}
+            onChange={update("telefono", { uppercase: true })}
             className="w-[150px]"
           />
           <PatientCardField
@@ -190,14 +191,14 @@ export function PatientScreen() {
             icon={<ExclamationTriangleIcon />}
             label="Obra Social"
             value={data?.obraSocial || ""}
-            onChange={update("obraSocial")}
+            onChange={update("obraSocial", { uppercase: true })}
             className="flex-1"
           />
           <PatientCardField
             icon={<ExclamationTriangleIcon />}
             label="Numero"
             value={data?.numeroObraSocial || ""}
-            onChange={update("numeroObraSocial")}
+            onChange={update("numeroObraSocial", { uppercase: true })}
             className="flex-1"
           />
         </div>
@@ -213,7 +214,7 @@ export function PatientScreen() {
           <Tooltip tooltip="ARCHIVOS ADJUNTOS">
             <NewArchivoAdjuntoDialog patientId={params.id as string}>
               <SideToolbarButton variant="secondary">
-                <ArchiveIcon />
+                <ImAttachment />
               </SideToolbarButton>
             </NewArchivoAdjuntoDialog>
           </Tooltip>
@@ -234,7 +235,9 @@ export function PatientScreen() {
           </Tooltip>
           <Tooltip tooltip="RESUMEN DE HISTORIA CLINICA">
             <HistoriaMedicaDialog patientId={params.id as string}>
-              <SideToolbarButton variant="info">R</SideToolbarButton>
+              <SideToolbarButton variant="info">
+                <SlPrinter />
+              </SideToolbarButton>
             </HistoriaMedicaDialog>
           </Tooltip>
           <div className="grow" />

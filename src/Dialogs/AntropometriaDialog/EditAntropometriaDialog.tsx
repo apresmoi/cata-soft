@@ -31,7 +31,7 @@ export function EditAntropometriaDialog(
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && props.onClose?.()}>
-      <DialogContainer className="w-[300px] min-w-[300px]">
+      <DialogContainer className="w-[280px] min-w-[280px]">
         <DialogTitle>EDITAR ANTROPOMETRIA</DialogTitle>
 
         <AntropometriaDialogContent update={update} data={data} />

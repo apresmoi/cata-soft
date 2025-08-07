@@ -25,7 +25,11 @@ export function EvolucionRow(props: RowProps<Evoluciones>) {
           day: "numeric",
         })}
       </TableCol>
-      <TableCol>{"EVOLUCION"}</TableCol>
+      <TableCol>
+        <div className="flex items-center gap-2 bg-green-800 px-2 py-1 rounded-lg justify-center">
+          {"EVOLUCION"}
+        </div>
+      </TableCol>
       <TableCol>{props.motivo}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">

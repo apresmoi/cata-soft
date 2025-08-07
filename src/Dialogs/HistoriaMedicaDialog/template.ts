@@ -73,6 +73,9 @@ const head = `<head>
       .medical-history {
         margin-top: 20px;
       }
+      .section {
+        margin-top: 20px;
+      }
       .section-title {
         font-size: 14px;
         font-weight: bold;
@@ -133,7 +136,7 @@ const headerFormatter = (paciente: ReturnType<typeof usePaciente>["data"]) => {
         <div class="header-title">INFORMACION DEL PACIENTE</div>
         <div class="header-grid">
             <div class="header-item">
-                <span class="label">Nombre y Apellido:</span>
+                <span class="label">NOMBRE Y APELLIDO:</span>
                 <div class="value">${paciente?.nombre}</div>
             </div>
             <div class="header-item">
@@ -141,31 +144,45 @@ const headerFormatter = (paciente: ReturnType<typeof usePaciente>["data"]) => {
                 <div class="value">${paciente?.documento}</div>
             </div>
             <div class="header-item">
-                <span class="label">Edad:</span>
+                <span class="label">EDAD:</span>
                 <div class="value">${paciente?.edad}</div>
             </div>
             <div class="header-item">
-                <span class="label">Dirección:</span>
+                <span class="label">DIRECCIÓN:</span>
                 <div class="value">${paciente?.direccion}</div>
             </div>
             <div class="header-item">
-                <span class="label">Teléfono:</span>
+                <span class="label">TELÉFONO:</span>
                 <div class="value">${paciente?.telefono}</div>
             </div>
             <div class="header-item">
-                <span class="label">Email:</span>
+                <span class="label">EMAIL:</span>
                 <div class="value">${paciente?.email}</div>
             </div>
             <div class="header-item">
-                <span class="label">Obra Social:</span>
+                <span class="label">OBRA SOCIAL:</span>
                 <div class="value">${paciente?.obraSocial}</div>
             </div>
             <div class="header-item">
-                <span class="label">Número:</span>
+                <span class="label">NÚMERO:</span>
                 <div class="value">${paciente?.numeroObraSocial}</div>
             </div>
         </div>
-    </div>`;
+    </div>
+    <div class="section">
+      <div class="section-title">ANTECEDENTES</div>
+      <div class="section-content">
+        ${paciente?.antecedentes}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">MEDICACION HABITUAL</div>
+      <div class="section-content">
+        ${paciente?.medicacionHabitual}
+      </div>
+    </div>
+  </div>`;
 };
 
 const formatDate = (date?: Date | null) => {
@@ -179,15 +196,15 @@ const formatDate = (date?: Date | null) => {
 
 const antropometriaFormatter = (history: Antropometrias) => {
   return `<div class="history-item flex">
-            <div class="history-item-header">Antropometría - ${formatDate(
-              history.fecha
-            )}</div>
+                <div class="history-item-header">ANTROPOMETRÍA - ${formatDate(
+                  history.fecha
+                )}</div>
             <div class="history-field">
-                <span class="history-label">Peso:</span>
-                <span class="history-value">${history.peso} kg</span>
+                <span class="history-label">PESO:</span>
+                <span class="history-value">${history.peso} KG</span>
             </div>
             <div class="history-field">
-                <span class="history-label">Talla:</span>
+                <span class="history-label">TALLA:</span>
                 <span class="history-value">${history.talla} m</span>
             </div>
             <div class="history-field">
@@ -200,16 +217,16 @@ const antropometriaFormatter = (history: Antropometrias) => {
 const hospitalizacionFormatter = (history: Hospitalizaciones) => {
   return `<div class="history-item">
                 <div class="history-item-header">
-                    Hospitalización - Ingreso: ${formatDate(
+                    HOSPITALIZACIÓN - INGRESO: ${formatDate(
                       history.fechaIngreso
-                    )} | Egreso: ${formatDate(history.fechaEgreso)}
+                    )} | EGRESO: ${formatDate(history.fechaEgreso)}
                 </div>
                 <div class="history-field">
-                    <span class="history-label">Motivo:</span>
+                    <span class="history-label">MOTIVO:</span>
                     <span class="history-value">${history.motivo || ""}</span>
                 </div>
                 <div class="history-field">
-                    <span class="history-label">Notas:</span>
+                    <span class="history-label">NOTAS:</span>
                     <span class="history-value">${history.notas || ""}</span>
                 </div>
             </div>`;
@@ -221,13 +238,13 @@ const interconsultaFormatter = (history: Interconsultas) => {
                       history.fecha
                     )}</div>
                     <div class="history-field">
-                        <span class="history-label">Motivo:</span>
+                        <span class="history-label">MOTIVO:</span>
                         <span class="history-value">${
                           history.motivo || ""
                         }</span>
                     </div>
                     <div class="history-field">
-                        <span class="history-label">Notas:</span>
+                        <span class="history-label">NOTAS:</span>
                         <span class="history-value">${
                           history.notas || ""
                         }</span>
@@ -237,23 +254,23 @@ const interconsultaFormatter = (history: Interconsultas) => {
 
 const evolucionFormatter = (history: Evoluciones) => {
   return `<div class="history-item">
-                        <div class="history-item-header">Evolución - ${formatDate(
+                        <div class="history-item-header">EVOLUCIÓN - ${formatDate(
                           history.fecha
                         )}</div>
                         <div class="history-field">
-                            <span class="history-label">Motivo:</span>
+                            <span class="history-label">MOTIVO:</span>
                             <span class="history-value">${
                               history.motivo || ""
                             }</span>
                         </div>
                         <div class="history-field">
-                            <span class="history-label">Examen Físico:</span>
+                            <span class="history-label">EXAMEN FÍSICO:</span>
                             <span class="history-value">${
-                              history.examenFisico
+                              history.examenFisico || ""
                             }</span>
                         </div>
                         <div class="history-field">
-                            <span class="history-label">Plan:</span>
+                            <span class="history-label">PLAN:</span>
                             <span class="history-value">${
                               history.plan || ""
                             }</span>

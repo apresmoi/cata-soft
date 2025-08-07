@@ -38,7 +38,7 @@ export function NewAntropometriaDialog(
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>{props.children}</DialogTrigger>
 
-      <DialogContainer className="w-[300px] min-w-[300px]">
+      <DialogContainer className="w-[280px] min-w-[280px]">
         <DialogTitle>NUEVA ANTROPOMETRIA</DialogTitle>
 
         <AntropometriaDialogContent update={update} data={data} />

@@ -28,7 +28,9 @@ export function PatientCardSelect<T>(props: PatientCardSelectProps<T>) {
       </div>
       <div className="w-full">
         <select
-          className={cx("w-full bg-stone-600 outline-0 p-2 rounded-lg")}
+          className={cx(
+            "w-full bg-stone-600 outline-0 p-2 rounded-lg cursor-pointer"
+          )}
           onChange={handleChange}
           value={props.value as string}
           disabled={props.disabled}

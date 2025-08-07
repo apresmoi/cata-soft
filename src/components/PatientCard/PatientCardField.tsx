@@ -12,6 +12,8 @@ interface PatientCardFieldProps<T> {
   align?: "left" | "center" | "right";
 
   disabled?: boolean;
+  inline?: boolean;
+  inlineFieldMaxWidth?: number;
 }
 
 export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
@@ -22,11 +24,24 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
   };
 
   return (
-    <div className={cx("w-[100%] flex flex-col gap-2", props.className)}>
+    <div
+      className={cx(
+        "w-[100%] flex gap-2",
+        props.inline ? "flex-row" : "flex-col",
+        props.className
+      )}
+    >
       <div className={cx("flex items-center gap-2 select-none")}>
         {props.icon} {props.label}
       </div>
-      <div className="w-full">
+      <div
+        className={cx(
+          "w-full",
+          props.inlineFieldMaxWidth
+            ? `max-w-[${props.inlineFieldMaxWidth}%] ml-auto`
+            : ""
+        )}
+      >
         <input
           className={cx(
             "w-full bg-stone-600 outline-0 p-2 rounded-lg",

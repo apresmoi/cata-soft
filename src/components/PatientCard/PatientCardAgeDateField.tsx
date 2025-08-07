@@ -13,6 +13,9 @@ interface PatientCardDateFieldProps {
   className?: string;
 
   align?: "left" | "center" | "right";
+
+  inline?: boolean;
+  inlineFieldMaxWidth?: number;
 }
 
 const yearNow = new Date().getFullYear();
@@ -42,16 +45,32 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
   const { value } = props;
 
   return (
-    <div className={cx("w-[100%] flex flex-col gap-2", props.className)}>
+    <div
+      className={cx(
+        "w-[100%] flex gap-2",
+        props.className,
+        props.inline ? "flex-row" : "flex-col"
+      )}
+    >
       <div className={cx("flex items-center gap-2  select-none")}>
         {props.icon} {props.label}
       </div>
-      <div className="w-full">
+      <div
+        className={cx(
+          "w-full",
+          props.inlineFieldMaxWidth
+            ? `max-w-[${props.inlineFieldMaxWidth}%] ml-auto`
+            : ""
+        )}
+      >
         <DatePicker
           selected={value}
           required
           onChange={(date) => props.onChange?.(date as Date)}
-          className="dark:text-stone-100 p-2 outline-none bg-stone-600 w-full rounded-lg"
+          className={cx(
+            "dark:text-stone-100 p-2 outline-none bg-stone-600 w-full rounded-lg",
+            props.align === "right" ? "text-right" : ""
+          )}
           dateFormat={"dd/MM/yyyy"}
           wrapperClassName="custom-styles w-full"
           popperClassName="custom-styles z-20"
@@ -68,7 +87,7 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
               <button
                 onClick={decreaseMonth}
                 disabled={prevMonthButtonDisabled}
-                className="outline-none bg-stone-600 text-stone-100 hover:bg-stone-800 rounded-lg p-2"
+                className="outline-none bg-stone-600 text-stone-100 hover:bg-stone-800 rounded-lg p-2 transition-all duration-300"
               >
                 <ChevronLeftIcon />
               </button>

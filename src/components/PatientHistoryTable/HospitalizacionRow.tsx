@@ -4,7 +4,6 @@ import { useDeleteHospitalizacion } from "../../hooks";
 import { Tooltip } from "../Tooltip";
 import { DeleteDialog } from "../../Dialogs/DeleteDialog";
 import { ThrashCanIcon } from "../Icons/ThrashCanIcon";
-
 export function HospitalizacionRow(props: RowProps<Hospitalizaciones>) {
   const { remove } = useDeleteHospitalizacion(props.id);
 
@@ -25,7 +24,11 @@ export function HospitalizacionRow(props: RowProps<Hospitalizaciones>) {
           day: "numeric",
         })}
       </TableCol>
-      <TableCol>{"HOSPITALIZACION"}</TableCol>
+      <TableCol>
+        <div className="flex items-center gap-2 bg-red-800 px-2 py-1 rounded-lg justify-center">
+          {"HOSPITALIZACION"}
+        </div>
+      </TableCol>
       <TableCol>{props.motivo}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">

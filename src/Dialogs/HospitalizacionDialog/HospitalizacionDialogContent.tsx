@@ -5,6 +5,8 @@ import {
 } from "../../components";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useHospitalizacion, useNewHospitalizacion } from "../../hooks";
+import { Tab } from "../../components/Tabs";
+import { TabsContainer } from "../../components/Tabs";
 
 interface HospitalizacionDialogContentProps {
   update: ReturnType<typeof useHospitalizacion>["update"];
@@ -36,18 +38,24 @@ export function HospitalizacionDialogContent(
           className="w-[200px]"
         />
       </div>
-      <PatientCardTextAreaField
-        label="MOTIVO"
-        onChange={update("motivo")}
-        value={data?.motivo || ""}
-        className="flex-1"
-      />
-      <PatientCardTextAreaField
-        label="NOTAS"
-        onChange={update("notas")}
-        value={data?.notas || ""}
-        className="flex-1"
-      />
+      <TabsContainer>
+        <Tab name="MOTIVO">
+          <PatientCardTextAreaField
+            // label="MOTIVO"
+            onChange={update("motivo")}
+            value={data?.motivo || ""}
+            className="flex-1"
+          />
+        </Tab>
+        <Tab name="NOTAS">
+          <PatientCardTextAreaField
+            // label="NOTAS"
+            onChange={update("notas")}
+            value={data?.notas || ""}
+            className="flex-1"
+          />
+        </Tab>
+      </TabsContainer>
     </div>
   );
 }

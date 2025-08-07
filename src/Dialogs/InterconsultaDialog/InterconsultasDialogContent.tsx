@@ -5,6 +5,8 @@ import {
 } from "../../components";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useInterconsulta, useNewInterconsulta } from "../../hooks";
+import { Tab } from "../../components/Tabs";
+import { TabsContainer } from "../../components/Tabs";
 
 interface InterconsultasDialogContentProps {
   update: ReturnType<typeof useInterconsulta>["update"];
@@ -27,18 +29,24 @@ export function InterconsultasDialogContent(
         value={data?.fecha}
         className="max-w-[200px]"
       />
-      <PatientCardTextAreaField
-        label="MOTIVO"
-        onChange={update("motivo")}
-        value={data?.motivo || ""}
-        className="flex-1"
-      />
-      <PatientCardTextAreaField
-        label="NOTAS"
-        onChange={update("notas")}
-        value={data?.notas || ""}
-        className="flex-1"
-      />
+      <TabsContainer>
+        <Tab name="MOTIVO">
+          <PatientCardTextAreaField
+            // label="MOTIVO"
+            onChange={update("motivo")}
+            value={data?.motivo || ""}
+            className="flex-1"
+          />
+        </Tab>
+        <Tab name="NOTAS">
+          <PatientCardTextAreaField
+            // label="NOTAS"
+            onChange={update("notas")}
+            value={data?.notas || ""}
+            className="flex-1"
+          />
+        </Tab>
+      </TabsContainer>
     </div>
   );
 }

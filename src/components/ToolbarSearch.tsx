@@ -36,7 +36,7 @@ export function ToolbarSearch(
       <div className="absolute right-1 top-0 h-full flex items-center">
         {props.search && (
           <button
-            className="bg-stone-0 hover:bg-stone-800 text-white p-1 flex items-center gap-2 rounded-lg"
+            className="bg-stone-0 hover:bg-stone-800 text-white p-1 flex items-center gap-2 rounded-lg transition-all duration-300"
             onClick={handleClearSearch}
           >
             <Cross1Icon />

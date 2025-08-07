@@ -27,22 +27,29 @@ export function AntropometriaDialogContent(
         label="FECHA"
         onChange={update("fecha")}
         value={data?.fecha}
+        align="right"
+        inline
+        inlineFieldMaxWidth={50}
       />
       <PatientCardField
         className="w-[100%]"
         icon={<PinBottomIcon />}
-        label="Peso"
+        label="PESO"
         onChange={update("peso")}
         value={data?.peso || 0}
         align="right"
+        inline
+        inlineFieldMaxWidth={50}
       />
       <PatientCardField
         className="w-[100%]"
         icon={<SpaceBetweenVerticallyIcon />}
-        label="Talla"
+        label="TALLA"
         onChange={update("talla")}
         value={data?.talla || 0}
         align="right"
+        inline
+        inlineFieldMaxWidth={50}
       />
       <PatientCardField
         className="w-[100%]"
@@ -51,6 +58,8 @@ export function AntropometriaDialogContent(
         onChange={update("imc")}
         value={data?.imc || 0}
         align="right"
+        inline
+        inlineFieldMaxWidth={50}
       />
     </div>
   );

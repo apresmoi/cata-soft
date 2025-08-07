@@ -9,7 +9,7 @@ export function SideToolbarButton(
   return (
     <button
       className={cx(
-        "w-[60px] h-[60px] border-2 p-2 rounded-full flex items-center justify-center font-bold text-2xl",
+        "w-[60px] h-[60px] border-2 p-2 rounded-full flex items-center justify-center font-bold text-2xl transition-all duration-300",
         props.variant === "primary" &&
           "border-green-600 text-green-600 hover:bg-green-800 hover:text-gray-200",
 

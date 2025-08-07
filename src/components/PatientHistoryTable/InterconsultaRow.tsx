@@ -25,7 +25,11 @@ export function InterconsultaRow(props: RowProps<Interconsultas>) {
           day: "numeric",
         })}
       </TableCol>
-      <TableCol>{"INTERCONSULTA"}</TableCol>
+      <TableCol>
+        <div className="flex items-center gap-2 bg-yellow-800 px-2 py-1 rounded-lg justify-center">
+          {"INTERCONSULTA"}
+        </div>
+      </TableCol>
       <TableCol>{props.motivo}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">

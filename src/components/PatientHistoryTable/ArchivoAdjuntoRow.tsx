@@ -4,6 +4,7 @@ import { Tooltip } from "../Tooltip";
 import { DeleteDialog } from "../../Dialogs/DeleteDialog";
 import { ThrashCanIcon } from "../Icons/ThrashCanIcon";
 import { useDeleteArchivoAdjunto } from "../../hooks";
+import { ImAttachment } from "react-icons/im";
 
 export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
   const { remove } = useDeleteArchivoAdjunto(props.id);
@@ -25,7 +26,12 @@ export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
           day: "numeric",
         })}
       </TableCol>
-      <TableCol>{"ARCHIVO ADJUNTO"}</TableCol>
+      <TableCol>
+        <div className="flex items-center gap-2 bg-purple-800 px-2 py-1 rounded-lg justify-center">
+          <ImAttachment />
+          {"ARCHIVO ADJUNTO"}
+        </div>
+      </TableCol>
       <TableCol>{`${props.nombre}`}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">
