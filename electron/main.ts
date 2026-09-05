@@ -1,9 +1,9 @@
-import { app, BrowserWindow, screen } from "electron";
+import { app, BrowserWindow, dialog, screen } from "electron";
 // import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { registerIpcHandlers } from "./controller";
-import fs from "node:fs";
+import { initDatabase } from "./database";
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,21 +31,35 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
 let win: BrowserWindow | null;
 let loadingScreen: BrowserWindow | null;
 
+/**
+ * Quiet start: skip the always-on-top splash and open the window minimized and
+ * unfocused, so a dev session does not take over the screen on every reload.
+ *
+ * Default ON while a Vite dev server is attached, OFF in shipped builds -- the
+ * clinic still gets the splash and a maximized window. Override either way with
+ * CATASOFT_START_MINIMIZED=1 / =0.
+ */
+const startMinimized =
+  process.env.CATASOFT_START_MINIMIZED === "1" ||
+  (process.env.CATASOFT_START_MINIMIZED !== "0" && !!VITE_DEV_SERVER_URL);
+
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().bounds;
 
-  loadingScreen = new BrowserWindow({
-    width: 125,
-    height: 125,
-    frame: false,
-    transparent: true,
-    resizable: false,
-    alwaysOnTop: true,
-    icon: path.join(process.env.VITE_PUBLIC, "icon.png"),
-    skipTaskbar: true,
-  });
+  if (!startMinimized) {
+    loadingScreen = new BrowserWindow({
+      width: 125,
+      height: 125,
+      frame: false,
+      transparent: true,
+      resizable: false,
+      alwaysOnTop: true,
+      icon: path.join(process.env.VITE_PUBLIC, "icon.png"),
+      skipTaskbar: true,
+    });
 
-  loadingScreen.loadFile(path.join(process.env.VITE_PUBLIC, "loading.html"));
+    loadingScreen.loadFile(path.join(process.env.VITE_PUBLIC, "loading.html"));
+  }
 
   win = new BrowserWindow({
     show: false,
@@ -69,12 +83,19 @@ function createWindow() {
 
   // win.webContents.openDevTools();
 
-  const uploadsDir = path.join(__dirname, "uploads");
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
-  }
+  // The uploads directory is owned by ./database (under userData); nothing to
+  // create here. It used to be created next to the bundled code, which is a
+  // different path than the one the writer actually used.
 
   win.once("ready-to-show", () => {
+    if (startMinimized) {
+      // Stay fully hidden: showing then minimizing flashes the window on
+      // every dev reload. Click the dock/taskbar icon to bring it up.
+      win?.setMenuBarVisibility(false);
+      console.log("[window] quiet start: hidden. Activate the app to show it.");
+      return;
+    }
+
     setTimeout(() => {
       loadingScreen?.close();
 
@@ -103,9 +124,35 @@ app.on("activate", () => {
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+    return;
+  }
+
+  // Quiet start leaves the window hidden; activating is how you ask for it.
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.show();
+    win.focus();
   }
 });
 
-registerIpcHandlers();
+async function bootstrap() {
+  await app.whenReady();
 
-app.whenReady().then(createWindow);
+  try {
+    const result = await initDatabase();
+    console.log("[db] ready", result);
+  } catch (error) {
+    // Fail closed: never serve a half-migrated patient database.
+    dialog.showErrorBox(
+      "No se pudo preparar la base de datos",
+      error instanceof Error ? error.message : String(error)
+    );
+    app.quit();
+    return;
+  }
+
+  registerIpcHandlers();
+  createWindow();
+}
+
+bootstrap();
