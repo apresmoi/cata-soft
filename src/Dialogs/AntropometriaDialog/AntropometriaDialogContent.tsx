@@ -13,12 +13,14 @@ interface AntropometriaDialogContentProps {
   data?:
     | ReturnType<typeof useAntropometria>["data"]
     | ReturnType<typeof useNewAntropometria>["data"];
+  /** Field names to ring red -- required fields left empty on save. */
+  invalid?: string[];
 }
 
 export function AntropometriaDialogContent(
   props: React.PropsWithChildren<AntropometriaDialogContentProps>
 ) {
-  const { update, data } = props;
+  const { update, data, invalid } = props;
 
   return (
     <div className="flex gap-2 flex-col p-4 h-[auto]">
@@ -29,37 +31,33 @@ export function AntropometriaDialogContent(
         value={data?.fecha}
         align="right"
         inline
-        inlineFieldMaxWidth={50}
       />
       <PatientCardField
-        className="w-[100%]"
         icon={<PinBottomIcon />}
         label="PESO"
         onChange={update("peso")}
         value={data?.peso || 0}
         align="right"
         inline
-        inlineFieldMaxWidth={50}
+        invalid={invalid?.includes("peso")}
       />
       <PatientCardField
-        className="w-[100%]"
         icon={<SpaceBetweenVerticallyIcon />}
         label="TALLA"
         onChange={update("talla")}
         value={data?.talla || 0}
         align="right"
         inline
-        inlineFieldMaxWidth={50}
+        invalid={invalid?.includes("talla")}
       />
       <PatientCardField
-        className="w-[100%]"
         icon={<BlendingModeIcon />}
         label="IMC"
         onChange={update("imc")}
         value={data?.imc || 0}
         align="right"
         inline
-        inlineFieldMaxWidth={50}
+        invalid={invalid?.includes("imc")}
       />
     </div>
   );

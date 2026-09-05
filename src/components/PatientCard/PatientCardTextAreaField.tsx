@@ -7,6 +7,9 @@ interface PatientCardTextAreaFieldProps {
   onChange?: (value: string) => void;
 
   className?: string;
+
+  /** Draw a red ring: a required field left empty on save. */
+  invalid?: boolean;
 }
 
 export function PatientCardTextAreaField(props: PatientCardTextAreaFieldProps) {
@@ -24,7 +27,11 @@ export function PatientCardTextAreaField(props: PatientCardTextAreaFieldProps) {
         </div>
       )}
       <textarea
-        className="bg-stone-600 h-full outline-0 p-3 resize-none rounded-lg"
+        className={cx(
+          "bg-stone-600 h-full outline-0 p-3 resize-none rounded-lg",
+          // Painted outside the box, so flagging a field shifts no layout.
+          props.invalid && "ring-2 ring-red-500"
+        )}
         value={props.value}
         onChange={handleChange}
       />

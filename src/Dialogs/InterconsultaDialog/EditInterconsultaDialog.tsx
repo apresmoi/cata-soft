@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "../../components/Dialog";
 import { useInterconsulta } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { InterconsultasDialogContent } from "./InterconsultasDialogContent";
 
 interface EditInterconsultaDialogProps {
@@ -22,21 +23,30 @@ export function EditInterconsultaDialog(
   const { data, save, update } = useInterconsulta(props.id, {
     enabled: !!props.id,
   });
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([{ name: "motivo" }]);
+
+  const handleClose = () => {
+    reset();
+    props.onClose?.();
+  };
 
   const handleSave = async () => {
+    if (!check(data ?? undefined)) return;
     try {
       await save();
-      props.onClose?.();
+      handleClose();
     } catch (e) {}
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && props.onClose?.()}>
+    <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
       <DialogTrigger>{props.children}</DialogTrigger>
       <DialogContainer>
         <DialogTitle>EDITAR INTERCONSULTA</DialogTitle>
 
-        <InterconsultasDialogContent update={update} data={data} />
+        <InterconsultasDialogContent update={update} data={data} invalid={invalid(data ?? undefined)} />
 
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>

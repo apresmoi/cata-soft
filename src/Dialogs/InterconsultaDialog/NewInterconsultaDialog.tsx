@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "../../components/Dialog";
 import { useNewInterconsulta } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { InterconsultasDialogContent } from "./InterconsultasDialogContent";
 
 interface NewEvolutionProps {
@@ -19,10 +20,14 @@ export function NewInterconsultaDialog(
   props: React.PropsWithChildren<NewEvolutionProps>
 ) {
   const { data, save, update, clear } = useNewInterconsulta(props.patientId);
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([{ name: "motivo" }]);
 
   const [open, setOpen] = React.useState(false);
 
   const handleSave = async () => {
+    if (!check(data)) return;
     try {
       await save();
       setOpen(false);
@@ -30,7 +35,10 @@ export function NewInterconsultaDialog(
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) clear();
+    if (!open) {
+      clear();
+      reset();
+    }
     setOpen(open);
   };
 
@@ -40,7 +48,7 @@ export function NewInterconsultaDialog(
       <DialogContainer>
         <DialogTitle>NUEVA INTERCONSULTA</DialogTitle>
 
-        <InterconsultasDialogContent update={update} data={data} />
+        <InterconsultasDialogContent update={update} data={data} invalid={invalid(data)} />
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>
             GUARDAR

@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "../../components/Dialog";
 import { useAntropometria } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { AntropometriaDialogContent } from "./AntropometriaDialogContent";
 
 interface EditAntropometriaDialogProps {
@@ -22,19 +23,37 @@ export function EditAntropometriaDialog(
     enabled: !!props.id,
   });
 
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([
+    { name: "peso", kind: "positiveNumber" },
+    { name: "talla", kind: "positiveNumber" },
+    { name: "imc", kind: "positiveNumber" },
+  ]);
+
+  const handleClose = () => {
+    reset();
+    props.onClose?.();
+  };
+
   const handleSave = async () => {
+    if (!check(data ?? undefined)) return;
     try {
       await save();
-      props.onClose?.();
+      handleClose();
     } catch (e) {}
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && props.onClose?.()}>
-      <DialogContainer className="w-[280px] min-w-[280px]">
+    <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContainer maxWidth={320}>
         <DialogTitle>EDITAR ANTROPOMETRIA</DialogTitle>
 
-        <AntropometriaDialogContent update={update} data={data} />
+        <AntropometriaDialogContent
+          update={update}
+          data={data}
+          invalid={invalid(data ?? undefined)}
+        />
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>
             GUARDAR

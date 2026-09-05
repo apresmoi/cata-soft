@@ -13,12 +13,13 @@ interface InterconsultasDialogContentProps {
   data?:
     | ReturnType<typeof useInterconsulta>["data"]
     | ReturnType<typeof useNewInterconsulta>["data"];
+  invalid?: string[];
 }
 
 export function InterconsultasDialogContent(
   props: React.PropsWithChildren<InterconsultasDialogContentProps>
 ) {
-  const { update, data } = props;
+  const { update, data, invalid = [] } = props;
 
   return (
     <div className="flex gap-2 flex-col p-4 h-[60vh]">
@@ -36,6 +37,7 @@ export function InterconsultasDialogContent(
             onChange={update("motivo")}
             value={data?.motivo || ""}
             className="flex-1"
+            invalid={invalid.includes("motivo")}
           />
         </Tab>
         <Tab name="NOTAS">

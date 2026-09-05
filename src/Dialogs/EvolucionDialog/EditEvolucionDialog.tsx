@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "../../components/Dialog";
 import { useEvolution } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { EvolucionDialogContent } from "./EvolucionDialogContent";
 
 interface EditEvolucionDialogProps {
@@ -21,20 +22,31 @@ export function EditEvolucionDialog(
   const { data, save, update } = useEvolution(props.id, {
     enabled: !!props.id,
   });
+  // Schema-nullable, but an evolución with nothing in it is not a record --
+  // this is a UI rule, not a schema constraint.
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([{ name: "motivo" }]);
+
+  const handleClose = () => {
+    reset();
+    props.onClose?.();
+  };
 
   const handleSave = async () => {
+    if (!check(data ?? undefined)) return;
     try {
       await save();
-      props.onClose?.();
+      handleClose();
     } catch (e) {}
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && props.onClose?.()}>
+    <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
       <DialogContainer>
         <DialogTitle>EDITAR EVOLUCION</DialogTitle>
 
-        <EvolucionDialogContent update={update} data={data} />
+        <EvolucionDialogContent update={update} data={data} invalid={invalid(data ?? undefined)} />
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>
             GUARDAR

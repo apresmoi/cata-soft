@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "../../components/Dialog";
 import { useNewArchivoAdjunto } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { CrumpledPaperIcon, FileIcon } from "@radix-ui/react-icons";
 import { PatientCardField, PatientCardTextAreaField } from "../../components";
 
@@ -23,7 +24,13 @@ export function NewArchivoAdjuntoDialog(
 
   const [open, setOpen] = React.useState(false);
 
+  const { check, invalid, reset } = useRequiredFields<typeof data>([
+    { name: "nombre" },
+    { name: "file" },
+  ]);
+
   const handleSave = async () => {
+    if (!check(data)) return;
     try {
       await save();
       setOpen(false);
@@ -31,7 +38,10 @@ export function NewArchivoAdjuntoDialog(
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) clear();
+    if (!open) {
+      clear();
+      reset();
+    }
     setOpen(open);
   };
 
@@ -91,7 +101,10 @@ export function NewArchivoAdjuntoDialog(
 
         <div className="flex gap-2 flex-col p-4 h-[60vh]">
           <div
-            className="relative cursor-pointer min-h-[100px]"
+            className={
+              "relative cursor-pointer min-h-[100px]" +
+              (invalid(data).includes("file") ? " ring-2 ring-red-500" : "")
+            }
             onClick={handleInputClick}
           >
             <input
@@ -142,6 +155,7 @@ export function NewArchivoAdjuntoDialog(
             label="NOMBRE"
             onChange={update("nombre")}
             value={data?.nombre || ""}
+            invalid={invalid(data).includes("nombre")}
           />
           <PatientCardTextAreaField
             label="NOTAS"
@@ -151,11 +165,7 @@ export function NewArchivoAdjuntoDialog(
           />
         </div>
         <DialogFooter>
-          <DialogButton
-            variant="primary"
-            onClick={handleSave}
-            disabled={!data?.file || !data?.nombre}
-          >
+          <DialogButton variant="primary" onClick={handleSave}>
             GUARDAR
           </DialogButton>
           <DialogCancelButton />

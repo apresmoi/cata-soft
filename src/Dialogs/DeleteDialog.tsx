@@ -26,7 +26,7 @@ export function DeleteDialog(
   return (
     <Dialog>
       <DialogTrigger asChild={props.asChild}>{props.children}</DialogTrigger>
-      <DialogContainer className="w-[500px] min-w-[500px]">
+      <DialogContainer maxWidth={500}>
         <DialogTitle>
           <ExclamationTriangleIcon /> ¿Estás segura?
         </DialogTitle>

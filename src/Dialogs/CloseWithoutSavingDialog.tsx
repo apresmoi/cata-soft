@@ -34,7 +34,7 @@ export function CloseWithoutSavingDialog(
   return (
     <Dialog open onOpenChange={handleCancel}>
       <DialogTrigger>{props.children}</DialogTrigger>
-      <DialogContainer className="w-[500px] min-w-[500px]">
+      <DialogContainer maxWidth={500}>
         <DialogTitle>
           <ExclamationTriangleIcon />
           Tenes cambios sin guardar!
