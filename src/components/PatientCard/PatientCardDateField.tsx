@@ -25,7 +25,7 @@ export function PatientCardDateField(props: PatientCardDateFieldProps) {
       <div className={cx("flex items-center gap-2")}>
         {props.icon} {props.label}
       </div>
-      <div className="w-full">
+      <div data-skip-autofocus className="w-full">
         <DatePicker
           selected={props.value}
           required

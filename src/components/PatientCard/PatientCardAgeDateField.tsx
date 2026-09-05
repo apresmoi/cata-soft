@@ -15,7 +15,6 @@ interface PatientCardDateFieldProps {
   align?: "left" | "center" | "right";
 
   inline?: boolean;
-  inlineFieldMaxWidth?: number;
 }
 
 const yearNow = new Date().getFullYear();
@@ -56,11 +55,11 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
         {props.icon} {props.label}
       </div>
       <div
+        data-skip-autofocus
         className={cx(
           "w-full",
-          props.inlineFieldMaxWidth
-            ? `max-w-[${props.inlineFieldMaxWidth}%] ml-auto`
-            : ""
+          // Same fixed width as the other inline fields so they all line up.
+          props.inline && "ml-auto w-28 shrink-0"
         )}
       >
         <DatePicker
