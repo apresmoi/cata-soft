@@ -7,6 +7,10 @@
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -35,6 +39,7 @@
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^2.1.9",
     "autoprefixer": "^10.4.20",
     "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
@@ -48,7 +53,8 @@
     "typescript": "^5.2.2",
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",
-    "vite-plugin-electron-renderer": "^0.14.5"
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vitest": "^2.1.9"
   },
   "main": "dist-electron/main.js",
   "build": {
@@ -61,13 +67,22 @@
       "package.json",
       "dist-electron/**/*"
     ],
+    "asar": true,
     "extraResources": [
-      "prisma/**/*",
+      "prisma/schema.prisma",
+      "prisma/migrations/**/*",
       "node_modules/.prisma/**/*",
       "node_modules/@prisma/client/**/*"
     ],
     "directories": {
-      "buildResources": "build"
+      "buildResources": "build",
+      "output": "release/${version}"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
     },
     "win": {
       "requestedExecutionLevel": "requireAdministrator",
@@ -79,11 +94,18 @@
             "ia32"
           ]
         }
-      ]
+      ],
+      "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
     },
     "nsis": {
       "perMachine": true,
       "allowElevation": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "artifactName": "${productName}-Linux-${version}.${ext}"
     }
   }
 }
