@@ -1,7 +1,8 @@
+import { getUploadsDir } from "./database";
 import { ipcMain, shell } from "electron";
-import fs from "fs";
-import path from "path";
-
+import * as path from "path";
+import * as fs from "fs";
+import * as crypto from "crypto";
 import {
   getPacientes,
   getPaciente,
@@ -26,265 +27,255 @@ import {
   deleteInterconsulta,
   getHistorial,
   createArchivoAdjunto,
+  getArchivoAdjunto,
   getArchivosAdjuntos,
   deleteArchivoAdjunto,
 } from "./db";
 
+/** Largest attachment we accept, in bytes. */
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+
+/**
+ * Extensions we are willing to hand to the OS. Everything else stays on disk
+ * but is never opened, so a renderer compromise cannot turn `shell.openPath`
+ * into a program launcher.
+ */
+const OPENABLE_EXTENSIONS: Record<string, true> = {
+  ".pdf": true,
+  ".png": true,
+  ".jpg": true,
+  ".jpeg": true,
+  ".gif": true,
+  ".webp": true,
+  ".txt": true,
+  ".md": true,
+  ".csv": true,
+  ".json": true,
+  ".xml": true,
+  ".rtf": true,
+};
+
+/**
+ * Resolve `segments` under `root` and refuse anything that escapes it.
+ * `path.join` normalizes but does not confine, so `..` in a renderer-supplied
+ * name would otherwise walk out of the uploads directory.
+ */
+export function resolveInside(root: string, ...segments: string[]) {
+  const resolved = path.resolve(root, path.join(...segments));
+  const relative = path.relative(root, resolved);
+  if (relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative))) {
+    return resolved;
+  }
+  throw new Error("La ruta es inválida.");
+}
+
+/** Reject ids that could be used as path segments or SQL-ish payloads. */
+export function assertSafeId(id: unknown): string {
+  if (typeof id !== "string" || !/^[A-Za-z0-9_-]{1,64}$/.test(id)) {
+    // Used for patient ids as well as attachment ids: keep it generic.
+    throw new Error("Identificador inválido.");
+  }
+  return id;
+}
+
+/**
+ * Keep only a conservative extension from the user's filename. The stored
+ * name is opaque; the original is preserved in the `nombre` column.
+ */
+export function safeExtension(fileName: unknown): string {
+  if (typeof fileName !== "string") return "";
+  const ext = path.extname(fileName).toLowerCase();
+  // Capped length: an extension is a few characters, not a smuggled payload.
+  return /^\.[a-z0-9]{1,10}$/.test(ext) ? ext : "";
+}
+
+/** Policy: which stored attachments we let the OS open. */
+export function isOpenableAttachment(filePath: string): boolean {
+  return OPENABLE_EXTENSIONS[path.extname(filePath).toLowerCase()] === true;
+}
+
+/**
+ * Register an IPC handler with the shared failure contract: log with the
+ * channel name, then rethrow so the renderer's promise rejects.
+ */
+function handle<A extends unknown[]>(
+  channel: string,
+  handler: (...args: A) => unknown
+) {
+  ipcMain.handle(channel, async (_event, ...args) => {
+    try {
+      return await handler(...(args as A));
+    } catch (error) {
+      console.error(`[ipc] ${channel} failed:`, error);
+      throw error;
+    }
+  });
+}
+
 export function registerIpcHandlers() {
-  ipcMain.handle("get-pacientes", async () => {
-    try {
-      const pacientes = await getPacientes();
-      return pacientes;
-    } catch (error) {
-      console.error("Error fetching pacientes:", error);
-      throw error;
-    }
-  });
+  handle("get-pacientes", () => getPacientes());
+  handle("get-paciente", (id: Parameters<typeof getPaciente>[0]) => getPaciente(id));
+  handle("create-paciente", (paciente: Parameters<typeof createPaciente>[0]) =>
+    createPaciente(paciente)
+  );
+  handle(
+    "update-paciente",
+    (data: Parameters<typeof updatePaciente>[1], id: string) => updatePaciente(id, data)
+  );
+  handle("delete-paciente", (id: Parameters<typeof deletePaciente>[0]) => deletePaciente(id));
 
-  ipcMain.handle("get-paciente", async (_event, id) => {
-    try {
+  handle("get-antropometria", (id: Parameters<typeof getAntropometria>[0]) =>
+    getAntropometria(id)
+  );
+  handle(
+    "create-antropometria",
+    (data: Parameters<typeof createAntropometria>[1], pacienteId: string) =>
+      createAntropometria(pacienteId, data)
+  );
+  handle(
+    "update-antropometria",
+    (data: Parameters<typeof updateAntropometria>[1], id: string) =>
+      updateAntropometria(id, data)
+  );
+  handle("delete-antropometria", (id: Parameters<typeof deleteAntropometria>[0]) =>
+    deleteAntropometria(id)
+  );
+
+  handle("get-evolucion", (id: Parameters<typeof getEvolucion>[0]) => getEvolucion(id));
+  handle(
+    "create-evolucion",
+    (data: Parameters<typeof createEvolucion>[1], pacienteId: string) =>
+      createEvolucion(pacienteId, data)
+  );
+  handle(
+    "update-evolucion",
+    (data: Parameters<typeof updateEvolucion>[1], id: string) => updateEvolucion(id, data)
+  );
+  handle("delete-evolucion", (id: Parameters<typeof deleteEvolucion>[0]) => deleteEvolucion(id));
+
+  handle("get-hospitalizacion", (id: Parameters<typeof getHospitalizacion>[0]) =>
+    getHospitalizacion(id)
+  );
+  handle(
+    "create-hospitalizacion",
+    (data: Parameters<typeof createHospitalizacion>[1], pacienteId: string) =>
+      createHospitalizacion(pacienteId, data)
+  );
+  handle(
+    "update-hospitalizacion",
+    (data: Parameters<typeof updateHospitalizacion>[1], id: string) =>
+      updateHospitalizacion(id, data)
+  );
+  handle("delete-hospitalizacion", (id: Parameters<typeof deleteHospitalizacion>[0]) =>
+    deleteHospitalizacion(id)
+  );
+
+  handle("get-interconsulta", (id: Parameters<typeof getInterconsulta>[0]) =>
+    getInterconsulta(id)
+  );
+  handle(
+    "create-interconsulta",
+    (data: Parameters<typeof createInterconsulta>[1], pacienteId: string) =>
+      createInterconsulta(pacienteId, data)
+  );
+  handle(
+    "update-interconsulta",
+    (data: Parameters<typeof updateInterconsulta>[1], id: string) =>
+      updateInterconsulta(id, data)
+  );
+  handle("delete-interconsulta", (id: Parameters<typeof deleteInterconsulta>[0]) =>
+    deleteInterconsulta(id)
+  );
+
+  handle("get-historial", (pacienteId: Parameters<typeof getHistorial>[0]) =>
+    getHistorial(pacienteId)
+  );
+  handle("get-archivos", (pacienteId: Parameters<typeof getArchivosAdjuntos>[0]) =>
+    getArchivosAdjuntos(pacienteId)
+  );
+
+  handle(
+    "create-archivoadjunto",
+    async (
+      data: Parameters<typeof createArchivoAdjunto>[1],
+      pacienteId: string
+    ) => {
+      const id = assertSafeId(pacienteId);
+      const { file, fileName, fileType, ...rest } = data as Parameters<
+        typeof createArchivoAdjunto
+      >[1] & {
+        file?: Uint8Array | number[] | ArrayBuffer;
+        fileName?: unknown;
+        fileType?: unknown;
+      }; // IPC boundary: renderer args arrive untyped.
+
+      // Authorize before touching the filesystem: an unknown patient must not be
+      // able to create a directory or leave a file behind.
       const paciente = await getPaciente(id);
-      return paciente;
-    } catch (error) {
-      console.error("Error fetching paciente:", error);
-      throw error;
+      if (!paciente) throw new Error("El paciente no existe.");
+
+      const bytes = Buffer.from(new Uint8Array(file ?? new ArrayBuffer(0)));
+      if (bytes.byteLength === 0) throw new Error("El archivo está vacío.");
+      if (bytes.byteLength > MAX_ATTACHMENT_BYTES) {
+        throw new Error("El archivo supera el tamaño máximo permitido (25 MB).");
+      }
+
+      const patientDir = resolveInside(getUploadsDir(), id);
+      fs.mkdirSync(patientDir, { recursive: true });
+
+      const storedName = crypto.randomUUID() + safeExtension(fileName);
+      const filePath = resolveInside(patientDir, storedName);
+
+      fs.writeFileSync(filePath, bytes);
+
+      try {
+        return await createArchivoAdjunto(id, {
+          ...rest,
+          tipo: typeof fileType === "string" ? fileType : "",
+          path: filePath,
+        });
+      } catch (error) {
+        // Compensate: never leave an orphan file behind a failed insert.
+        if (fs.existsSync(filePath)) fs.rmSync(filePath);
+        console.error("Error saving file:", error);
+        throw error;
+      }
     }
+  );
+
+  handle("delete-archivoadjunto", async (id: Parameters<typeof deleteArchivoAdjunto>[0]) => {
+    const archivo = await deleteArchivoAdjunto(assertSafeId(id));
+
+    // Remove the document too; a record the clinician deleted must not remain
+    // readable on disk. The row is already gone, so a failure here is logged
+    // rather than surfaced.
+    try {
+      const filePath = resolveInside(getUploadsDir(), path.relative(getUploadsDir(), archivo.path));
+      if (fs.existsSync(filePath)) fs.rmSync(filePath);
+    } catch (error) {
+      console.error("Error deleting attachment file:", error);
+    }
+
+    return archivo;
   });
 
-  ipcMain.handle("create-paciente", async (_event, paciente) => {
-    try {
-      return await createPaciente(paciente);
-    } catch (error) {
-      console.error("Error creating paciente:", error);
-      throw error;
-    }
-  });
+  handle("open-archivoadjunto", async (id: Parameters<typeof getArchivoAdjunto>[0]) => {
+    const archivo = await getArchivoAdjunto(assertSafeId(id));
+    if (!archivo) throw new Error("El archivo adjunto no existe.");
 
-  ipcMain.handle("update-paciente", async (_event, data, id) => {
-    try {
-      return await updatePaciente(id, data);
-    } catch (error) {
-      console.error("Error updating paciente:", error);
-      throw error;
-    }
-  });
+    // The path comes from our own row, but re-confine it anyway: rows written
+    // by older versions contain absolute paths from outside the uploads root.
+    const uploads = getUploadsDir();
+    const filePath = resolveInside(uploads, path.relative(uploads, archivo.path));
 
-  ipcMain.handle("delete-paciente", async (_event, id) => {
-    try {
-      return await deletePaciente(id);
-    } catch (error) {
-      console.error("Error deleting paciente:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("get-antropometria", async (_event, id) => {
-    try {
-      return await getAntropometria(id);
-    } catch (error) {
-      console.error("Error fetching antropometria:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("create-antropometria", async (_event, data, pacienteId) => {
-    try {
-      return await createAntropometria(pacienteId, data);
-    } catch (error) {
-      console.error("Error creating antropometria:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("update-antropometria", async (_event, data, id) => {
-    try {
-      return await updateAntropometria(id, data);
-    } catch (error) {
-      console.error("Error updating antropometria:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("delete-antropometria", async (_event, id) => {
-    try {
-      return await deleteAntropometria(id);
-    } catch (error) {
-      console.error("Error deleting antropometria:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("get-evolucion", async (_event, id) => {
-    try {
-      return await getEvolucion(id);
-    } catch (error) {
-      console.error("Error fetching evolucion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("create-evolucion", async (_event, data, pacienteId) => {
-    try {
-      return await createEvolucion(pacienteId, data);
-    } catch (error) {
-      console.error("Error creating evolucion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("update-evolucion", async (_event, data, id) => {
-    try {
-      return await updateEvolucion(id, data);
-    } catch (error) {
-      console.error("Error updating evolucion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("delete-evolucion", async (_event, id) => {
-    try {
-      return await deleteEvolucion(id);
-    } catch (error) {
-      console.error("Error deleting evolucion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("get-hospitalizacion", async (_event, id) => {
-    try {
-      return await getHospitalizacion(id);
-    } catch (error) {
-      console.error("Error fetching hospitalizacion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("create-hospitalizacion", async (_event, data, pacienteId) => {
-    try {
-      return await createHospitalizacion(pacienteId, data);
-    } catch (error) {
-      console.error("Error creating hospitalizacion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("update-hospitalizacion", async (_event, data, id) => {
-    try {
-      return await updateHospitalizacion(id, data);
-    } catch (error) {
-      console.error("Error updating hospitalizacion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("delete-hospitalizacion", async (_event, id) => {
-    try {
-      return await deleteHospitalizacion(id);
-    } catch (error) {
-      console.error("Error deleting hospitalizacion:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("get-interconsulta", async (_event, id) => {
-    try {
-      return await getInterconsulta(id);
-    } catch (error) {
-      console.error("Error fetching interconsulta:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("create-interconsulta", async (_event, data, pacienteId) => {
-    try {
-      return await createInterconsulta(pacienteId, data);
-    } catch (error) {
-      console.error("Error creating interconsulta:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("update-interconsulta", async (_event, data, id) => {
-    try {
-      return await updateInterconsulta(id, data);
-    } catch (error) {
-      console.error("Error updating interconsulta:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("delete-interconsulta", async (_event, id) => {
-    try {
-      return await deleteInterconsulta(id);
-    } catch (error) {
-      console.error("Error deleting interconsulta:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("get-historial", async (_event, pacienteId) => {
-    try {
-      return await getHistorial(pacienteId);
-    } catch (error) {
-      console.error("Error fetching historial:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("get-archivos", async (_event, pacienteId) => {
-    try {
-      return await getArchivosAdjuntos(pacienteId);
-    } catch (error) {
-      console.error("Error fetching archivos:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("create-archivoadjunto", async (_event, data, pacienteId) => {
-    try {
-      const { file, fileName, fileType, ...rest } = data;
-
-      //how do I get the current directory without using __Dirname?
-      //answer: use process.cwd()
-
-      const dirname = process.cwd();
-
-      const uploadsDir = path.join(dirname, "uploads", pacienteId);
-      console.log({ uploadsDir });
-      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-
-      const dateStr = new Date().toISOString().replace(/:/g, "-");
-
-      const filePath = path.join(
-        dirname,
-        "uploads",
-        pacienteId,
-        dateStr + "-" + fileName
+    if (!isOpenableAttachment(filePath)) {
+      throw new Error(
+        "Este tipo de archivo no se puede abrir desde la aplicación."
       );
-      const fileData = Buffer.from(file);
-      fs.writeFileSync(filePath, fileData);
-
-      return await createArchivoAdjunto(pacienteId, {
-        ...rest,
-        tipo: fileType,
-        path: filePath,
-      });
-    } catch (error) {
-      console.error("Error saving file:", error);
-      return error;
     }
-  });
+    if (!fs.existsSync(filePath)) throw new Error("El archivo ya no está disponible.");
 
-  ipcMain.handle("delete-archivoadjunto", async (_event, id) => {
-    try {
-      return await deleteArchivoAdjunto(id);
-    } catch (error) {
-      console.error("Error deleting archivo:", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("open-path", async (_event, filePath) => {
     return shell.openPath(filePath);
   });
 }
+

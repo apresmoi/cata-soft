@@ -16,7 +16,9 @@ export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
   return (
     <TableRow
       onClick={() => {
-        window.ipcRenderer.invoke("open-path", props.path);
+        // Main resolves the path from the row id and refuses anything outside
+        // the uploads directory; never hand it a path from here.
+        window.ipcRenderer.invoke("open-archivoadjunto", props.id);
       }}
     >
       <TableCol>
