@@ -202,5 +202,25 @@ Do not be surprised by these; fix them deliberately, not incidentally.
 
 ## Commits
 
-Conventional commits, single-line messages, no attribution or co-author
-trailers.
+Conventional commits. **One single-line message. No body, no trailers.**
+
+```
+<type>(<optional scope>): <imperative summary in lower case>
+```
+
+Types in use here: `feat`, `fix`, `refactor`, `test`, `build`, `chore`, `docs`.
+Scopes seen in the history: `db`, `ui`, `ipc`, `attachments`, `print`, `git`.
+
+```
+fix(ui): keep the caret in place when editing the middle of a field
+feat(db): keep the database in user data with backed-up startup migrations
+build: use a single builder config and stop shipping the test database
+```
+
+**Never add attribution of any kind.** No `Co-Authored-By:` trailer, no
+"Generated with", no tool or model name, no emoji, no issue-closing footer
+unless explicitly asked. The subject line is the entire commit message.
+
+Group related changes into one commit rather than committing file by file, and
+keep each commit compiling: `npm run typecheck` and `npm test` must pass at
+every commit.
