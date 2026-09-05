@@ -14,6 +14,17 @@ dist-electron
 release
 *.local
 
+# Patient data and secrets - never commit
+.env
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+uploads/
+release/
+dist/mac-arm64/
+coverage/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
