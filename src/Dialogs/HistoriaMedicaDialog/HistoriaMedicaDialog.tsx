@@ -127,7 +127,7 @@ export function HistoriaMedicaDialog(
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild={props.asChild}>{props.children}</DialogTrigger>
-      <DialogContainer className="min-w-[80vw] max-w-[80vw] ">
+      <DialogContainer maxWidth="80vw">
         <DialogTitle>DESCARGAR RESUMEN DE HISTORIA</DialogTitle>
 
         <div className="flex gap-2 min-h-[50vh]">
@@ -176,6 +176,14 @@ export function HistoriaMedicaDialog(
               className="h-full w-full"
               srcDoc={getTemplate(patient, filteredHistory || [])}
               title="Historia Medica"
+              // No allow-scripts: printed template renders raw clinical text, so
+              // disabling script execution inside the frame prevents any markup
+              // saved in a patient note from running as script. Printing is
+              // driven from the parent (handleDownload -> contentWindow.print()),
+              // not from a script inside the srcDoc HTML, so this is safe.
+              // allow-same-origin keeps the parent able to call
+              // contentWindow.print(); allow-modals permits the print dialog.
+              sandbox="allow-same-origin allow-modals"
             ></iframe>
           </div>
         </div>

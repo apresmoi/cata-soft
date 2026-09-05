@@ -6,6 +6,20 @@ import {
 } from "@prisma/client";
 import { PacienteHistoryItem, usePaciente } from "../../hooks";
 
+// Escapes values interpolated into the printable HTML template. Every value
+// that originates from the database (patient demographics, history notes)
+// or otherwise from user input MUST pass through this before being embedded
+// in the srcDoc HTML, since the iframe renders that markup directly.
+const esc = (v: unknown): string =>
+  v == null
+    ? ""
+    : String(v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
 const head = `<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -137,49 +151,49 @@ const headerFormatter = (paciente: ReturnType<typeof usePaciente>["data"]) => {
         <div class="header-grid">
             <div class="header-item">
                 <span class="label">NOMBRE Y APELLIDO:</span>
-                <div class="value">${paciente?.nombre}</div>
+                <div class="value">${esc(paciente?.nombre)}</div>
             </div>
             <div class="header-item">
                 <span class="label">DNI:</span>
-                <div class="value">${paciente?.documento}</div>
+                <div class="value">${esc(paciente?.documento)}</div>
             </div>
             <div class="header-item">
                 <span class="label">EDAD:</span>
-                <div class="value">${paciente?.edad}</div>
+                <div class="value">${esc(paciente?.edad)}</div>
             </div>
             <div class="header-item">
                 <span class="label">DIRECCIÓN:</span>
-                <div class="value">${paciente?.direccion}</div>
+                <div class="value">${esc(paciente?.direccion)}</div>
             </div>
             <div class="header-item">
                 <span class="label">TELÉFONO:</span>
-                <div class="value">${paciente?.telefono}</div>
+                <div class="value">${esc(paciente?.telefono)}</div>
             </div>
             <div class="header-item">
                 <span class="label">EMAIL:</span>
-                <div class="value">${paciente?.email}</div>
+                <div class="value">${esc(paciente?.email)}</div>
             </div>
             <div class="header-item">
                 <span class="label">OBRA SOCIAL:</span>
-                <div class="value">${paciente?.obraSocial}</div>
+                <div class="value">${esc(paciente?.obraSocial)}</div>
             </div>
             <div class="header-item">
                 <span class="label">NÚMERO:</span>
-                <div class="value">${paciente?.numeroObraSocial}</div>
+                <div class="value">${esc(paciente?.numeroObraSocial)}</div>
             </div>
         </div>
     </div>
     <div class="section">
       <div class="section-title">ANTECEDENTES</div>
       <div class="section-content">
-        ${paciente?.antecedentes}
+        ${esc(paciente?.antecedentes)}
       </div>
     </div>
 
     <div class="section">
       <div class="section-title">MEDICACION HABITUAL</div>
       <div class="section-content">
-        ${paciente?.medicacionHabitual}
+        ${esc(paciente?.medicacionHabitual)}
       </div>
     </div>
   </div>`;
@@ -201,15 +215,15 @@ const antropometriaFormatter = (history: Antropometrias) => {
                 )}</div>
             <div class="history-field">
                 <span class="history-label">PESO:</span>
-                <span class="history-value">${history.peso} KG</span>
+                <span class="history-value">${esc(history.peso)} KG</span>
             </div>
             <div class="history-field">
                 <span class="history-label">TALLA:</span>
-                <span class="history-value">${history.talla} m</span>
+                <span class="history-value">${esc(history.talla)} m</span>
             </div>
             <div class="history-field">
                 <span class="history-label">IMC:</span>
-                <span class="history-value">${history.imc}</span>
+                <span class="history-value">${esc(history.imc)}</span>
             </div>
         </div>`;
 };
@@ -223,11 +237,11 @@ const hospitalizacionFormatter = (history: Hospitalizaciones) => {
                 </div>
                 <div class="history-field">
                     <span class="history-label">MOTIVO:</span>
-                    <span class="history-value">${history.motivo || ""}</span>
+                    <span class="history-value">${esc(history.motivo || "")}</span>
                 </div>
                 <div class="history-field">
                     <span class="history-label">NOTAS:</span>
-                    <span class="history-value">${history.notas || ""}</span>
+                    <span class="history-value">${esc(history.notas || "")}</span>
                 </div>
             </div>`;
 };
@@ -239,15 +253,15 @@ const interconsultaFormatter = (history: Interconsultas) => {
                     )}</div>
                     <div class="history-field">
                         <span class="history-label">MOTIVO:</span>
-                        <span class="history-value">${
+                        <span class="history-value">${esc(
                           history.motivo || ""
-                        }</span>
+                        )}</span>
                     </div>
                     <div class="history-field">
                         <span class="history-label">NOTAS:</span>
-                        <span class="history-value">${
+                        <span class="history-value">${esc(
                           history.notas || ""
-                        }</span>
+                        )}</span>
                     </div>
                 </div>`;
 };
@@ -259,21 +273,21 @@ const evolucionFormatter = (history: Evoluciones) => {
                         )}</div>
                         <div class="history-field">
                             <span class="history-label">MOTIVO:</span>
-                            <span class="history-value">${
+                            <span class="history-value">${esc(
                               history.motivo || ""
-                            }</span>
+                            )}</span>
                         </div>
                         <div class="history-field">
                             <span class="history-label">EXAMEN FÍSICO:</span>
-                            <span class="history-value">${
+                            <span class="history-value">${esc(
                               history.examenFisico || ""
-                            }</span>
+                            )}</span>
                         </div>
                         <div class="history-field">
                             <span class="history-label">PLAN:</span>
-                            <span class="history-value">${
+                            <span class="history-value">${esc(
                               history.plan || ""
-                            }</span>
+                            )}</span>
                         </div>
                     </div>`;
 };
