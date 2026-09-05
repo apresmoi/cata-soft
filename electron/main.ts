@@ -45,7 +45,7 @@ function createWindow() {
     skipTaskbar: true,
   });
 
-  loadingScreen.loadFile(path.join(__dirname, "loading.html"));
+  loadingScreen.loadFile(path.join(process.env.VITE_PUBLIC, "loading.html"));
 
   win = new BrowserWindow({
     show: false,

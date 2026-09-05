@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .stage {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .logo {
+        position: relative;
+        width: 110px;
+        line-height: 0;
+        animation: breathe 2.4s ease-in-out infinite;
+      }
+      .logo img {
+        width: 110px;
+        height: auto;
+        display: block;
+      }
+      /* Gray base layer sits underneath */
+      .logo .gray {
+        filter: grayscale(100%) brightness(1.05) contrast(0.95);
+        opacity: 0.55;
+      }
+      /* Color layer is revealed bottom-to-top as it "loads" */
+      .logo .color {
+        position: absolute;
+        inset: 0;
+        clip-path: inset(100% 0 0 0);
+        animation: fill 2.5s ease-in-out infinite;
+      }
+      @keyframes fill {
+        0% {
+          clip-path: inset(100% 0 0 0);
+        }
+        70%,
+        100% {
+          clip-path: inset(0 0 0 0);
+        }
+      }
+      @keyframes breathe {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.04);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <div class="logo">
+        <img class="gray" src="./icon.png" alt="" />
+        <img class="color" src="./icon.png" alt="Cargando" />
+      </div>
+    </div>
+  </body>
+</html>
