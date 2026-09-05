@@ -1,5 +1,4 @@
 import cx from "classnames";
-import { usePreservedCaret } from "../../hooks/usePreservedCaret";
 
 interface PatientCardFieldProps<T> {
   icon: React.ReactNode;
@@ -19,10 +18,7 @@ interface PatientCardFieldProps<T> {
 }
 
 export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
-  const { caretProps, remember } = usePreservedCaret<HTMLInputElement>();
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    remember(event.target.selectionStart);
     if (props.onChange) {
       props.onChange(event.target.value as T);
     }
@@ -47,7 +43,6 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
         )}
       >
         <input
-          {...caretProps}
           className={cx(
             "w-full bg-stone-600 outline-0 p-2 rounded-lg",
             props.align === "center" && "text-center",

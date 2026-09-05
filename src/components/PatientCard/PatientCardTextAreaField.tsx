@@ -1,5 +1,4 @@
 import cx from "classnames";
-import { usePreservedCaret } from "../../hooks/usePreservedCaret";
 
 interface PatientCardTextAreaFieldProps {
   label?: string;
@@ -14,10 +13,7 @@ interface PatientCardTextAreaFieldProps {
 }
 
 export function PatientCardTextAreaField(props: PatientCardTextAreaFieldProps) {
-  const { caretProps, remember } = usePreservedCaret<HTMLTextAreaElement>();
-
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    remember(event.target.selectionStart);
     if (props.onChange) {
       props.onChange(event.target.value);
     }
@@ -31,7 +27,6 @@ export function PatientCardTextAreaField(props: PatientCardTextAreaFieldProps) {
         </div>
       )}
       <textarea
-        {...caretProps}
         className={cx(
           "bg-stone-600 h-full outline-0 p-3 resize-none rounded-lg",
           // Painted outside the box, so flagging a field shifts no layout.
