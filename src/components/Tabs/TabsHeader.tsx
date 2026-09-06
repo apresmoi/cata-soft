@@ -4,19 +4,16 @@ export function TabsHeader() {
   const { tabs, currentTab, setCurrentTab } = useTabs();
 
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row border-b border-stone-200">
       {tabs.map((tab) => (
         <button
           key={tab}
           onClick={() => setCurrentTab(tab)}
           className={cx(
-            "px-4 py-2 border-b w-full whitespace-nowrap hover:bg-stone-500/10 transition-colors",
+            "border-b-2 px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors",
             currentTab === tab
-              ? "border-brand-600 text-brand-600 font-semibold"
-              // `text-current` so the header reads on a dark panel and on a
-              // light one: it inherits the surrounding text colour instead of
-              // hard-coding white, which was invisible on light surfaces.
-              : "border-stone-300 text-current opacity-60 hover:opacity-100"
+              ? "border-brand-600 text-brand-600"
+              : "border-transparent text-stone-500 hover:text-stone-800"
           )}
         >
           {tab}

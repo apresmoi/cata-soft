@@ -4,7 +4,7 @@ import { TabsHeader } from "./TabsHeader";
 export function TabsContainer(props: React.PropsWithChildren) {
   return (
     <TabProvider>
-      <div className="flex flex-col gap-2 w-full h-full">
+      <div className="flex min-h-0 flex-1 flex-col gap-2">
         <TabsHeader />
         {props.children}
       </div>

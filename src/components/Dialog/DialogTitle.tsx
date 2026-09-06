@@ -3,8 +3,8 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 
 export function DialogTitle(props: React.PropsWithChildren) {
   return (
-    <RadixDialog.Title className="px-4 pb-4 pt-5 sm:p-6 flex items-center justify-between border-b border-stone-200 select-none text-base font-semibold text-stone-900">
-      {props.children}
+    <RadixDialog.Title className="flex items-center justify-between gap-2 border-b border-stone-200 px-5 py-4 select-none text-base font-semibold text-stone-900">
+      <div className="flex items-center gap-2">{props.children}</div>
 
       <RadixDialog.Close asChild>
         <button

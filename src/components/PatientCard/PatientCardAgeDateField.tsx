@@ -46,18 +46,26 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
   return (
     <div
       className={cx(
-        "w-[100%] flex gap-2",
+        "flex w-full gap-1.5",
         props.className,
         props.inline ? "flex-row" : "flex-col"
       )}
     >
-      <div className={cx("flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500")}>
+      <div
+        className={cx(
+          "flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500",
+          // `flex-1` so the label keeps its share of the row: `min-w-0` with
+          // `truncate` alone let it shrink to nothing next to the fixed-width
+          // input, and the label disappeared entirely.
+          props.inline && "min-w-0 flex-1 truncate"
+        )}
+      >
         {props.icon} {props.label}
       </div>
       <div
         data-skip-autofocus
         className={cx(
-          "w-full",
+          "w-full min-w-0",
           // Same fixed width as the other inline fields so they all line up.
           props.inline && "ml-auto w-28 shrink-0"
         )}

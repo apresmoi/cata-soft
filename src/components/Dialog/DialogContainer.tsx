@@ -1,7 +1,9 @@
-import { useRef } from "react";
+import { Children, isValidElement, useRef } from "react";
 import cx from "classnames";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import { focusFirstField } from "../../hooks/useFocusFirstField";
+import { DialogTitle } from "./DialogTitle";
+import { DialogFooter } from "./DialogFooter";
 
 export function DialogContainer(
   props: React.PropsWithChildren<{
@@ -11,6 +13,21 @@ export function DialogContainer(
   }>
 ) {
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Split the flat children into title / footer / body so the body alone
+  // can scroll while the header and footer stay put.
+  const children = Children.toArray(props.children);
+  const title = children.filter(
+    (child) => isValidElement(child) && child.type === DialogTitle
+  );
+  const footer = children.filter(
+    (child) => isValidElement(child) && child.type === DialogFooter
+  );
+  const body = children.filter(
+    (child) =>
+      !(isValidElement(child) && child.type === DialogTitle) &&
+      !(isValidElement(child) && child.type === DialogFooter)
+  );
 
   return (
     <RadixDialog.Portal>
@@ -32,12 +49,14 @@ export function DialogContainer(
             // No min-width here: `min-width` overrides `max-width` in CSS, so a
             // base min-w silently defeated every caller's width.
             className={cx(
-              "popover relative m-auto w-full bg-white border border-stone-200 rounded-xl shadow-xl",
+              "popover relative m-auto flex w-full flex-col bg-white border border-stone-200 rounded-xl shadow-xl",
               props.className
             )}
             style={{ maxWidth: props.maxWidth ?? 680 }}
           >
-            {props.children}
+            {title}
+            <div className="max-h-[70vh] overflow-y-auto p-5">{body}</div>
+            {footer}
           </RadixDialog.Content>
         </div>
       </div>

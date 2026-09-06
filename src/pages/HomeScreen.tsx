@@ -1,11 +1,14 @@
 import React from "react";
 
-import { ReaderIcon, DownloadIcon } from "@radix-ui/react-icons";
+import { ReaderIcon, GearIcon } from "@radix-ui/react-icons";
 import { Toolbar } from "../components/Toolbar";
-import { ToolbarButton } from "../components/ToolbarButton";
 import { ToolbarSearch } from "../components/ToolbarSearch";
 import { AppContainer, Tooltip } from "../components";
-import { HistoriaMedicaDialog, NewPatientDialog } from "../Dialogs";
+import {
+  ConfiguracionDialog,
+  HistoriaMedicaDialog,
+  NewPatientDialog,
+} from "../Dialogs";
 import { Pacientes } from "@prisma/client";
 import { useNavigate } from "react-router-dom";
 import { usePacientes } from "../hooks";
@@ -84,16 +87,6 @@ export function HomeScreen() {
           />
         </div>
 
-        <Tooltip tooltip="Exportar copia de seguridad (ZIP)">
-          <ToolbarButton
-            variant="secondary"
-            icon={<DownloadIcon />}
-            onClick={async () => {
-              await window.ipcRenderer.invoke("export-backup");
-            }}
-          />
-        </Tooltip>
-
         <NewPatientDialog />
       </Toolbar>
 
@@ -162,9 +155,25 @@ export function HomeScreen() {
             </tbody>
           }
         />
-        <footer className="shrink-0 border-t border-stone-200 bg-stone-50 px-4 py-2 text-xs text-stone-500">
-          {filteredCount} {filteredCount === 1 ? "paciente" : "pacientes"}
-          {filteredCount !== totalCount ? ` de ${totalCount}` : ""}
+        {/*
+         * Count on the left, settings on the right. The backup export lives in
+         * there rather than the toolbar: it is occasional maintenance, not an
+         * everyday action, and it does not deserve equal billing with opening
+         * a patient.
+         */}
+        <footer className="flex shrink-0 items-center justify-between border-t border-stone-200 bg-stone-50 px-4 py-2 text-xs text-stone-500">
+          <span>
+            {filteredCount} {filteredCount === 1 ? "paciente" : "pacientes"}
+            {filteredCount !== totalCount ? ` de ${totalCount}` : ""}
+          </span>
+          <ConfiguracionDialog asChild>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-md border border-stone-300 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            >
+              <GearIcon /> Configuración
+            </button>
+          </ConfiguracionDialog>
         </footer>
       </div>
     </AppContainer>

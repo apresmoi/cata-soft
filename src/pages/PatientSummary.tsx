@@ -33,20 +33,22 @@ function itemDate(item: PacienteHistoryItem): Date {
   const raw = item.type === "hospitalizacion" ? item.fechaIngreso : item.type === "archivoadjunto" ? item.createdAt : item.fecha;
   return raw instanceof Date ? raw : new Date(raw);
 }
-
-/** One-line Spanish description of a history item derived from its own fields. */
+/**
+ * One-line Spanish description, phrased as the design board had it: the record
+ * type leads, so a row is self-describing next to its coloured dot.
+ */
 function describeItem(item: PacienteHistoryItem): string {
   switch (item.type) {
     case "evolucion":
-      return item.motivo ?? "Evolución registrada";
+      return `Evolución: ${item.motivo ?? "sin motivo"}`;
     case "antropometria":
-      return `Peso ${formatDecimal(item.peso)} kg, talla ${formatDecimal(item.talla, 2)} m`;
+      return `Antropometría registrada: IMC ${formatDecimal(item.imc)}`;
     case "interconsulta":
-      return item.motivo;
+      return `Interconsulta: ${item.motivo}`;
     case "hospitalizacion":
-      return item.motivo;
+      return `Internación: ${item.motivo}`;
     case "archivoadjunto":
-      return item.nombre;
+      return `Archivo adjuntado: ${item.nombre}`;
   }
 }
 
@@ -69,21 +71,23 @@ function DeltaChip(props: { delta: number | null; unit: string }): JSX.Element |
 function TrendKpiCard(props: { label: string; value: string; hint: string; values: number[]; delta: number | null; deltaUnit: string; patientId: string }) {
   return (
     <div className={`relative ${cardBase}`}>
-      <NewAntropometriaDialog patientId={props.patientId}>
-        {/*
-         * No stopPropagation here: the surrounding card is a plain div with no
-         * click handler, and swallowing the event stopped it reaching
-         * `DialogTrigger`, so the button did nothing at all.
-         */}
-        <button
-          type="button"
-          className={`absolute right-3 top-3 ${iconButton}`}
-          title="Nueva antropometría"
-          aria-label="Nueva antropometría"
-        >
-          <FiPlus />
-        </button>
-      </NewAntropometriaDialog>
+      {/*
+       * `DialogTrigger` renders its own <button>, so the child must not be one
+       * too -- nested buttons are invalid and Radix's wrapper sat in normal
+       * flow, pushing the card's label onto its own row. Position the wrapper
+       * and keep the child a span.
+       */}
+      <div className="absolute right-3 top-3">
+        <NewAntropometriaDialog patientId={props.patientId}>
+          <span
+            className={iconButton}
+            title="Nueva antropometría"
+            aria-label="Nueva antropometría"
+          >
+            <FiPlus />
+          </span>
+        </NewAntropometriaDialog>
+      </div>
       <div className={kpiLabel}>{props.label}</div>
       <div className="mt-2 flex items-center justify-between gap-3">
         <div>
@@ -209,29 +213,44 @@ export function PatientSummary(props: {
           </div>
         </section>
 
-        <section className="flex min-h-0 flex-col rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-          <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-stone-500">Interconsultas</h3>
+        {/*
+         * Same treatment as the design board's pane in this slot: a tinted
+         * panel holding white record cards, each with a chip, its notes and an
+         * explicit edit action. The design's chip read "Pendiente" and carried
+         * a "Marcar respuesta recibida" button; both need an `estado` column
+         * that `Interconsultas` does not have, so the chip states the
+         * speciality's date instead of inventing a status.
+         */}
+        <section className="flex min-h-0 flex-col rounded-xl border border-brand-200 bg-brand-50/50 p-4 shadow-sm">
+          <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-brand-800">
+            Interconsultas
+          </h3>
           <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto pr-2">
             {interconsultas.length === 0 ? (
-              <p className="text-sm text-stone-500">Todavía no hay interconsultas cargadas.</p>
+              <p className="text-sm text-brand-800">Sin interconsultas cargadas.</p>
             ) : (
               interconsultas.map((item) => (
-                <button
+                <div
                   key={item.id}
-                  type="button"
-                  onClick={() => props.onOpenRecord(item)}
-                  className="w-full rounded-lg border border-brand-100 bg-brand-50/60 p-3 text-left hover:border-brand-300 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                  className="rounded-lg border border-brand-200 bg-white p-4"
                 >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-semibold text-stone-800">{item.motivo}</span>
-                    <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-stone-400">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="font-semibold text-stone-800">{item.motivo}</div>
+                    <span className="shrink-0 rounded-full bg-brand-100 px-2 py-1 text-xs font-bold text-brand-800">
                       {formatDate(itemDate(item))}
                     </span>
                   </div>
                   {item.notas ? (
-                    <p className="mt-1 text-sm leading-6 text-stone-600">{item.notas}</p>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">{item.notas}</p>
                   ) : null}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => props.onOpenRecord(item)}
+                    className="mt-3 rounded-md border border-brand-300 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-900 hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                  >
+                    Editar
+                  </button>
+                </div>
               ))
             )}
           </div>

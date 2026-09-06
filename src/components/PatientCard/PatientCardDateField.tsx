@@ -17,10 +17,7 @@ interface PatientCardDateFieldProps {
 export function PatientCardDateField(props: PatientCardDateFieldProps) {
   return (
     <div
-      className={cx(
-        "w-[100%] flex flex-col gap-2  select-none",
-        props.className
-      )}
+      className={cx("flex w-full flex-col gap-1.5 select-none", props.className)}
     >
       <div className={cx("flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500")}>
         {props.icon} {props.label}

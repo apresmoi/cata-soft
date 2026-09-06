@@ -198,17 +198,20 @@ export function PatientScreen() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Toolbar>
-            {/* Identity reads as one line; it is a header, not a form. */}
-            <div className="flex min-w-0 flex-wrap items-baseline gap-x-3">
-              <h1 className="truncate text-lg font-bold tracking-tight text-stone-900">
+            {/*
+             * One line, centred: a padded pill next to text does not sit right
+             * on a shared baseline, and the bar centres its children.
+             */}
+            <div className="flex min-w-0 items-center gap-x-3">
+              <h1 className="shrink-0 truncate text-lg font-bold leading-none tracking-tight text-stone-900">
                 {data?.nombre}
               </h1>
               {edad !== null && (
-                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-800">
+                <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold leading-none text-brand-800">
                   {edad} años
                 </span>
               )}
-              <span className="truncate text-sm text-stone-500">
+              <span className="truncate text-sm leading-none text-stone-500">
                 DNI {data?.documento}
                 {data?.obraSocial ? ` · ${data.obraSocial} Nº ${data.numeroObraSocial}` : ""}
                 {data?.telefono ? ` · ${data.telefono}` : ""}

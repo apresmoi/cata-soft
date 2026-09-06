@@ -10,8 +10,16 @@ import {
 } from "../../components/Dialog";
 import { useNewArchivoAdjunto } from "../../hooks";
 import { useRequiredFields } from "../../hooks/useRequiredFields";
-import { CrumpledPaperIcon, FileIcon } from "@radix-ui/react-icons";
+import { CrumpledPaperIcon, FileIcon, UploadIcon } from "@radix-ui/react-icons";
 import { PatientCardField, PatientCardTextAreaField } from "../../components";
+import cx from "classnames";
+
+/** Format a byte count as a human-readable KB/MB string. */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 interface NewArchivoAdjuntoDialogProps {
   patientId: string;
@@ -47,13 +55,6 @@ export function NewArchivoAdjuntoDialog(
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleInputClick = () => {
-    if (data.file) {
-      handleFile(undefined);
-      return;
-    }
-    fileInputRef.current?.click();
-  };
 
   const handleFile = async (fileInput: File | undefined) => {
     if (fileInput) {
@@ -100,56 +101,47 @@ export function NewArchivoAdjuntoDialog(
         <DialogTitle>SUBIR ARCHIVO ADJUNTO</DialogTitle>
 
         <div className="flex gap-2 flex-col p-4 h-[60vh]">
-          <div
-            className={
-              "relative cursor-pointer min-h-[100px]" +
-              (invalid(data).includes("file") ? " ring-2 ring-red-500" : "")
-            }
-            onClick={handleInputClick}
+          <input
+            ref={fileInputRef}
+            id="archivo-adjunto-file"
+            className="sr-only"
+            type="file"
+            onChange={(e) => {
+              handleFile(e.target.files?.[0]);
+            }}
+          />
+          <label
+            htmlFor="archivo-adjunto-file"
+            className={cx(
+              "flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 p-6 text-center transition-colors hover:border-brand-400 hover:bg-brand-50",
+              invalid(data).includes("file") && "ring-2 ring-red-500"
+            )}
           >
-            <input
-              ref={fileInputRef}
-              className="hidden"
-              type="file"
-              onChange={(e) => {
-                handleFile(e.target.files?.[0]);
-              }}
-            />
-            <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              <rect
-                width="100%"
-                height="100%"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="16 8"
-              />
-            </svg>
+            <UploadIcon className="h-6 w-6 text-stone-400" />
+            <span className="text-sm text-stone-600">
+              Arrastrá un archivo a cualquier lugar de la ventana o hacé click acá para elegirlo
+            </span>
+          </label>
 
-            <div className="w-full h-full flex items-center justify-center dash-array hover:bg-stone-700 group">
-              <label
-                htmlFor="file"
-                className="cursor-pointer text-center flex gap-2 items-center"
+          {data?.file && (
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-stone-200 bg-white p-3">
+              <div className="flex min-w-0 items-center gap-2 text-sm text-stone-700">
+                <FileIcon className="shrink-0 text-stone-400" />
+                <span className="truncate">{data.nombre}</span>
+                <span className="shrink-0 text-stone-400">
+                  ({formatFileSize(data.file.byteLength)})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleFile(undefined)}
+                className="flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
               >
-                {data?.nombre ? (
-                  <>
-                    <FileIcon /> {data.nombre}
-                  </>
-                ) : (
-                  <>ARRASTRA UN ARCHIVO A CUALQUIER LUGAR O HACE CLICK ACA</>
-                )}
-              </label>
-
-              {data?.nombre && (
-                <div className="absolute bottom-0 left-0 right-0 top-0 p-2 hidden group-hover:flex">
-                  <button className="p-2 m-auto text-xl bg-red-800 text-stone-100 flex items-center gap-2">
-                    <CrumpledPaperIcon />
-                    BORRAR
-                  </button>
-                </div>
-              )}
+                <CrumpledPaperIcon />
+                BORRAR
+              </button>
             </div>
-          </div>
+          )}
           <PatientCardField
             icon={<FileIcon />}
             label="NOMBRE"

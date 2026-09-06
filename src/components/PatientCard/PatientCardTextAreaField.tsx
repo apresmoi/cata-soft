@@ -20,15 +20,15 @@ export function PatientCardTextAreaField(props: PatientCardTextAreaFieldProps) {
   };
 
   return (
-    <div className={cx("w-[100%] flex flex-col gap-2", props.className)}>
+    <div className={cx("flex w-full flex-col gap-1.5", props.className)}>
       {props.label && (
-        <div className="text-center pb-2 text-xs font-semibold uppercase tracking-wide text-stone-500 select-none">
+        <div className="pb-2 text-center text-xs font-semibold uppercase tracking-wide text-stone-500 select-none">
           {props.label}
         </div>
       )}
       <textarea
         className={cx(
-          "border border-stone-300 bg-white text-stone-800 h-full outline-0 p-3 resize-none rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
+          "min-h-[8rem] w-full resize-y rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
           // Painted outside the box, so flagging a field shifts no layout.
           props.invalid && "ring-2 ring-red-500"
         )}
