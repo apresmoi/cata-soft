@@ -89,7 +89,7 @@ export default function Summary(props: {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <button
           type="button"
           onClick={() => latestVisit && props.onEdit({ kind: "evolucion", row: latestVisit })}
@@ -138,7 +138,7 @@ export default function Summary(props: {
         </div>
       </div>
 
-      <div className="grid grid-cols-[1.1fr_0.9fr] items-start gap-4">
+      <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div

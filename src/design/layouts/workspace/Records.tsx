@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { FiChevronDown, FiChevronUp, FiEdit3, FiPlus } from "react-icons/fi";
+import { useMemo, useState } from "react";
+import { FiChevronDown, FiChevronUp, FiEdit3 } from "react-icons/fi";
 import { formatDate, KIND_META, type RecordKind, type UnifiedRecord } from "./data";
 
 type SortDirection = "asc" | "desc";
@@ -9,55 +9,9 @@ const tableCell = "border-t border-stone-200 px-4 py-3 text-sm text-stone-700";
 
 const ALL_KINDS = Object.keys(KIND_META) as RecordKind[];
 
-function NewRecordMenu(props: { onCreate: (kind: RecordKind) => void }) {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function handleOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, [open]);
-
-  return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
-      >
-        <FiPlus /> Nuevo registro
-      </button>
-      {open ? (
-        <div className="absolute right-0 z-10 mt-1 w-48 overflow-hidden rounded-md border border-stone-200 bg-white py-1 shadow-lg">
-          {ALL_KINDS.map((kind) => (
-            <button
-              key={kind}
-              type="button"
-              onClick={() => {
-                props.onCreate(kind);
-                setOpen(false);
-              }}
-              className="block w-full px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-100"
-            >
-              {KIND_META[kind].singular}
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 export default function Records(props: {
   records: UnifiedRecord[];
   onOpen: (kind: RecordKind, id: string) => void;
-  onCreate: (kind: RecordKind) => void;
 }) {
   const [selectedKinds, setSelectedKinds] = useState<Set<RecordKind>>(new Set());
   const [query, setQuery] = useState("");
@@ -121,7 +75,6 @@ export default function Records(props: {
             </button>
           ))}
         </div>
-        <NewRecordMenu onCreate={props.onCreate} />
       </div>
 
       <input

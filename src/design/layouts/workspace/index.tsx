@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { FiArrowLeft, FiEdit3, FiPrinter } from "react-icons/fi";
 import Summary from "./Summary";
 import Records from "./Records";
+import Sidebar from "./Sidebar";
 import PatientsTable from "./PatientsTable";
 import ExportPreview from "./Export";
 import { EditModal, type ModalTarget } from "./Modals";
@@ -224,33 +225,38 @@ export default function WorkspaceLayout() {
         onEditPatient={() => setModal({ kind: "paciente" })}
         onExport={() => setExportMode(true)}
       />
-      <Tabs active={activeTab} counts={counts} onChange={setActiveTab} />
-      <main className="min-h-0 flex-1 overflow-auto p-5">
-        {activeTab === "resumen" ? (
-          <Summary
-            patient={patient}
-            evoluciones={evoluciones}
-            antropometria={antropometria}
-            interconsultas={interconsultas}
-            onEdit={setModal}
-            onToggleInterconsulta={(id) =>
-              setInterconsultas((current) =>
-                current.map((row) =>
-                  row.id === id
-                    ? { ...row, estado: row.estado === "pendiente" ? "respondida" : "pendiente" }
-                    : row
-                )
-              )
-            }
-          />
-        ) : (
-          <Records
-            records={records}
-            onOpen={openRecord}
-            onCreate={(kind) => setModal({ kind } as ModalTarget)}
-          />
-        )}
-      </main>
+      <div className="flex min-h-0 flex-1">
+        <Sidebar
+          onCreate={(kind) => setModal({ kind } as ModalTarget)}
+          onExport={() => setExportMode(true)}
+          onDelete={() => undefined}
+        />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Tabs active={activeTab} counts={counts} onChange={setActiveTab} />
+          <main className="min-h-0 flex-1 overflow-auto p-5">
+            {activeTab === "resumen" ? (
+              <Summary
+                patient={patient}
+                evoluciones={evoluciones}
+                antropometria={antropometria}
+                interconsultas={interconsultas}
+                onEdit={setModal}
+                onToggleInterconsulta={(id) =>
+                  setInterconsultas((current) =>
+                    current.map((row) =>
+                      row.id === id
+                        ? { ...row, estado: row.estado === "pendiente" ? "respondida" : "pendiente" }
+                        : row
+                    )
+                  )
+                }
+              />
+            ) : (
+              <Records records={records} onOpen={openRecord} />
+            )}
+          </main>
+        </div>
+      </div>
 
       {modal ? (
         <EditModal
