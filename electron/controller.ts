@@ -1,8 +1,11 @@
-import { getUploadsDir } from "./database";
-import { ipcMain, shell } from "electron";
-import * as path from "path";
-import * as fs from "fs";
+import { getDbPath, getUploadsDir } from "./database";
+import { dialog, ipcMain, shell } from "electron";
+// @ts-ignore
+import archiver from "archiver";
 import * as crypto from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+
 import {
   getPacientes,
   getPaciente,
@@ -277,5 +280,40 @@ export function registerIpcHandlers() {
 
     return shell.openPath(filePath);
   });
-}
 
+  handle("export-backup", async () => {
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: "Exportar Copia de Seguridad",
+      defaultPath: `CataSoft-Backup-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`,
+      filters: [{ name: "Archivos ZIP", extensions: ["zip"] }],
+    });
+
+    if (canceled || !filePath) return null;
+
+    return new Promise<string>((resolve, reject) => {
+      const output = fs.createWriteStream(filePath);
+      const archive = (archiver as unknown as Function)("zip", { zlib: { level: 9 } });
+      output.on("close", () => resolve(filePath));
+      archive.on("error", reject);
+
+      archive.pipe(output);
+
+      // Safely copy DB files including WAL/SHM to avoid corruption
+      const dbPath = getDbPath();
+      for (const suffix of ["", "-wal", "-shm"]) {
+        const source = dbPath + suffix;
+        if (fs.existsSync(source)) {
+          archive.file(source, { name: `catasoft.db${suffix}` });
+        }
+      }
+
+      // Add uploads directory
+      const uploadsDir = getUploadsDir();
+      if (fs.existsSync(uploadsDir)) {
+        archive.directory(uploadsDir, "uploads");
+      }
+
+      archive.finalize();
+    });
+  });
+}

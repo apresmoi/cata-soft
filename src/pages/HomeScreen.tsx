@@ -1,7 +1,8 @@
 import React from "react";
 
-import { ReaderIcon } from "@radix-ui/react-icons";
+import { ReaderIcon, DownloadIcon } from "@radix-ui/react-icons";
 import { Toolbar } from "../components/Toolbar";
+import { ToolbarButton } from "../components/ToolbarButton";
 import { ToolbarSearch } from "../components/ToolbarSearch";
 import { AppContainer, Tooltip } from "../components";
 import { HistoriaMedicaDialog, NewPatientDialog } from "../Dialogs";
@@ -62,6 +63,16 @@ export function HomeScreen() {
             legend="Buscar paciente"
           />
         </div>
+        <div className="grow" />
+        <Tooltip tooltip="Exportar copia de seguridad (ZIP)">
+          <ToolbarButton 
+            variant="secondary" 
+            icon={<DownloadIcon />} 
+            onClick={async () => {
+              await window.ipcRenderer.invoke("export-backup");
+            }}
+          />
+        </Tooltip>
       </Toolbar>
 
       <Table

@@ -534,6 +534,7 @@ describe("registeredChannels", () => {
       "delete-hospitalizacion",
       "delete-interconsulta",
       "delete-paciente",
+      "export-backup",
       "get-antropometria",
       "get-archivos",
       "get-evolucion",
