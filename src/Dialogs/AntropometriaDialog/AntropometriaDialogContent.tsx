@@ -22,10 +22,12 @@ export function AntropometriaDialogContent(
 ) {
   const { update, data, invalid } = props;
 
-  // IMC is derived from peso and talla (kg / m^2), never typed directly.
+  // IMC is derived from peso and talla (kg / m^2), never typed directly, and
+  // rounded to one decimal: that is the precision the value is read at, and
+  // storing 24.671201814058956 would only render as noise.
   const peso = Number(data?.peso) || 0;
   const talla = Number(data?.talla) || 0;
-  const imc = talla > 0 ? peso / (talla * talla) : 0;
+  const imc = talla > 0 ? Math.round((peso / (talla * talla)) * 10) / 10 : 0;
 
   React.useEffect(() => {
     // Keep the saved value in sync with the computed one so the save path

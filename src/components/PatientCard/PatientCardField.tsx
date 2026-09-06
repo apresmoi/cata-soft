@@ -46,14 +46,22 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
       >
         {props.icon} {props.label}
       </div>
-      <div className="min-w-0 w-full">
+      {/*
+       * A capped numeric box is pushed to the row's right edge so it shares
+       * that edge with the full-width controls above and below it, instead of
+       * ending short of them.
+       */}
+      <div className={cx("flex min-w-0 w-full", props.numeric && "justify-end")}>
         <input
           className={cx(
             "box-border h-9 min-w-0 w-full rounded-md border px-3 py-0 text-sm leading-5 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-1",
+            // A three-digit measurement does not need 256px, and a number
+            // belongs right-aligned so the digits line up column-wise. An
+            // explicit `align` still overrides, since it comes after.
+            props.numeric && "max-w-[144px] text-right tabular-nums",
             props.align === "center" && "text-center",
             props.align === "right" && "text-right",
-            // A three-digit measurement does not need 256px.
-            props.numeric && "max-w-[144px] tabular-nums",
+            props.align === "left" && "text-left",
             // Chosen, not layered: `bg-stone-50` and `bg-white` have equal
             // specificity, so adding one on top of the other left a derived
             // field looking perfectly typeable.

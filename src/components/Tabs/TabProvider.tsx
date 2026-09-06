@@ -1,18 +1,14 @@
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type TabsContextType = {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
-  registerTab: (tab: string) => void;
-  unregisterTab: (tab: string) => void;
   tabs: string[];
 };
 
 const TabsContext = createContext<TabsContextType>({
   currentTab: "",
   setCurrentTab: () => {},
-  registerTab: () => {},
-  unregisterTab: () => {},
   tabs: [],
 });
 
@@ -20,35 +16,26 @@ export function useTabs() {
   return useContext(TabsContext);
 }
 
-export function TabProvider(props: React.PropsWithChildren) {
-  const [currentTab, setCurrentTab] = useState("");
-  const [tabs, setTabs] = useState<string[]>([]);
-  const tempTabs = useRef<string[]>([]);
-  const tempTabsTimeout = useRef<NodeJS.Timeout | null>(null);
+/**
+ * Tab names come from the container, which reads them off its children, so the
+ * active tab is known on the very first render.
+ *
+ * They used to be self-registered by each `Tab` from an effect, collected
+ * through a 100ms debounce. Until that timeout fired no tab matched
+ * `currentTab`, so every panel rendered `null`: a dialog opened short and
+ * empty and then jumped to its real size once the timer resolved. Deriving the
+ * names during render removes the frame gap entirely rather than shortening it.
+ */
+export function TabProvider(props: React.PropsWithChildren<{ tabs: string[] }>) {
+  const { tabs } = props;
+  const [selected, setSelected] = useState("");
 
-  const updateTabs = (newTabs: string[]) => {
-    tempTabs.current = newTabs;
-    if (tempTabsTimeout.current) {
-      clearTimeout(tempTabsTimeout.current);
-    }
-    tempTabsTimeout.current = setTimeout(() => {
-      setTabs(tempTabs.current);
-      if (!currentTab) setCurrentTab(tempTabs.current[0]);
-    }, 100);
-  };
-
-  const registerTab = (tab: string) => {
-    updateTabs([...tempTabs.current, tab]);
-  };
-
-  const unregisterTab = (tab: string) => {
-    updateTabs(tempTabs.current.filter((t) => t !== tab));
-  };
+  // Fall back to the first tab instead of storing it, so the provider stays
+  // correct if the set of tabs changes.
+  const currentTab = selected && tabs.includes(selected) ? selected : (tabs[0] ?? "");
 
   return (
-    <TabsContext.Provider
-      value={{ currentTab, setCurrentTab, registerTab, unregisterTab, tabs }}
-    >
+    <TabsContext.Provider value={{ currentTab, setCurrentTab: setSelected, tabs }}>
       {props.children}
     </TabsContext.Provider>
   );
