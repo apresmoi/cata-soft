@@ -129,6 +129,24 @@ const historial = [
   { ...hospitalizacion, fecha: hospitalizacion.fechaIngreso, type: "hospitalizacion" },
 ];
 
+/**
+ * Direct exports for the layout variants, which restructure the screens and so
+ * do not go through the app's hooks. Same data the bridge serves.
+ */
+export const FIXTURES = {
+  paciente,
+  pacientes,
+  historial,
+  evolucion,
+  interconsulta,
+  antropometria,
+  hospitalizacion,
+  archivo,
+};
+
+export type HistorialEntry = (typeof historial)[number];
+export type Paciente = typeof paciente;
+
 const responses: Record<string, unknown> = {
   "get-pacientes": pacientes,
   "get-paciente": paciente,
