@@ -13,7 +13,7 @@ export function TableCol(
       className={classNames(
         "whitespace-nowrap",
         Component === "th"
-          ? "bg-stone-100 p-3 text-xs font-semibold uppercase tracking-wide text-stone-500"
+          ? "border-b border-stone-200 bg-stone-100 p-3 text-xs font-semibold uppercase tracking-wide text-stone-500"
           : "border-t border-stone-200 p-3 text-sm text-stone-700",
         props.className
       )}
