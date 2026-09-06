@@ -162,8 +162,12 @@ export default function WorkspaceLayout() {
     [interconsultas, records.length]
   );
 
-  /** Resolve a table row back to its typed record so the modal can prefill. */
-  function openRecord(kind: RecordKind, id: string) {
+  /**
+   * Resolve a table/feed row back to its typed record. `consult` distinguishes
+   * the two intents: consulting an attachment opens the file (as the app's
+   * `open-archivoadjunto` handler does), while the pencil always edits.
+   */
+  function findRecord(kind: RecordKind, id: string, consult: boolean) {
     if (kind === "evolucion") {
       const row = evoluciones.find((current) => current.id === id);
       if (row) setModal({ kind, row });
@@ -185,8 +189,11 @@ export default function WorkspaceLayout() {
       return;
     }
     const row = archivos.find((current) => current.id === id);
-    if (row) setModal({ kind: "archivo", row });
+    if (row) setModal(consult ? { kind: "verArchivo", row } : { kind: "archivo", row });
   }
+
+  const openRecord = (kind: RecordKind, id: string) => findRecord(kind, id, true);
+  const editRecord = (kind: RecordKind, id: string) => findRecord(kind, id, false);
 
   /*
    * One modal node, rendered by whichever view is on screen. `onSavePatient`
@@ -197,6 +204,7 @@ export default function WorkspaceLayout() {
     <EditModal
       target={modal}
       patient={patient}
+      documentosTaken={pacientes.map((row) => row.documento)}
       onClose={() => setModal(null)}
       onSavePatient={(patch) => {
         if (modal.kind === "nuevoPaciente") {
@@ -217,6 +225,7 @@ export default function WorkspaceLayout() {
       onSaveInterconsulta={(row) => setInterconsultas((current) => upsert(current, row))}
       onSaveInternacion={(row) => setInternaciones((current) => upsert(current, row))}
       onSaveArchivo={(row) => setArchivos((current) => upsert(current, row))}
+      onEditArchivo={(row) => setModal({ kind: "archivo", row })}
     />
   ) : null;
 
@@ -290,7 +299,7 @@ export default function WorkspaceLayout() {
                 }
               />
             ) : (
-              <Records records={records} onOpen={openRecord} />
+              <Records records={records} onOpen={openRecord} onEdit={editRecord} />
             )}
           </div>
         </main>

@@ -11,7 +11,10 @@ const ALL_KINDS = Object.keys(KIND_META) as RecordKind[];
 
 export default function Records(props: {
   records: UnifiedRecord[];
+  /** Row click: consult the record (an attachment opens the file). */
   onOpen: (kind: RecordKind, id: string) => void;
+  /** Pencil: always the edit form, even for attachments. */
+  onEdit: (kind: RecordKind, id: string) => void;
 }) {
   const [selectedKinds, setSelectedKinds] = useState<Set<RecordKind>>(new Set());
   const [query, setQuery] = useState("");
@@ -145,10 +148,10 @@ export default function Records(props: {
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation();
-                          props.onOpen(record.kind, record.id);
+                          props.onEdit(record.kind, record.id);
                         }}
                         aria-label={`Editar ${meta.singular.toLowerCase()}`}
-                        className="inline-flex items-center justify-center rounded-md border border-stone-300 p-2 text-stone-600 hover:bg-stone-100"
+                        className="inline-flex items-center justify-center rounded-md border border-stone-300 p-2 text-stone-600 hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                       >
                         <FiEdit3 />
                       </button>

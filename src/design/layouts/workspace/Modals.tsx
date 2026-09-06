@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FiX } from "react-icons/fi";
-import { emptyPatient } from "./data";
+import { emptyPatient, isOpenableArchivo } from "./data";
 import type {
   AntropometriaRow,
   ArchivoRow,
@@ -9,13 +9,18 @@ import type {
   InternacionRow,
   PatientData,
 } from "./data";
+import { useRequiredFields } from "../../../hooks/useRequiredFields";
+import { useFocusFirstField } from "../../../hooks/useFocusFirstField";
+import { Tab, TabsContainer } from "../../../components/Tabs";
 
 /**
  * Centralized modal editing surface. Every record shown on the Resumen (and
  * the unified records table) is edited through one of these forms rather
  * than an inline strip -- callers pass a `ModalTarget` describing what to
  * edit (and, for record rows, the row itself when editing an existing one)
- * and this file owns rendering, local form state, and save wiring.
+ * and this file owns rendering, local form state, and save wiring. Required-
+ * field gating and cursor focus reuse the app's own `useRequiredFields` and
+ * `useFocusFirstField` hooks rather than reimplementing them.
  */
 
 export type ModalTarget =
@@ -27,11 +32,13 @@ export type ModalTarget =
   | { kind: "antropometria"; row?: AntropometriaRow }
   | { kind: "interconsulta"; row?: InterconsultaRow }
   | { kind: "internacion"; row?: InternacionRow }
-  | { kind: "archivo"; row?: ArchivoRow };
+  | { kind: "archivo"; row?: ArchivoRow }
+  | { kind: "verArchivo"; row: ArchivoRow };
 
 type EditModalProps = {
   target: ModalTarget;
   patient: PatientData;
+  documentosTaken: string[];
   onClose: () => void;
   onSavePatient: (patch: Partial<PatientData>) => void;
   onSaveEvolucion: (row: EvolucionRow) => void;
@@ -39,6 +46,7 @@ type EditModalProps = {
   onSaveInterconsulta: (row: InterconsultaRow) => void;
   onSaveInternacion: (row: InternacionRow) => void;
   onSaveArchivo: (row: ArchivoRow) => void;
+  onEditArchivo: (row: ArchivoRow) => void;
 };
 
 const inputCls =
@@ -72,9 +80,17 @@ function ModalShell(props: {
   title: string;
   maxWidth?: string;
   onClose: () => void;
-  onSubmit: () => void;
+  onSubmit?: () => void;
+  /** Overrides the default Cancelar/Guardar pair -- used by the archivo viewer. */
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Puts the caret in the first real data-entry field on mount, at the end of
+  // any prefilled text. Forms with no fields of their own (the archivo
+  // viewer) simply focus nothing.
+  useFocusFirstField(panelRef);
+
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") props.onClose();
@@ -89,6 +105,7 @@ function ModalShell(props: {
       onClick={props.onClose}
     >
       <div
+        ref={panelRef}
         className={`w-full ${props.maxWidth ?? "max-w-lg"} rounded-xl border border-stone-200 bg-white shadow-xl`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -105,20 +122,24 @@ function ModalShell(props: {
         </div>
         <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{props.children}</div>
         <div className="flex items-center justify-end gap-2 border-t border-stone-200 px-5 py-4">
-          <button
-            type="button"
-            onClick={props.onClose}
-            className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={props.onSubmit}
-            className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Guardar
-          </button>
+          {props.footer ?? (
+            <>
+              <button
+                type="button"
+                onClick={props.onClose}
+                className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={props.onSubmit}
+                className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+              >
+                Guardar
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -134,16 +155,28 @@ function Field(props: { label: string; className?: string; children: React.React
   );
 }
 
+/** Whole years between a birth date and today. */
+function ageFromBirthDate(birth: Date): number {
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDelta = today.getMonth() - birth.getMonth();
+  if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < birth.getDate())) age -= 1;
+  return age < 0 ? 0 : age;
+}
+
 function PacienteForm(props: {
   patient: PatientData;
   title?: string;
+  /** Documents already in use, so the unique constraint fails here, not in Prisma. */
+  documentosTaken: string[];
   onClose: () => void;
   onSavePatient: (patch: Partial<PatientData>) => void;
 }) {
   const { patient } = props;
+  const req = useRequiredFields<PatientData>([{ name: "nombre" }, { name: "documento" }]);
+  const [attemptedSave, setAttemptedSave] = useState(false);
   const [nombre, setNombre] = useState(patient.nombre);
   const [documento, setDocumento] = useState(patient.documento);
-  const [edad, setEdad] = useState(String(patient.edad));
   const [fechaNacimiento, setFechaNacimiento] = useState(toDateInputValue(patient.fechaNacimiento));
   const [telefono, setTelefono] = useState(patient.telefono);
   const [direccion, setDireccion] = useState(patient.direccion);
@@ -151,11 +184,29 @@ function PacienteForm(props: {
   const [obraSocial, setObraSocial] = useState(patient.obraSocial);
   const [numeroObraSocial, setNumeroObraSocial] = useState(patient.numeroObraSocial);
 
+  // `Pacientes` has no `edad` column: it is derived from fechaNacimiento, so
+  // the two can never disagree.
+  const edad = ageFromBirthDate(parseDateInput(fechaNacimiento));
+
+  // `documento` is `@unique` in the schema; a value already used by another
+  // patient fails there with "Unique constraint failed" -- flagged here
+  // instead, excluding the patient's own current value when editing.
+  function isDuplicateDocumento(value: string): boolean {
+    const trimmed = value.trim();
+    return trimmed !== patient.documento && props.documentosTaken.includes(trimmed);
+  }
+
   function submit() {
+    setAttemptedSave(true);
+    const documentoTrimmed = documento.trim();
+    const duplicate = isDuplicateDocumento(documento);
+    const ok = req.check({ nombre, documento: documentoTrimmed }) && !duplicate;
+    if (!ok) return;
+
     props.onSavePatient({
-      nombre,
-      documento,
-      edad: parseNumberInput(edad),
+      nombre: nombre.trim(),
+      documento: documentoTrimmed,
+      edad,
       fechaNacimiento: parseDateInput(fechaNacimiento),
       telefono,
       direccion,
@@ -166,26 +217,39 @@ function PacienteForm(props: {
     props.onClose();
   }
 
+  const invalidFields = req.invalid({ nombre, documento });
+  const documentoInvalid =
+    invalidFields.includes("documento") || (attemptedSave && isDuplicateDocumento(documento));
+
   return (
-    <ModalShell title={props.title ?? "Editar datos del paciente"} maxWidth="max-w-2xl" onClose={props.onClose} onSubmit={submit}>
+    <ModalShell
+      title={props.title ?? "Editar datos del paciente"}
+      maxWidth="max-w-2xl"
+      onClose={props.onClose}
+      onSubmit={submit}
+    >
       <div className="grid grid-cols-2 gap-4">
         <Field label="Nombre completo">
-          <input className={inputCls} value={nombre} onChange={(e) => setNombre(e.target.value)} />
+          <input
+            className={`${inputCls}${invalidFields.includes("nombre") ? " ring-2 ring-red-500" : ""}`}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+          />
         </Field>
         <Field label="Documento">
-          <input className={inputCls} value={documento} onChange={(e) => setDocumento(e.target.value)} />
+          <input
+            className={`${inputCls}${documentoInvalid ? " ring-2 ring-red-500" : ""}`}
+            value={documento}
+            onChange={(e) => setDocumento(e.target.value)}
+          />
         </Field>
         <Field label="Edad">
-          <input
-            type="number"
-            className={inputCls}
-            value={edad}
-            onChange={(e) => setEdad(e.target.value)}
-          />
+          <input className={`${inputCls} bg-stone-50 text-stone-500`} value={edad} readOnly />
         </Field>
         <Field label="Fecha de nacimiento">
           <input
             type="date"
+            data-skip-autofocus
             className={inputCls}
             value={fechaNacimiento}
             onChange={(e) => setFechaNacimiento(e.target.value)}
@@ -271,49 +335,64 @@ function EvolucionForm(props: {
   onSaveEvolucion: (row: EvolucionRow) => void;
 }) {
   const { row } = props;
+  // Schema-nullable, but an evolución with nothing in it is not a record --
+  // this is a UI rule, not a schema constraint.
+  const req = useRequiredFields<EvolucionRow>([{ name: "motivo" }]);
   const [fecha, setFecha] = useState(toDateInputValue(row?.fecha ?? new Date()));
   const [motivo, setMotivo] = useState(row?.motivo ?? "");
   const [examenFisico, setExamenFisico] = useState(row?.examenFisico ?? "");
   const [plan, setPlan] = useState(row?.plan ?? "");
 
   function submit() {
+    if (!req.check({ motivo })) return;
+
     props.onSaveEvolucion({
       id: row?.id ?? crypto.randomUUID(),
       fecha: parseDateInput(fecha),
-      motivo,
+      motivo: motivo.trim(),
       examenFisico,
       plan,
     });
     props.onClose();
   }
 
+  const invalid = req.invalid({ motivo });
+
   return (
-    <ModalShell
-      title={row ? "Editar evolución" : "Nueva evolución"}
-      onClose={props.onClose}
-      onSubmit={submit}
-    >
-      <div className="flex flex-col gap-4">
-        <Field label="Fecha">
-          <input type="date" className={inputCls} value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        </Field>
-        <Field label="Motivo">
-          <input className={inputCls} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        </Field>
-        <Field label="Examen físico">
-          <textarea
-            className={`${inputCls} min-h-[6rem] resize-y`}
-            value={examenFisico}
-            onChange={(e) => setExamenFisico(e.target.value)}
+    <ModalShell title={row ? "Editar evolución" : "Nueva evolución"} onClose={props.onClose} onSubmit={submit}>
+      <div className="flex flex-col gap-3 h-[26rem]">
+        <Field label="Fecha" className="max-w-[10rem]">
+          <input
+            type="date"
+            data-skip-autofocus
+            className={inputCls}
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
           />
         </Field>
-        <Field label="Plan">
-          <textarea
-            className={`${inputCls} min-h-[6rem] resize-y`}
-            value={plan}
-            onChange={(e) => setPlan(e.target.value)}
-          />
-        </Field>
+        <TabsContainer>
+          <Tab name="MOTIVO">
+            <textarea
+              className={`${inputCls} h-full resize-none${invalid.includes("motivo") ? " ring-2 ring-red-500" : ""}`}
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+            />
+          </Tab>
+          <Tab name="EXAMEN FISICO">
+            <textarea
+              className={`${inputCls} h-full resize-none`}
+              value={examenFisico}
+              onChange={(e) => setExamenFisico(e.target.value)}
+            />
+          </Tab>
+          <Tab name="PLAN">
+            <textarea
+              className={`${inputCls} h-full resize-none`}
+              value={plan}
+              onChange={(e) => setPlan(e.target.value)}
+            />
+          </Tab>
+        </TabsContainer>
       </div>
     </ModalShell>
   );
@@ -325,6 +404,10 @@ function AntropometriaForm(props: {
   onSaveAntropometria: (row: AntropometriaRow) => void;
 }) {
   const { row } = props;
+  const req = useRequiredFields<AntropometriaRow>([
+    { name: "peso", kind: "positiveNumber" },
+    { name: "talla", kind: "positiveNumber" },
+  ]);
   const [fecha, setFecha] = useState(toDateInputValue(row?.fecha ?? new Date()));
   const [peso, setPeso] = useState(row ? String(row.peso) : "");
   const [talla, setTalla] = useState(row ? String(row.talla) : "");
@@ -334,6 +417,10 @@ function AntropometriaForm(props: {
   const imc = tallaNum > 0 ? pesoNum / (tallaNum * tallaNum) : 0;
 
   function submit() {
+    // Both are NOT NULL Floats, and a zero or negative reading is not a
+    // measurement -- it would also make IMC meaningless.
+    if (!req.check({ peso: pesoNum, talla: tallaNum })) return;
+
     props.onSaveAntropometria({
       id: row?.id ?? crypto.randomUUID(),
       fecha: parseDateInput(fecha),
@@ -344,6 +431,8 @@ function AntropometriaForm(props: {
     props.onClose();
   }
 
+  const invalid = req.invalid({ peso: pesoNum, talla: tallaNum });
+
   return (
     <ModalShell
       title={row ? "Editar antropometría" : "Nueva antropometría"}
@@ -352,13 +441,19 @@ function AntropometriaForm(props: {
     >
       <div className="flex flex-col gap-4">
         <Field label="Fecha">
-          <input type="date" className={inputCls} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <input
+            type="date"
+            data-skip-autofocus
+            className={inputCls}
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+          />
         </Field>
         <Field label="Peso (kg)">
           <input
             type="number"
             step="0.1"
-            className={inputCls}
+            className={`${inputCls}${invalid.includes("peso") ? " ring-2 ring-red-500" : ""}`}
             value={peso}
             onChange={(e) => setPeso(e.target.value)}
           />
@@ -367,7 +462,7 @@ function AntropometriaForm(props: {
           <input
             type="number"
             step="0.01"
-            className={inputCls}
+            className={`${inputCls}${invalid.includes("talla") ? " ring-2 ring-red-500" : ""}`}
             value={talla}
             onChange={(e) => setTalla(e.target.value)}
           />
@@ -388,21 +483,26 @@ function InterconsultaForm(props: {
   onSaveInterconsulta: (row: InterconsultaRow) => void;
 }) {
   const { row } = props;
+  const req = useRequiredFields<InterconsultaRow>([{ name: "especialidad" }]);
   const [fecha, setFecha] = useState(toDateInputValue(row?.fecha ?? new Date()));
   const [especialidad, setEspecialidad] = useState(row?.especialidad ?? "");
   const [notas, setNotas] = useState(row?.notas ?? "");
   const [estado, setEstado] = useState<"pendiente" | "respondida">(row?.estado ?? "pendiente");
 
   function submit() {
+    if (!req.check({ especialidad })) return;
+
     props.onSaveInterconsulta({
       id: row?.id ?? crypto.randomUUID(),
       fecha: parseDateInput(fecha),
-      especialidad,
+      especialidad: especialidad.trim(),
       notas,
       estado,
     });
     props.onClose();
   }
+
+  const invalid = req.invalid({ especialidad });
 
   return (
     <ModalShell
@@ -410,34 +510,44 @@ function InterconsultaForm(props: {
       onClose={props.onClose}
       onSubmit={submit}
     >
-      <div className="flex flex-col gap-4">
-        <Field label="Fecha">
-          <input type="date" className={inputCls} value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        </Field>
-        <Field label="Especialidad">
-          <input
-            className={inputCls}
-            value={especialidad}
-            onChange={(e) => setEspecialidad(e.target.value)}
-          />
-        </Field>
-        <Field label="Notas">
-          <textarea
-            className={`${inputCls} min-h-[6rem] resize-y`}
-            value={notas}
-            onChange={(e) => setNotas(e.target.value)}
-          />
-        </Field>
-        <Field label="Estado">
-          <select
-            className={inputCls}
-            value={estado}
-            onChange={(e) => setEstado(e.target.value as "pendiente" | "respondida")}
-          >
-            <option value="pendiente">Pendiente</option>
-            <option value="respondida">Respondida</option>
-          </select>
-        </Field>
+      <div className="flex flex-col gap-3 h-[24rem]">
+        <div className="flex gap-4">
+          <Field label="Fecha" className="max-w-[10rem]">
+            <input
+              type="date"
+              data-skip-autofocus
+              className={inputCls}
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+            />
+          </Field>
+          <Field label="Estado" className="max-w-[12rem]">
+            <select
+              className={inputCls}
+              value={estado}
+              onChange={(e) => setEstado(e.target.value as "pendiente" | "respondida")}
+            >
+              <option value="pendiente">Pendiente</option>
+              <option value="respondida">Respondida</option>
+            </select>
+          </Field>
+        </div>
+        <TabsContainer>
+          <Tab name="ESPECIALIDAD">
+            <input
+              className={`${inputCls}${invalid.includes("especialidad") ? " ring-2 ring-red-500" : ""}`}
+              value={especialidad}
+              onChange={(e) => setEspecialidad(e.target.value)}
+            />
+          </Tab>
+          <Tab name="NOTAS">
+            <textarea
+              className={`${inputCls} h-full resize-none`}
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+            />
+          </Tab>
+        </TabsContainer>
       </div>
     </ModalShell>
   );
@@ -449,21 +559,26 @@ function InternacionForm(props: {
   onSaveInternacion: (row: InternacionRow) => void;
 }) {
   const { row } = props;
+  const req = useRequiredFields<InternacionRow>([{ name: "motivo" }]);
   const [ingreso, setIngreso] = useState(toDateInputValue(row?.ingreso ?? new Date()));
   const [egreso, setEgreso] = useState(toDateInputValue(row?.egreso ?? new Date()));
   const [motivo, setMotivo] = useState(row?.motivo ?? "");
   const [notas, setNotas] = useState(row?.notas ?? "");
 
   function submit() {
+    if (!req.check({ motivo })) return;
+
     props.onSaveInternacion({
       id: row?.id ?? crypto.randomUUID(),
       ingreso: parseDateInput(ingreso),
       egreso: parseDateInput(egreso),
-      motivo,
+      motivo: motivo.trim(),
       notas,
     });
     props.onClose();
   }
+
+  const invalid = req.invalid({ motivo });
 
   return (
     <ModalShell
@@ -471,23 +586,43 @@ function InternacionForm(props: {
       onClose={props.onClose}
       onSubmit={submit}
     >
-      <div className="flex flex-col gap-4">
-        <Field label="Ingreso">
-          <input type="date" className={inputCls} value={ingreso} onChange={(e) => setIngreso(e.target.value)} />
-        </Field>
-        <Field label="Egreso">
-          <input type="date" className={inputCls} value={egreso} onChange={(e) => setEgreso(e.target.value)} />
-        </Field>
-        <Field label="Motivo">
-          <input className={inputCls} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        </Field>
-        <Field label="Notas">
-          <textarea
-            className={`${inputCls} min-h-[6rem] resize-y`}
-            value={notas}
-            onChange={(e) => setNotas(e.target.value)}
-          />
-        </Field>
+      <div className="flex flex-col gap-3 h-[24rem]">
+        <div className="flex gap-4">
+          <Field label="Ingreso" className="max-w-[10rem]">
+            <input
+              type="date"
+              data-skip-autofocus
+              className={inputCls}
+              value={ingreso}
+              onChange={(e) => setIngreso(e.target.value)}
+            />
+          </Field>
+          <Field label="Egreso" className="max-w-[10rem]">
+            <input
+              type="date"
+              data-skip-autofocus
+              className={inputCls}
+              value={egreso}
+              onChange={(e) => setEgreso(e.target.value)}
+            />
+          </Field>
+        </div>
+        <TabsContainer>
+          <Tab name="MOTIVO">
+            <textarea
+              className={`${inputCls} h-full resize-none${invalid.includes("motivo") ? " ring-2 ring-red-500" : ""}`}
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+            />
+          </Tab>
+          <Tab name="NOTAS">
+            <textarea
+              className={`${inputCls} h-full resize-none`}
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+            />
+          </Tab>
+        </TabsContainer>
       </div>
     </ModalShell>
   );
@@ -499,33 +634,52 @@ function ArchivoForm(props: {
   onSaveArchivo: (row: ArchivoRow) => void;
 }) {
   const { row } = props;
+  const req = useRequiredFields<ArchivoRow>([{ name: "nombre" }, { name: "tipo" }]);
   const [nombre, setNombre] = useState(row?.nombre ?? "");
   const [tipo, setTipo] = useState(row?.tipo ?? "");
   const [fecha, setFecha] = useState(toDateInputValue(row?.fecha ?? new Date()));
   const [tamanioKb, setTamanioKb] = useState(row ? String(row.tamanioKb) : "");
 
   function submit() {
+    if (!req.check({ nombre, tipo })) return;
+
     props.onSaveArchivo({
       id: row?.id ?? crypto.randomUUID(),
-      nombre,
-      tipo,
+      nombre: nombre.trim(),
+      tipo: tipo.trim(),
       fecha: parseDateInput(fecha),
       tamanioKb: parseNumberInput(tamanioKb),
     });
     props.onClose();
   }
 
+  const invalid = req.invalid({ nombre, tipo });
+
   return (
     <ModalShell title={row ? "Editar archivo" : "Adjuntar archivo"} onClose={props.onClose} onSubmit={submit}>
       <div className="flex flex-col gap-4">
         <Field label="Nombre">
-          <input className={inputCls} value={nombre} onChange={(e) => setNombre(e.target.value)} />
+          <input
+            className={`${inputCls}${invalid.includes("nombre") ? " ring-2 ring-red-500" : ""}`}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+          />
         </Field>
         <Field label="Tipo">
-          <input className={inputCls} value={tipo} onChange={(e) => setTipo(e.target.value)} />
+          <input
+            className={`${inputCls}${invalid.includes("tipo") ? " ring-2 ring-red-500" : ""}`}
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value)}
+          />
         </Field>
         <Field label="Fecha">
-          <input type="date" className={inputCls} value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <input
+            type="date"
+            data-skip-autofocus
+            className={inputCls}
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+          />
         </Field>
         <Field label="Tamaño (KB)">
           <input
@@ -540,18 +694,97 @@ function ArchivoForm(props: {
   );
 }
 
+/**
+ * The real app hands an attachment off to Electron's `shell.openPath` after
+ * checking it against a whitelist, so opening one is not a form -- it is a
+ * viewer with a single, whitelist-gated action.
+ */
+function ArchivoViewer(props: {
+  row: ArchivoRow;
+  onClose: () => void;
+  onEditArchivo: (row: ArchivoRow) => void;
+}) {
+  const { row } = props;
+  const openable = isOpenableArchivo(row.nombre);
+
+  return (
+    <ModalShell
+      title={row.nombre}
+      onClose={props.onClose}
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={props.onClose}
+            className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+          >
+            Cerrar
+          </button>
+          <button
+            type="button"
+            onClick={() => props.onEditArchivo(row)}
+            className="rounded-md border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+          >
+            Editar datos del archivo
+          </button>
+          {openable && (
+            <button
+              type="button"
+              // The real app calls shell.openPath here; a design board has no
+              // actual file on disk to open.
+              onClick={() => {}}
+              className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            >
+              Abrir archivo
+            </button>
+          )}
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <Field label="Nombre">
+          <p className="rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-700">
+            {row.nombre}
+          </p>
+        </Field>
+        <Field label="Tipo">
+          <p className="rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-700">
+            {row.tipo}
+          </p>
+        </Field>
+        <Field label="Tamaño">
+          <p className="rounded-md border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-700">
+            {row.tamanioKb} KB
+          </p>
+        </Field>
+        {!openable && (
+          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Este tipo de archivo no se puede abrir desde la aplicación.
+          </p>
+        )}
+      </div>
+    </ModalShell>
+  );
+}
+
 export function EditModal(props: EditModalProps): JSX.Element {
   const { target } = props;
   switch (target.kind) {
     case "paciente":
       return (
-        <PacienteForm patient={props.patient} onClose={props.onClose} onSavePatient={props.onSavePatient} />
+        <PacienteForm
+          patient={props.patient}
+          documentosTaken={props.documentosTaken}
+          onClose={props.onClose}
+          onSavePatient={props.onSavePatient}
+        />
       );
     case "nuevoPaciente":
       return (
         <PacienteForm
           patient={emptyPatient}
           title="Nuevo paciente"
+          documentosTaken={props.documentosTaken}
           onClose={props.onClose}
           onSavePatient={props.onSavePatient}
         />
@@ -594,5 +827,9 @@ export function EditModal(props: EditModalProps): JSX.Element {
       );
     case "archivo":
       return <ArchivoForm row={target.row} onClose={props.onClose} onSaveArchivo={props.onSaveArchivo} />;
+    case "verArchivo":
+      return (
+        <ArchivoViewer row={target.row} onClose={props.onClose} onEditArchivo={props.onEditArchivo} />
+      );
   }
 }

@@ -168,7 +168,43 @@ export const initialArchivos: ArchivoRow[] = [
     fecha: shiftDays(FIXTURES.archivo.createdAt, 90),
     tamanioKb: 310,
   },
+  {
+    // Clinics really do attach Word files; kept here so the design shows what
+    // happens when the app refuses to hand a type to the OS.
+    id: "f-synth-3",
+    nombre: "derivacion-traumatologia.docx",
+    tipo: "Documento",
+    fecha: shiftDays(FIXTURES.archivo.createdAt, 120),
+    tamanioKb: 96,
+  },
 ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+
+/**
+ * Mirrors `OPENABLE_EXTENSIONS` in `electron/controller.ts`: the main process
+ * only hands these types to `shell.openPath`, so a renderer compromise cannot
+ * turn it into a program launcher. Anything else stays on disk. Keep the two
+ * lists in step.
+ */
+const OPENABLE_EXTENSIONS = [
+  ".pdf",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".txt",
+  ".md",
+  ".csv",
+  ".json",
+  ".xml",
+  ".rtf",
+];
+
+export function isOpenableArchivo(nombre: string): boolean {
+  const dot = nombre.lastIndexOf(".");
+  if (dot < 0) return false;
+  return OPENABLE_EXTENSIONS.includes(nombre.slice(dot).toLowerCase());
+}
 
 /**
  * A summary feed entry. `recordId` addresses the underlying clinical record so
