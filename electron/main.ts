@@ -1,4 +1,5 @@
 import { app, BrowserWindow, dialog, screen } from "electron";
+import { autoUpdater } from "electron-updater";
 // import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -153,6 +154,13 @@ async function bootstrap() {
 
   registerIpcHandlers();
   createWindow();
+
+  // Check for updates after the window is created
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+      console.error("Failed to check for updates:", err);
+    });
+  }
 }
 
 bootstrap();
