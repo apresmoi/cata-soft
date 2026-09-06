@@ -38,6 +38,7 @@ import { ThrashCanIcon } from "../components/Icons/ThrashCanIcon";
 import { SlPrinter } from "react-icons/sl";
 import { ImAttachment } from "react-icons/im";
 import { PatientSummary } from "./PatientSummary";
+import { richTextToPlainText } from "../richText";
 
 const searchKeys = [
   "type",
@@ -116,7 +117,9 @@ export function PatientScreen() {
       (key) =>
         row &&
         key in row &&
-        row[key]?.toString().toUpperCase().includes(search.toUpperCase())
+        richTextToPlainText(row[key]?.toString())
+          .toUpperCase()
+          .includes(search.toUpperCase())
     )
   );
 

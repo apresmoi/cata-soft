@@ -11,7 +11,7 @@ import {
 import { useNewArchivoAdjunto } from "../../hooks";
 import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { CrumpledPaperIcon, FileIcon, UploadIcon } from "@radix-ui/react-icons";
-import { PatientCardField, PatientCardTextAreaField } from "../../components";
+import { PatientCardField, RichTextField } from "../../components";
 import cx from "classnames";
 
 /** Format a byte count as a human-readable KB/MB string. */
@@ -150,7 +150,7 @@ export function NewArchivoAdjuntoDialog(
             invalid={invalid(data).includes("nombre")}
           />
           <div className="h-32">
-            <PatientCardTextAreaField
+            <RichTextField
               label="NOTAS"
               onChange={update("notas")}
               value={data?.notas || ""}

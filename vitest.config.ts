@@ -15,7 +15,10 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary"],
-      include: ["electron/**/*.ts", "src/utils.ts"],
+      // `src/richText.ts` is the allowlist that lets patient text be stored as
+      // markup and printed as markup, so it is held to the same bar as the
+      // main process rather than left uncovered.
+      include: ["electron/**/*.ts", "src/utils.ts", "src/richText.ts"],
       // main.ts and preload.ts are Electron bootstrap wiring with no logic to
       // assert; electron-env.d.ts is types only. Excluded on purpose rather
       // than padded with tests that would only restate the source.

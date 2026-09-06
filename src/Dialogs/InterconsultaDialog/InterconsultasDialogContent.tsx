@@ -1,7 +1,7 @@
 import React from "react";
 import {
   PatientCardAgeDateField,
-  PatientCardTextAreaField,
+  RichTextField,
 } from "../../components";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useInterconsulta, useNewInterconsulta } from "../../hooks";
@@ -33,7 +33,7 @@ export function InterconsultasDialogContent(
       />
       <TabsContainer>
         <Tab name="MOTIVO">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="MOTIVO"
             onChange={update("motivo")}
             value={data?.motivo || ""}
@@ -42,7 +42,7 @@ export function InterconsultasDialogContent(
           />
         </Tab>
         <Tab name="NOTAS">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="NOTAS"
             onChange={update("notas")}
             value={data?.notas || ""}

@@ -5,6 +5,7 @@ import { DeleteDialog } from "../../Dialogs/DeleteDialog";
 import { ThrashCanIcon } from "../Icons/ThrashCanIcon";
 import { useDeleteArchivoAdjunto } from "../../hooks";
 import { ImAttachment } from "react-icons/im";
+import { richTextToPlainText } from "../../richText";
 
 export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
   const { remove } = useDeleteArchivoAdjunto(props.id);
@@ -34,7 +35,7 @@ export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
           {"ARCHIVO ADJUNTO"}
         </div>
       </TableCol>
-      <TableCol>{`${props.nombre}`}</TableCol>
+      <TableCol>{richTextToPlainText(props.nombre)}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">
           <DeleteDialog asChild onDelete={handleRemove}>

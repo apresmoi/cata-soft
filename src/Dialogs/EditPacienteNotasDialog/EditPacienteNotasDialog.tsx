@@ -1,5 +1,5 @@
 import React from "react";
-import { PatientCardTextAreaField } from "../../components";
+import { RichTextField } from "../../components";
 import {
   Dialog,
   DialogButton,
@@ -48,7 +48,7 @@ export function EditPacienteNotasDialog(
         <DialogTitle>{TITLE_BY_FIELD[props.field]}</DialogTitle>
         {/* Flex column, so the field's `flex-1` textarea actually fills it. */}
         <div className="flex h-[45vh] min-h-[16rem] flex-col p-5">
-          <PatientCardTextAreaField
+          <RichTextField
             value={data?.[props.field] || ""}
             onChange={update(props.field)}
           />

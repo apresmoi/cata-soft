@@ -4,6 +4,7 @@ import { useDeleteHospitalizacion } from "../../hooks";
 import { Tooltip } from "../Tooltip";
 import { DeleteDialog } from "../../Dialogs/DeleteDialog";
 import { ThrashCanIcon } from "../Icons/ThrashCanIcon";
+import { richTextToPlainText } from "../../richText";
 export function HospitalizacionRow(props: RowProps<Hospitalizaciones>) {
   const { remove } = useDeleteHospitalizacion(props.id);
 
@@ -29,7 +30,7 @@ export function HospitalizacionRow(props: RowProps<Hospitalizaciones>) {
           {"HOSPITALIZACION"}
         </div>
       </TableCol>
-      <TableCol>{props.motivo}</TableCol>
+      <TableCol>{richTextToPlainText(props.motivo)}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">
           <DeleteDialog asChild onDelete={handleRemove}>

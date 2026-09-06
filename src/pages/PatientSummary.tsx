@@ -3,6 +3,7 @@ import { NewAntropometriaDialog } from "../Dialogs/AntropometriaDialog";
 import { EditPacienteNotasDialog } from "../Dialogs/EditPacienteNotasDialog";
 import Sparkline from "../components/Sparkline";
 import { usePaciente, type PacienteHistoryItem } from "../hooks";
+import { isRichTextEmpty, richTextToHtml, richTextToPlainText } from "../richText";
 
 const cardBase = "rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition hover:border-brand-300 hover:shadow";
 const iconButton =
@@ -40,13 +41,13 @@ function itemDate(item: PacienteHistoryItem): Date {
 function describeItem(item: PacienteHistoryItem): string {
   switch (item.type) {
     case "evolucion":
-      return `Evolución: ${item.motivo ?? "sin motivo"}`;
+      return `Evolución: ${richTextToPlainText(item.motivo) || "sin motivo"}`;
     case "antropometria":
       return `Antropometría registrada: IMC ${formatDecimal(item.imc)}`;
     case "interconsulta":
-      return `Interconsulta: ${item.motivo}`;
+      return `Interconsulta: ${richTextToPlainText(item.motivo)}`;
     case "hospitalizacion":
-      return `Internación: ${item.motivo}`;
+      return `Internación: ${richTextToPlainText(item.motivo)}`;
     case "archivoadjunto":
       return `Archivo adjuntado: ${item.nombre}`;
   }
@@ -147,7 +148,7 @@ export function PatientSummary(props: {
         >
           <div className={kpiLabel}>Última visita</div>
           <div className={kpiValue}>{latestVisit ? formatDate(itemDate(latestVisit)) : "Sin registros"}</div>
-          <div className={kpiHint}>{latestVisit ? latestVisit.motivo ?? "Evolución registrada" : "Todavía no hay evoluciones cargadas"}</div>
+          <div className={kpiHint}>{latestVisit ? richTextToPlainText(latestVisit.motivo) || "Evolución registrada" : "Todavía no hay evoluciones cargadas"}</div>
         </button>
 
         <TrendKpiCard
@@ -235,13 +236,13 @@ export function PatientSummary(props: {
                   className="rounded-lg border border-brand-200 bg-white p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <div className="font-semibold text-stone-800">{item.motivo}</div>
+                    <div className="font-semibold text-stone-800">{richTextToPlainText(item.motivo)}</div>
                     <span className="shrink-0 rounded-full bg-brand-100 px-2 py-1 text-xs font-bold text-brand-800">
                       {formatDate(itemDate(item))}
                     </span>
                   </div>
                   {item.notas ? (
-                    <p className="mt-2 text-sm leading-6 text-stone-600">{item.notas}</p>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">{richTextToPlainText(item.notas)}</p>
                   ) : null}
                   <button
                     type="button"
@@ -292,7 +293,14 @@ function EditableInfoCard(props: {
             <FiEdit3 />
           </button>
         </div>
-        <p className="mt-3 text-sm leading-6 text-stone-700">{props.text || "Sin datos cargados"}</p>
+        {isRichTextEmpty(props.text) ? (
+          <p className="mt-3 text-sm leading-6 text-stone-700">Sin datos cargados</p>
+        ) : (
+          <div
+            className="mt-3 text-sm leading-6 text-stone-700 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+            dangerouslySetInnerHTML={{ __html: richTextToHtml(props.text) }}
+          />
+        )}
       </div>
     </EditPacienteNotasDialog>
   );

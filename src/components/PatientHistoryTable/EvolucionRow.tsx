@@ -4,6 +4,7 @@ import { DeleteDialog } from "../../Dialogs/DeleteDialog";
 import { Tooltip } from "../Tooltip";
 import { ThrashCanIcon } from "../Icons/ThrashCanIcon";
 import { useDeleteEvolucion } from "../../hooks";
+import { richTextToPlainText } from "../../richText";
 
 export function EvolucionRow(props: RowProps<Evoluciones>) {
   const { remove } = useDeleteEvolucion(props.id);
@@ -30,7 +31,7 @@ export function EvolucionRow(props: RowProps<Evoluciones>) {
           {"EVOLUCION"}
         </div>
       </TableCol>
-      <TableCol>{props.motivo}</TableCol>
+      <TableCol>{richTextToPlainText(props.motivo)}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">
           <DeleteDialog asChild onDelete={handleRemove}>

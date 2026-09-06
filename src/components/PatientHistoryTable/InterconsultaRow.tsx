@@ -4,6 +4,7 @@ import { useDeleteInterconsulta } from "../../hooks";
 import { Tooltip } from "../Tooltip";
 import { DeleteDialog } from "../../Dialogs/DeleteDialog";
 import { ThrashCanIcon } from "../Icons/ThrashCanIcon";
+import { richTextToPlainText } from "../../richText";
 
 export function InterconsultaRow(props: RowProps<Interconsultas>) {
   const { remove } = useDeleteInterconsulta(props.id);
@@ -30,7 +31,7 @@ export function InterconsultaRow(props: RowProps<Interconsultas>) {
           {"INTERCONSULTA"}
         </div>
       </TableCol>
-      <TableCol>{props.motivo}</TableCol>
+      <TableCol>{richTextToPlainText(props.motivo)}</TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">
           <DeleteDialog asChild onDelete={handleRemove}>

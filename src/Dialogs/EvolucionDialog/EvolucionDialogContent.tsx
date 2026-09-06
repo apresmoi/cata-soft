@@ -1,7 +1,7 @@
 import React from "react";
 import {
   PatientCardAgeDateField,
-  PatientCardTextAreaField,
+  RichTextField,
 } from "../../components";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useEvolution, useNewEvolution } from "../../hooks";
@@ -31,7 +31,7 @@ export function EvolucionDialogContent(
       />
       <TabsContainer>
         <Tab name="MOTIVO">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="MOTIVO"
             onChange={update("motivo")}
             value={data?.motivo || ""}
@@ -40,7 +40,7 @@ export function EvolucionDialogContent(
           />
         </Tab>
         <Tab name="EXAMEN FISICO">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="EXAMEN FISICO"
             onChange={update("examenFisico")}
             value={data?.examenFisico || ""}
@@ -48,7 +48,7 @@ export function EvolucionDialogContent(
           />
         </Tab>
         <Tab name="PLAN">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="PLAN"
             onChange={update("plan")}
             value={data?.plan || ""}

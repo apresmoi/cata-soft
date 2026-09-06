@@ -1,7 +1,7 @@
 import React from "react";
 import {
   PatientCardAgeDateField,
-  PatientCardTextAreaField,
+  RichTextField,
 } from "../../components";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useHospitalizacion, useNewHospitalizacion } from "../../hooks";
@@ -41,7 +41,7 @@ export function HospitalizacionDialogContent(
       </div>
       <TabsContainer>
         <Tab name="MOTIVO">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="MOTIVO"
             onChange={update("motivo")}
             value={data?.motivo || ""}
@@ -50,7 +50,7 @@ export function HospitalizacionDialogContent(
           />
         </Tab>
         <Tab name="NOTAS">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="NOTAS"
             onChange={update("notas")}
             value={data?.notas || ""}

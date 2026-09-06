@@ -6,3 +6,4 @@ export * from "./SideToolbar";
 export * from "./Tooltip";
 export * from "./PatientCard";
 export * from "./PatientHistoryTable";
+export * from "./RichTextField";
