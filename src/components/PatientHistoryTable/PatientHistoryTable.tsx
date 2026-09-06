@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { FiSearch } from "react-icons/fi";
+import { useMemo, useState } from "react";
+import { FiChevronDown, FiChevronUp, FiSearch } from "react-icons/fi";
 import { PacienteHistoryItem } from "../../hooks";
 import { Table, TableCol } from "../Table";
 import { AntropometriaRow } from "./AntropometriaRow";
@@ -16,22 +16,54 @@ const KIND_LABELS: Record<string, string> = {
   archivoadjunto: "Archivos",
 };
 
-// Written once; the shared Table component renders it both as the sticky
-// visible header and the invisible column-width spacer.
-const historyTableHeader = (
-  <tr>
-    <TableCol component="th" className="text-left w-[100px]">
-      Fecha
-    </TableCol>
-    <TableCol component="th" className="text-left w-[150px]">
-      Tipo
-    </TableCol>
-    <TableCol component="th" className="text-left">
-      Contenido
-    </TableCol>
-    <TableCol component="th" className="text-left w-[50px]"></TableCol>
-  </tr>
-);
+type SortDirection = "asc" | "desc";
+
+/**
+ * Returns the comparable timestamp for a history item; each variant keys its
+ * own date field, and a missing/invalid date sorts as the oldest.
+ */
+function getItemTimestamp(item: PacienteHistoryItem): number {
+  const raw =
+    item.type === "hospitalizacion"
+      ? item.fechaIngreso
+      : item.type === "archivoadjunto"
+        ? item.createdAt
+        : item.fecha;
+  const date = raw instanceof Date ? raw : new Date(raw);
+  return Number.isNaN(date.getTime()) ? -Infinity : date.getTime();
+}
+
+// Written once; the shared Table component renders it as the sticky header.
+function renderHistoryTableHeader(
+  sortDirection: SortDirection,
+  onToggleSort: () => void
+) {
+  return (
+    <tr>
+      <TableCol component="th" className="text-left w-[100px]">
+        <button
+          type="button"
+          onClick={onToggleSort}
+          className="inline-flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+          aria-label={
+            sortDirection === "desc"
+              ? "Ordenar por fecha, de más antiguo a más reciente"
+              : "Ordenar por fecha, de más reciente a más antiguo"
+          }
+        >
+          Fecha {sortDirection === "desc" ? <FiChevronDown /> : <FiChevronUp />}
+        </button>
+      </TableCol>
+      <TableCol component="th" className="text-left w-[150px]">
+        Tipo
+      </TableCol>
+      <TableCol component="th" className="text-left">
+        Contenido
+      </TableCol>
+      <TableCol component="th" className="text-left w-[50px]"></TableCol>
+    </tr>
+  );
+}
 
 export function PatientHistoryTable(props: {
   history: PacienteHistoryItem[];
@@ -49,6 +81,7 @@ export function PatientHistoryTable(props: {
   const hasKindFilters = props.kinds !== undefined;
   const showFilterRow = hasSearch || hasKindFilters;
   const selectedKinds = props.selectedKinds ?? [];
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   const counts = useMemo(() => {
     const result: Record<string, number> = {};
@@ -63,9 +96,16 @@ export function PatientHistoryTable(props: {
     return props.history.filter((item) => selectedKinds.includes(item.type));
   }, [props.history, selectedKinds]);
 
+  const sortedHistory = useMemo(() => {
+    const sign = sortDirection === "desc" ? -1 : 1;
+    return [...filteredHistory].sort(
+      (a, b) => sign * (getItemTimestamp(a) - getItemTimestamp(b))
+    );
+  }, [filteredHistory, sortDirection]);
+
   const tableBody = (
     <tbody>
-      {filteredHistory.length === 0 ? (
+      {sortedHistory.length === 0 ? (
         <tr>
           <td
             colSpan={4}
@@ -75,7 +115,7 @@ export function PatientHistoryTable(props: {
           </td>
         </tr>
       ) : (
-        filteredHistory.map((row, index) => {
+        sortedHistory.map((row, index) => {
           switch (row.type) {
             case "evolucion":
               return (
@@ -173,7 +213,12 @@ export function PatientHistoryTable(props: {
           ) : null}
         </div>
       ) : null}
-      <Table tableHeaderContent={historyTableHeader} tableBody={tableBody} />
+      <Table
+        tableHeaderContent={renderHistoryTableHeader(sortDirection, () =>
+          setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))
+        )}
+        tableBody={tableBody}
+      />
     </div>
   );
 }

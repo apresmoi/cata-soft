@@ -7,3 +7,4 @@ export * from "./CloseWithoutSavingDialog";
 export * from "./ArchivoAdjuntoDialog";
 export * from "./HistoriaMedicaDialog/HistoriaMedicaDialog";
 export * from "./EditPacienteDialog";
+export * from "./EditPacienteNotasDialog";

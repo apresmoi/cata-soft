@@ -1,4 +1,6 @@
-import { FiArrowDown, FiArrowUp, FiEdit3 } from "react-icons/fi";
+import { FiArrowDown, FiArrowUp, FiEdit3, FiPlus } from "react-icons/fi";
+import { NewAntropometriaDialog } from "../Dialogs/AntropometriaDialog";
+import { EditPacienteNotasDialog } from "../Dialogs/EditPacienteNotasDialog";
 import Sparkline from "../components/Sparkline";
 import { usePaciente, type PacienteHistoryItem } from "../hooks";
 
@@ -64,9 +66,24 @@ function DeltaChip(props: { delta: number | null; unit: string }): JSX.Element |
   );
 }
 
-function TrendKpiCard(props: { label: string; value: string; hint: string; values: number[]; delta: number | null; deltaUnit: string }) {
+function TrendKpiCard(props: { label: string; value: string; hint: string; values: number[]; delta: number | null; deltaUnit: string; patientId: string }) {
   return (
-    <div className={cardBase}>
+    <div className={`relative ${cardBase}`}>
+      <NewAntropometriaDialog patientId={props.patientId}>
+        {/*
+         * No stopPropagation here: the surrounding card is a plain div with no
+         * click handler, and swallowing the event stopped it reaching
+         * `DialogTrigger`, so the button did nothing at all.
+         */}
+        <button
+          type="button"
+          className={`absolute right-3 top-3 ${iconButton}`}
+          title="Nueva antropometría"
+          aria-label="Nueva antropometría"
+        >
+          <FiPlus />
+        </button>
+      </NewAntropometriaDialog>
       <div className={kpiLabel}>{props.label}</div>
       <div className="mt-2 flex items-center justify-between gap-3">
         <div>
@@ -105,6 +122,11 @@ export function PatientSummary(props: {
   const pesoDelta = pesoValues.length < 2 ? null : pesoValues[pesoValues.length - 1] - pesoValues[pesoValues.length - 2];
   const imcDelta = imcValues.length < 2 ? null : imcValues[imcValues.length - 1] - imcValues[imcValues.length - 2];
 
+  const interconsultas = props.history
+    .filter((item): item is Extract<PacienteHistoryItem, { type: "interconsulta" }> => item.type === "interconsulta")
+    .slice()
+    .sort((a, b) => itemDate(b).getTime() - itemDate(a).getTime());
+
   const novedades = props.history
     .slice()
     .sort((a, b) => itemDate(b).getTime() - itemDate(a).getTime())
@@ -131,6 +153,7 @@ export function PatientSummary(props: {
           values={pesoValues}
           delta={pesoDelta}
           deltaUnit=" kg"
+          patientId={props.patientId}
         />
 
         <TrendKpiCard
@@ -140,6 +163,7 @@ export function PatientSummary(props: {
           values={imcValues}
           delta={imcDelta}
           deltaUnit=""
+          patientId={props.patientId}
         />
 
         <div className={cardBase}>
@@ -150,68 +174,107 @@ export function PatientSummary(props: {
       </div>
 
       <div className="grid shrink-0 grid-cols-1 items-start gap-4 sm:grid-cols-2">
-        <EditableInfoCard title="Antecedentes" patientId={props.patientId} text={data?.antecedentes} />
-        <EditableInfoCard title="Medicación habitual" patientId={props.patientId} text={data?.medicacionHabitual} />
+        <EditableInfoCard title="Antecedentes" field="antecedentes" patientId={props.patientId} text={data?.antecedentes} />
+        <EditableInfoCard title="Medicación habitual" field="medicacionHabitual" patientId={props.patientId} text={data?.medicacionHabitual} />
       </div>
 
-      <section className="flex min-h-0 flex-1 flex-col rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-        <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-stone-500">Últimas novedades</h3>
-        <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto pr-2">
-          {novedades.length === 0 ? (
-            <p className="text-sm text-stone-500">Todavía no hay registros en la historia.</p>
-          ) : (
-            novedades.map((item) => (
-              <button
-                key={`${item.type}-${item.id}`}
-                type="button"
-                onClick={() => props.onOpenRecord(item)}
-                className="flex w-full gap-3 rounded-lg border border-stone-100 bg-stone-50 p-3 text-left hover:border-brand-300 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
-              >
-                <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT_BY_TYPE[item.type]}`} />
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-stone-400">{formatDate(itemDate(item))}</div>
-                  <div className="text-sm text-stone-700">{describeItem(item)}</div>
-                </div>
-              </button>
-            ))
-          )}
-        </div>
-      </section>
+      {/*
+       * Two panes side by side. The design board had "Items abiertos" here,
+       * listing pending interconsultas -- but `Interconsultas` has no `estado`
+       * column, so there is nothing to mark one pending with. This shows the
+       * interconsultas themselves rather than inventing a status.
+       */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+        <section className="flex min-h-0 flex-col rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+          <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-stone-500">Últimas novedades</h3>
+          <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto pr-2">
+            {novedades.length === 0 ? (
+              <p className="text-sm text-stone-500">Todavía no hay registros en la historia.</p>
+            ) : (
+              novedades.map((item) => (
+                <button
+                  key={`${item.type}-${item.id}`}
+                  type="button"
+                  onClick={() => props.onOpenRecord(item)}
+                  className="flex w-full gap-3 rounded-lg border border-stone-100 bg-stone-50 p-3 text-left hover:border-brand-300 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                >
+                  <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT_BY_TYPE[item.type]}`} />
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-stone-400">{formatDate(itemDate(item))}</div>
+                    <div className="text-sm text-stone-700">{describeItem(item)}</div>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="flex min-h-0 flex-col rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+          <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-stone-500">Interconsultas</h3>
+          <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto pr-2">
+            {interconsultas.length === 0 ? (
+              <p className="text-sm text-stone-500">Todavía no hay interconsultas cargadas.</p>
+            ) : (
+              interconsultas.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => props.onOpenRecord(item)}
+                  className="w-full rounded-lg border border-brand-100 bg-brand-50/60 p-3 text-left hover:border-brand-300 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="font-semibold text-stone-800">{item.motivo}</span>
+                    <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-stone-400">
+                      {formatDate(itemDate(item))}
+                    </span>
+                  </div>
+                  {item.notas ? (
+                    <p className="mt-1 text-sm leading-6 text-stone-600">{item.notas}</p>
+                  ) : null}
+                </button>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
 
-/**
- * Fully clickable card reading a text field from the patient. The edit affordance
- * is a no-op placeholder for the integrator: `EditPacienteDialog` does not exist
- * yet at `src/Dialogs/EditPacienteDialog`, so this wires no dialog trigger.
- */
-function EditableInfoCard(props: { title: string; patientId: string; text: string | null | undefined }): JSX.Element {
-  const handleEdit = () => {
-    // Integrator: wrap this card's click and the icon button below with
-    // `EditPacienteDialog` once it lands at src/Dialogs/EditPacienteDialog.
-  };
-
+/** Fully clickable card reading a text field from the patient, wired to `EditPacienteNotasDialog`. */
+function EditableInfoCard(props: {
+  title: string;
+  field: "antecedentes" | "medicacionHabitual";
+  patientId: string;
+  text: string | null | undefined;
+}): JSX.Element {
   return (
-    <div role="button" tabIndex={0} onClick={handleEdit} onKeyDown={(event) => {
-      if (event.key === "Enter" || event.key === " ") handleEdit();
-    }} className={`${cardBase} cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400`}>
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-stone-500">{props.title}</h3>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            handleEdit();
-          }}
-          className={iconButton}
-          title={`Editar ${props.title.toLowerCase()}`}
-          aria-label={`Editar ${props.title.toLowerCase()}`}
-        >
-          <FiEdit3 />
-        </button>
+    <EditPacienteNotasDialog patientId={props.patientId} field={props.field}>
+      <div
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            event.currentTarget.click();
+          }
+        }}
+        className={`${cardBase} cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-stone-500">{props.title}</h3>
+          <button
+            type="button"
+            onClick={(event) => event.stopPropagation()}
+            className={iconButton}
+            title={`Editar ${props.title.toLowerCase()}`}
+            aria-label={`Editar ${props.title.toLowerCase()}`}
+          >
+            <FiEdit3 />
+          </button>
+        </div>
+        <p className="mt-3 text-sm leading-6 text-stone-700">{props.text || "Sin datos cargados"}</p>
       </div>
-      <p className="mt-3 text-sm leading-6 text-stone-700">{props.text || "Sin datos cargados"}</p>
-    </div>
+    </EditPacienteNotasDialog>
   );
 }

@@ -12,9 +12,7 @@ import {
   PatientHistoryTable,
   SideToolbar,
   SideToolbarButton,
-  Tooltip,
 } from "../components";
-import { Tab, TabsContainer } from "../components/Tabs";
 import { useParams } from "react-router-dom";
 import {
   PacienteHistoryItem,
@@ -58,6 +56,13 @@ const HISTORY_KINDS = [
   "archivoadjunto",
 ];
 
+type PaneId = "resumen" | "registros";
+
+const PANES: Array<{ id: PaneId; label: string }> = [
+  { id: "resumen", label: "RESUMEN" },
+  { id: "registros", label: "REGISTROS" },
+];
+
 /** Whole years between a birth date and today. `Pacientes` has no `edad` column. */
 function calculateAge(birth?: Date | null): number | null {
   if (!birth) return null;
@@ -73,6 +78,7 @@ function calculateAge(birth?: Date | null): number | null {
 export function PatientScreen() {
   const params = useParams();
   const patientId = params.id as string;
+  const [activePane, setActivePane] = React.useState<PaneId>("resumen");
   const [search, setSearch] = React.useState("");
   const [selectedKinds, setSelectedKinds] = React.useState<string[]>([]);
 
@@ -131,97 +137,83 @@ export function PatientScreen() {
          * Full-height rail: every record type is one click from anywhere in
          * the screen. Each button keeps its dialog trigger as its child, which
          * is what actually opens the form.
+         *
+         * The labels are `SideToolbarButton`'s own hover-only tooltip, not the
+         * Radix `Tooltip`: Radix opens on focus for accessibility, so closing a
+         * dialog returned focus to the rail trigger and popped its tooltip.
          */}
         <SideToolbar>
-          <Tooltip tooltip="VOLVER AL LISTADO">
-            <SideToolbarButton variant="secondary" onClick={handleGoBack}>
-              <ArrowLeftIcon />
+          <SideToolbarButton
+            variant="secondary"
+            label="Volver al listado"
+            onClick={handleGoBack}
+          >
+            <ArrowLeftIcon />
+          </SideToolbarButton>
+
+          <div className="my-1 h-px w-8 bg-stone-200" />
+
+          <NewEvolucionDialog patientId={patientId}>
+            <SideToolbarButton variant="primary" label="Nueva evolución">
+              <FiFileText />
             </SideToolbarButton>
-          </Tooltip>
+          </NewEvolucionDialog>
+          <NewAntropometriaDialog patientId={patientId}>
+            <SideToolbarButton variant="primary" label="Nueva antropometría">
+              <FiActivity />
+            </SideToolbarButton>
+          </NewAntropometriaDialog>
+          <NewInterconsultaDialog patientId={patientId}>
+            <SideToolbarButton variant="info" label="Nueva interconsulta">
+              <FiUsers />
+            </SideToolbarButton>
+          </NewInterconsultaDialog>
+          <NewHospitalizacionDialogDialog patientId={patientId}>
+            <SideToolbarButton variant="warning" label="Nueva internación">
+              <FiThermometer />
+            </SideToolbarButton>
+          </NewHospitalizacionDialogDialog>
+          <NewArchivoAdjuntoDialog patientId={patientId}>
+            <SideToolbarButton variant="secondary" label="Adjuntar archivo">
+              <ImAttachment />
+            </SideToolbarButton>
+          </NewArchivoAdjuntoDialog>
 
           <div className="my-1 h-px w-8 bg-stone-200" />
 
-          <Tooltip tooltip="NUEVA EVOLUCION">
-            <NewEvolucionDialog patientId={patientId}>
-              <SideToolbarButton variant="primary">
-                <FiFileText />
-              </SideToolbarButton>
-            </NewEvolucionDialog>
-          </Tooltip>
-          <Tooltip tooltip="NUEVA ANTROPOMETRIA">
-            <NewAntropometriaDialog patientId={patientId}>
-              <SideToolbarButton variant="primary">
-                <FiActivity />
-              </SideToolbarButton>
-            </NewAntropometriaDialog>
-          </Tooltip>
-          <Tooltip tooltip="NUEVA INTERCONSULTA">
-            <NewInterconsultaDialog patientId={patientId}>
-              <SideToolbarButton variant="info">
-                <FiUsers />
-              </SideToolbarButton>
-            </NewInterconsultaDialog>
-          </Tooltip>
-          <Tooltip tooltip="NUEVA INTERNACION">
-            <NewHospitalizacionDialogDialog patientId={patientId}>
-              <SideToolbarButton variant="warning">
-                <FiThermometer />
-              </SideToolbarButton>
-            </NewHospitalizacionDialogDialog>
-          </Tooltip>
-          <Tooltip tooltip="ADJUNTAR ARCHIVO">
-            <NewArchivoAdjuntoDialog patientId={patientId}>
-              <SideToolbarButton variant="secondary">
-                <ImAttachment />
-              </SideToolbarButton>
-            </NewArchivoAdjuntoDialog>
-          </Tooltip>
-
-          <div className="my-1 h-px w-8 bg-stone-200" />
-
-          <Tooltip tooltip="RESUMEN DE HISTORIA CLINICA">
-            <HistoriaMedicaDialog patientId={patientId}>
-              <SideToolbarButton variant="secondary">
-                <SlPrinter />
-              </SideToolbarButton>
-            </HistoriaMedicaDialog>
-          </Tooltip>
+          <HistoriaMedicaDialog patientId={patientId}>
+            <SideToolbarButton variant="secondary" label="Resumen de historia clínica">
+              <SlPrinter />
+            </SideToolbarButton>
+          </HistoriaMedicaDialog>
 
           <div className="grow" />
 
-          <Tooltip tooltip="ELIMINAR PACIENTE">
-            <DeleteDialog onDelete={handleDelete}>
-              <SideToolbarButton variant="danger">
-                <ThrashCanIcon />
-              </SideToolbarButton>
-            </DeleteDialog>
-          </Tooltip>
+          <DeleteDialog onDelete={handleDelete}>
+            <SideToolbarButton variant="danger" label="Eliminar paciente">
+              <ThrashCanIcon />
+            </SideToolbarButton>
+          </DeleteDialog>
         </SideToolbar>
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Toolbar>
-            <div className="flex min-w-0 flex-col justify-center">
-              <div className="flex flex-wrap items-baseline gap-x-3">
-                <h1 className="truncate text-lg font-bold tracking-tight text-stone-900">
-                  {data?.nombre}
-                </h1>
-                {edad !== null && (
-                  <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-800">
-                    {edad} años
-                  </span>
-                )}
-                <span className="text-sm text-stone-500">
-                  DNI {data?.documento}
+            {/* Identity reads as one line; it is a header, not a form. */}
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-3">
+              <h1 className="truncate text-lg font-bold tracking-tight text-stone-900">
+                {data?.nombre}
+              </h1>
+              {edad !== null && (
+                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-bold text-brand-800">
+                  {edad} años
                 </span>
-                {data?.obraSocial && (
-                  <span className="text-sm text-stone-500">
-                    {data.obraSocial} · Nº {data.numeroObraSocial}
-                  </span>
-                )}
-              </div>
-              <p className="truncate text-xs text-stone-500">
-                {data?.telefono} {data?.email ? `· ${data.email}` : ""}
-              </p>
+              )}
+              <span className="truncate text-sm text-stone-500">
+                DNI {data?.documento}
+                {data?.obraSocial ? ` · ${data.obraSocial} Nº ${data.numeroObraSocial}` : ""}
+                {data?.telefono ? ` · ${data.telefono}` : ""}
+                {data?.email ? ` · ${data.email}` : ""}
+              </span>
             </div>
             <div className="grow" />
             <EditPacienteDialog patientId={patientId}>
@@ -231,30 +223,61 @@ export function PatientScreen() {
             </EditPacienteDialog>
           </Toolbar>
 
-          <TabsContainer>
-            <Tab name="RESUMEN">
-              <div className="min-h-0 flex-1 overflow-auto p-4">
-                <PatientSummary
-                  patientId={patientId}
-                  history={history || []}
-                  onOpenRecord={(item) => setHistoryId(item.id)}
-                />
-              </div>
-            </Tab>
-            <Tab name="REGISTROS">
-              <div className="flex min-h-0 flex-1 flex-col p-4">
-                <PatientHistoryTable
-                  history={filteredHistory || []}
-                  onClick={handleHistoryClick}
-                  search={search}
-                  onSearchChange={setSearch}
-                  kinds={HISTORY_KINDS}
-                  selectedKinds={selectedKinds}
-                  onToggleKind={toggleKind}
-                />
-              </div>
-            </Tab>
-          </TabsContainer>
+          {/*
+           * Compact underlined tabs rather than the shared TabsHeader: that one
+           * stretches each tab to an equal share of the width, which is right
+           * inside a dialog and far too heavy for a screen-level switch.
+           */}
+          <nav className="border-b border-stone-200 bg-white px-4">
+            <div className="flex gap-1">
+              {PANES.map((pane) => {
+                const selected = activePane === pane.id;
+                return (
+                  <button
+                    key={pane.id}
+                    type="button"
+                    onClick={() => setActivePane(pane.id)}
+                    className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+                      selected
+                        ? "border-brand-600 text-brand-700"
+                        : "border-transparent text-stone-500 hover:text-stone-800"
+                    }`}
+                  >
+                    {pane.label}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                        selected ? "bg-brand-100 text-brand-800" : "bg-stone-100 text-stone-500"
+                      }`}
+                    >
+                      {pane.id === "resumen" ? (history?.length ?? 0) : filteredHistory?.length ?? 0}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+
+          {activePane === "resumen" ? (
+            <div className="min-h-0 flex-1 overflow-auto p-4">
+              <PatientSummary
+                patientId={patientId}
+                history={history || []}
+                onOpenRecord={(item) => setHistoryId(item.id)}
+              />
+            </div>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col p-4">
+              <PatientHistoryTable
+                history={filteredHistory || []}
+                onClick={handleHistoryClick}
+                search={search}
+                onSearchChange={setSearch}
+                kinds={HISTORY_KINDS}
+                selectedKinds={selectedKinds}
+                onToggleKind={toggleKind}
+              />
+            </div>
+          )}
         </div>
       </div>
 
