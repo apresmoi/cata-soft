@@ -9,11 +9,12 @@ import {
   type EvolucionRow,
   type InterconsultaRow,
   type PatientData,
+  type RecordKind,
 } from "./data";
 
 const cardBase = "rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition hover:border-brand-300 hover:shadow";
 const iconButton =
-  "inline-flex h-7 w-7 items-center justify-center rounded-md border border-stone-200 bg-white text-stone-500 hover:border-brand-300 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-200";
+  "inline-flex h-7 w-7 items-center justify-center rounded-md border border-stone-200 bg-white text-stone-500 hover:border-brand-300 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400";
 const kpiLabel = "text-xs font-semibold uppercase tracking-wide text-stone-400";
 const kpiValue = "text-2xl font-bold text-stone-950";
 const kpiHint = "mt-1 text-sm text-stone-500";
@@ -77,6 +78,7 @@ export default function Summary(props: {
   interconsultas: InterconsultaRow[];
   onEdit: (target: ModalTarget) => void;
   onToggleInterconsulta: (id: string) => void;
+  onOpenRecord: (kind: RecordKind, id: string) => void;
 }) {
   const latestVisit =
     props.evoluciones.length > 0
@@ -88,12 +90,12 @@ export default function Summary(props: {
   const imcDelta = trendDelta(props.antropometria, "imc");
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <button
           type="button"
           onClick={() => latestVisit && props.onEdit({ kind: "evolucion", row: latestVisit })}
-          className={`${cardBase} text-left focus:outline-none focus:ring-2 focus:ring-brand-200`}
+          className={`${cardBase} text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400`}
         >
           <div className={kpiLabel}>Última visita</div>
           <div className={kpiValue}>{latestVisit ? formatDate(latestVisit.fecha) : "Sin registros"}</div>
@@ -138,9 +140,8 @@ export default function Summary(props: {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
+      {/* Two aligned columns matching the KPI halves above. */}
+      <div className="grid shrink-0 grid-cols-1 items-start gap-4 sm:grid-cols-2">
             <div
               role="button"
               tabIndex={0}
@@ -148,7 +149,7 @@ export default function Summary(props: {
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") props.onEdit({ kind: "antecedentes" });
               }}
-              className={`${cardBase} cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-200`}
+              className={`${cardBase} cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400`}
             >
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-bold uppercase tracking-wide text-stone-500">Antecedentes</h3>
@@ -175,7 +176,7 @@ export default function Summary(props: {
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") props.onEdit({ kind: "medicacion" });
               }}
-              className={`${cardBase} cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-200`}
+              className={`${cardBase} cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400`}
             >
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-sm font-bold uppercase tracking-wide text-stone-500">Medicación habitual</h3>
@@ -194,27 +195,35 @@ export default function Summary(props: {
               </div>
               <p className="mt-3 text-sm leading-6 text-stone-700">{props.patient.medicacionHabitual}</p>
             </div>
-          </div>
+      </div>
 
-          <section className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-stone-500">Últimas novedades</h3>
-            <div className="mt-4 max-h-96 space-y-3 overflow-auto pr-2">
+      {/* The feed row takes whatever height is left and scrolls inside each
+          card, so the two panes stay aligned instead of ending raggedly. */}
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+          <section className="flex min-h-0 flex-col rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+            <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-stone-500">Últimas novedades</h3>
+            <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto pr-2">
               {novedades.map((item) => (
-                <div key={item.id} className="flex gap-3 rounded-lg border border-stone-100 bg-stone-50 p-3">
-                  <div className={`mt-1 h-2.5 w-2.5 rounded-full ${KIND_META[item.tipo].dot}`} />
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => props.onOpenRecord(item.tipo, item.recordId)}
+                  title={`Ver ${KIND_META[item.tipo].singular.toLowerCase()}`}
+                  className="flex w-full gap-3 rounded-lg border border-stone-100 bg-stone-50 p-3 text-left hover:border-brand-300 hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+                >
+                  <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${KIND_META[item.tipo].dot}`} />
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-wide text-stone-400">{formatDate(item.fecha)}</div>
                     <div className="text-sm text-stone-700">{item.texto}</div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </section>
-        </div>
 
-        <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-amber-800">Items abiertos</h3>
-          <div className="mt-4 max-h-96 space-y-3 overflow-auto pr-2">
+        <section className="flex min-h-0 flex-col rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-amber-800">Items abiertos</h3>
+          <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto pr-2">
             {pending.length === 0 ? (
               <p className="text-sm text-amber-800">Sin items abiertos.</p>
             ) : (
@@ -229,14 +238,14 @@ export default function Summary(props: {
                     <button
                       type="button"
                       onClick={() => props.onEdit({ kind: "interconsulta", row: item })}
-                      className="rounded-md border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="rounded-md border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                     >
                       Editar
                     </button>
                     <button
                       type="button"
                       onClick={() => props.onToggleInterconsulta(item.id)}
-                      className="rounded-md border border-amber-300 bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="rounded-md border border-amber-300 bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                     >
                       Marcar respuesta recibida
                     </button>

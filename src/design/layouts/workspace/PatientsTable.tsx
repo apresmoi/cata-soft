@@ -4,13 +4,17 @@
  * single-patient workspace via `onOpenPatient`.
  */
 import { useState } from "react";
-import { FIXTURES } from "../../fixtures";
-
-export default function PatientsTable(props: { onOpenPatient: (id: string) => void }): JSX.Element {
+import { FiSearch } from "react-icons/fi";
+import { type PatientData } from "./data";
+export default function PatientsTable(props: {
+  pacientes: PatientData[];
+  onOpenPatient: (id: string) => void;
+  onCreatePatient: () => void;
+}): JSX.Element {
   const [query, setQuery] = useState("");
 
   const normalized = query.trim().toLowerCase();
-  const pacientes = FIXTURES.pacientes.filter((paciente) => {
+  const pacientes = props.pacientes.filter((paciente) => {
     if (!normalized) return true;
     return (
       paciente.nombre.toLowerCase().includes(normalized) ||
@@ -19,37 +23,40 @@ export default function PatientsTable(props: { onOpenPatient: (id: string) => vo
   });
 
   return (
-    <div className="flex h-full min-h-screen flex-col bg-stone-100">
-      <header className="flex items-center justify-between border-b border-stone-200 bg-white px-6 py-4">
-        <div className="flex items-center gap-3">
-          <img src="/icon.png" alt="CataSoft" className="h-10 w-10" />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">CataSoft</p>
-            <h1 className="text-xl font-bold tracking-tight text-stone-900">
-              Pacientes <span className="font-normal text-stone-500">({FIXTURES.pacientes.length})</span>
-            </h1>
-          </div>
+    <div className="flex h-screen flex-col overflow-hidden bg-stone-100">
+      {/* One row only: wordmark, the search this screen exists for, the
+          filtered count, and the primary action. */}
+      <header className="flex items-center gap-4 border-b border-stone-200 bg-white px-5 py-2.5">
+        <div className="flex shrink-0 items-center gap-2">
+          <img src="/icon.png" alt="" className="h-7 w-7" />
+          <h1 className="text-sm font-bold uppercase tracking-wide text-stone-900">CataSoft</h1>
         </div>
-        <button
-          type="button"
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700"
-        >
-          Nuevo paciente
-        </button>
-      </header>
 
-      <div className="flex-1 overflow-auto px-6 py-6">
-        <div className="mb-4 max-w-md">
+        <label className="relative flex-1">
+          <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
           <input
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Buscar por nombre o DNI"
-            className="w-full rounded-lg border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="w-full rounded-lg border border-stone-200 bg-stone-50 py-2 pl-9 pr-3 text-sm text-stone-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
           />
-        </div>
+        </label>
 
-        <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+        <button
+          type="button"
+          onClick={props.onCreatePatient}
+          className="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+        >
+          Nuevo paciente
+        </button>
+      </header>
+
+      {/* The card fills the area under the header and scrolls internally, so
+          the table never floats above dead space. */}
+      <div className="flex min-h-0 flex-1 flex-col p-5">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+          <div className="min-h-0 flex-1 overflow-auto">
           <table className="w-full border-collapse text-left">
             <thead className="sticky top-0 z-10">
               <tr>
@@ -92,8 +99,10 @@ export default function PatientsTable(props: { onOpenPatient: (id: string) => vo
                   </td>
                   <td className="border-t border-stone-200 px-4 py-3 text-sm text-stone-700">{paciente.edad}</td>
                   <td className="border-t border-stone-200 px-4 py-3 text-sm text-stone-700">
-                    <p>{paciente.obraSocial}</p>
-                    <p className="text-sm text-stone-500">Nº {paciente.numeroObraSocial}</p>
+                    <p>{paciente.obraSocial || <span className="text-stone-400">Sin obra social</span>}</p>
+                    {paciente.numeroObraSocial ? (
+                      <p className="text-sm text-stone-500">Nº {paciente.numeroObraSocial}</p>
+                    ) : null}
                   </td>
                   <td className="border-t border-stone-200 px-4 py-3 text-sm text-stone-700">
                     <p>{paciente.telefono}</p>
@@ -122,6 +131,14 @@ export default function PatientsTable(props: { onOpenPatient: (id: string) => vo
               )}
             </tbody>
           </table>
+          </div>
+
+          {/* Row count belongs to the table, not the header. Sits outside the
+              scroll area so it stays visible while the list scrolls. */}
+          <footer className="shrink-0 border-t border-stone-200 bg-stone-50 px-4 py-2 text-xs text-stone-500">
+            {pacientes.length} {pacientes.length === 1 ? "paciente" : "pacientes"}
+            {pacientes.length !== props.pacientes.length ? ` de ${props.pacientes.length}` : ""}
+          </footer>
         </div>
       </div>
     </div>

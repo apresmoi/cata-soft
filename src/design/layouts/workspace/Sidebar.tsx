@@ -66,7 +66,7 @@ function RailButton(props: {
         type="button"
         onClick={props.onClick}
         aria-label={props.label}
-        className={`flex h-11 w-11 items-center justify-center rounded-xl border text-xl shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-200 ${tone}`}
+        className={`flex h-11 w-11 items-center justify-center rounded-xl border text-xl shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${tone}`}
       >
         {props.children}
       </button>

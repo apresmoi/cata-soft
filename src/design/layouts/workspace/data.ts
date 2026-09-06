@@ -170,18 +170,50 @@ export const initialArchivos: ArchivoRow[] = [
   },
 ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
 
+/**
+ * A summary feed entry. `recordId` addresses the underlying clinical record so
+ * anything shown on the summary can be opened from there -- a feed row that
+ * cannot be consulted is just decoration.
+ */
 export type Novedad = {
   id: string;
+  recordId: string;
   fecha: Date;
   tipo: RecordKind;
   texto: string;
 };
 
+const latestAnthro = initialAntropometria[initialAntropometria.length - 1];
+
 const novedadRows: Novedad[] = [
-  { id: "n1", fecha: initialEvoluciones[0].fecha, tipo: "evolucion", texto: `Evolución: ${initialEvoluciones[0].motivo}` },
-  { id: "n2", fecha: initialAntropometria[initialAntropometria.length - 1].fecha, tipo: "antropometria", texto: `Antropometría registrada: IMC ${initialAntropometria[initialAntropometria.length - 1].imc}` },
-  { id: "n3", fecha: initialInterconsultas[0].fecha, tipo: "interconsulta", texto: `Interconsulta a ${initialInterconsultas[0].especialidad} (${initialInterconsultas[0].estado})` },
-  { id: "n4", fecha: initialArchivos[0].fecha, tipo: "archivo", texto: `Archivo adjuntado: ${initialArchivos[0].nombre}` },
+  {
+    id: "n1",
+    recordId: initialEvoluciones[0].id,
+    fecha: initialEvoluciones[0].fecha,
+    tipo: "evolucion",
+    texto: `Evolución: ${initialEvoluciones[0].motivo}`,
+  },
+  {
+    id: "n2",
+    recordId: latestAnthro.id,
+    fecha: latestAnthro.fecha,
+    tipo: "antropometria",
+    texto: `Antropometría registrada: IMC ${latestAnthro.imc}`,
+  },
+  {
+    id: "n3",
+    recordId: initialInterconsultas[0].id,
+    fecha: initialInterconsultas[0].fecha,
+    tipo: "interconsulta",
+    texto: `Interconsulta a ${initialInterconsultas[0].especialidad} (${initialInterconsultas[0].estado})`,
+  },
+  {
+    id: "n4",
+    recordId: initialArchivos[0].id,
+    fecha: initialArchivos[0].fecha,
+    tipo: "archivo",
+    texto: `Archivo adjuntado: ${initialArchivos[0].nombre}`,
+  },
 ];
 
 export const novedades = novedadRows.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
@@ -219,6 +251,38 @@ export const initialPatient: PatientData = {
   numeroObraSocial: FIXTURES.paciente.numeroObraSocial,
   antecedentes: FIXTURES.paciente.antecedentes,
   medicacionHabitual: FIXTURES.paciente.medicacionHabitual,
+};
+
+/** The full roster the landing table lists. */
+export const initialPacientes: PatientData[] = FIXTURES.pacientes.map((paciente) => ({
+  id: paciente.id,
+  nombre: paciente.nombre,
+  documento: paciente.documento,
+  edad: paciente.edad,
+  fechaNacimiento: paciente.fechaNacimiento,
+  telefono: paciente.telefono,
+  direccion: paciente.direccion,
+  email: paciente.email,
+  obraSocial: paciente.obraSocial,
+  numeroObraSocial: paciente.numeroObraSocial,
+  antecedentes: paciente.antecedentes,
+  medicacionHabitual: paciente.medicacionHabitual,
+}));
+
+/** Seed for the "new patient" form. */
+export const emptyPatient: PatientData = {
+  id: "",
+  nombre: "",
+  documento: "",
+  edad: 0,
+  fechaNacimiento: new Date(),
+  telefono: "",
+  direccion: "",
+  email: "",
+  obraSocial: "",
+  numeroObraSocial: "",
+  antecedentes: "",
+  medicacionHabitual: "",
 };
 
 /**

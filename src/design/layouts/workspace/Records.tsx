@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FiChevronDown, FiChevronUp, FiEdit3 } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiEdit3, FiSearch } from "react-icons/fi";
 import { formatDate, KIND_META, type RecordKind, type UnifiedRecord } from "./data";
 
 type SortDirection = "asc" | "desc";
@@ -51,12 +51,24 @@ export default function Records(props: {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
+      {/* One row: search on the left, kind filters on the right. */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+        <label className="relative">
+          <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+          <input
+            type="text"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Buscar en registros"
+            className="w-72 rounded-md border border-stone-300 bg-white py-2 pl-9 pr-3 text-sm text-stone-700 placeholder:text-stone-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+          />
+        </label>
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={() => setSelectedKinds(new Set())}
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            className={`rounded-full px-3 py-1 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
               selectedKinds.size === 0 ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
             }`}
           >
@@ -67,7 +79,7 @@ export default function Records(props: {
               key={kind}
               type="button"
               onClick={() => toggleKind(kind)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              className={`rounded-full px-3 py-1 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
                 selectedKinds.has(kind) ? "bg-brand-600 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
               }`}
             >
@@ -76,14 +88,6 @@ export default function Records(props: {
           ))}
         </div>
       </div>
-
-      <input
-        type="text"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Buscar en registros"
-        className="w-full max-w-sm rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-700 placeholder:text-stone-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-      />
 
       <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-stone-200 bg-white shadow-sm">
         <table className="w-full border-collapse">

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
+import { emptyPatient } from "./data";
 import type {
   AntropometriaRow,
   ArchivoRow,
@@ -19,6 +20,7 @@ import type {
 
 export type ModalTarget =
   | { kind: "paciente" }
+  | { kind: "nuevoPaciente" }
   | { kind: "antecedentes" }
   | { kind: "medicacion" }
   | { kind: "evolucion"; row?: EvolucionRow }
@@ -134,6 +136,7 @@ function Field(props: { label: string; className?: string; children: React.React
 
 function PacienteForm(props: {
   patient: PatientData;
+  title?: string;
   onClose: () => void;
   onSavePatient: (patch: Partial<PatientData>) => void;
 }) {
@@ -164,7 +167,7 @@ function PacienteForm(props: {
   }
 
   return (
-    <ModalShell title="Editar datos del paciente" maxWidth="max-w-2xl" onClose={props.onClose} onSubmit={submit}>
+    <ModalShell title={props.title ?? "Editar datos del paciente"} maxWidth="max-w-2xl" onClose={props.onClose} onSubmit={submit}>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Nombre completo">
           <input className={inputCls} value={nombre} onChange={(e) => setNombre(e.target.value)} />
@@ -543,6 +546,15 @@ export function EditModal(props: EditModalProps): JSX.Element {
     case "paciente":
       return (
         <PacienteForm patient={props.patient} onClose={props.onClose} onSavePatient={props.onSavePatient} />
+      );
+    case "nuevoPaciente":
+      return (
+        <PacienteForm
+          patient={emptyPatient}
+          title="Nuevo paciente"
+          onClose={props.onClose}
+          onSavePatient={props.onSavePatient}
+        />
       );
     case "antecedentes":
       return (

@@ -7,7 +7,9 @@ import PatientsTable from "./PatientsTable";
 import ExportPreview from "./Export";
 import { EditModal, type ModalTarget } from "./Modals";
 import {
+  emptyPatient,
   formatDate,
+  initialPacientes,
   initialArchivos,
   initialAntropometria,
   initialEvoluciones,
@@ -74,13 +76,13 @@ function Header(props: {
         <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={props.onEditPatient}
-            className="inline-flex items-center gap-2 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="inline-flex items-center gap-2 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
           >
             <FiEdit3 /> Editar datos
           </button>
           <button
             onClick={props.onExport}
-            className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
           >
             <FiPrinter /> Exportar resumen
           </button>
@@ -104,7 +106,7 @@ function Tabs(props: {
             <button
               key={tab.id}
               onClick={() => props.onChange(tab.id)}
-              className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-200 ${
+              className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
                 selected
                   ? "border-brand-600 text-brand-700"
                   : "border-transparent text-stone-500 hover:text-stone-800"
@@ -138,6 +140,7 @@ export default function WorkspaceLayout() {
   const [interconsultas, setInterconsultas] = useState<InterconsultaRow[]>(initialInterconsultas);
   const [internaciones, setInternaciones] = useState<InternacionRow[]>(initialInternaciones);
   const [archivos, setArchivos] = useState<ArchivoRow[]>(initialArchivos);
+  const [pacientes, setPacientes] = useState<PatientData[]>(initialPacientes);
 
   const [exportSections, setExportSections] = useState<ExportSections>({
     resumen: true,
@@ -185,8 +188,49 @@ export default function WorkspaceLayout() {
     if (row) setModal({ kind: "archivo", row });
   }
 
+  /*
+   * One modal node, rendered by whichever view is on screen. `onSavePatient`
+   * routes on the open target: creating appends to the roster, editing patches
+   * the patient in view.
+   */
+  const modalNode = modal ? (
+    <EditModal
+      target={modal}
+      patient={patient}
+      onClose={() => setModal(null)}
+      onSavePatient={(patch) => {
+        if (modal.kind === "nuevoPaciente") {
+          setPacientes((current) => [
+            { ...emptyPatient, ...patch, id: crypto.randomUUID() },
+            ...current,
+          ]);
+          return;
+        }
+        setPatient((current) => ({ ...current, ...patch }));
+      }}
+      onSaveEvolucion={(row) => setEvoluciones((current) => upsert(current, row))}
+      onSaveAntropometria={(row) =>
+        setAntropometria((current) =>
+          upsert(current, row).sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
+        )
+      }
+      onSaveInterconsulta={(row) => setInterconsultas((current) => upsert(current, row))}
+      onSaveInternacion={(row) => setInternaciones((current) => upsert(current, row))}
+      onSaveArchivo={(row) => setArchivos((current) => upsert(current, row))}
+    />
+  ) : null;
+
   if (openPatient === null) {
-    return <PatientsTable onOpenPatient={(id) => setOpenPatient(id)} />;
+    return (
+      <>
+        <PatientsTable
+          pacientes={pacientes}
+          onOpenPatient={(id) => setOpenPatient(id)}
+          onCreatePatient={() => setModal({ kind: "nuevoPaciente" })}
+        />
+        {modalNode}
+      </>
+    );
   }
 
   if (exportMode) {
@@ -222,9 +266,11 @@ export default function WorkspaceLayout() {
           onEditPatient={() => setModal({ kind: "paciente" })}
           onExport={() => setExportMode(true)}
         />
-        <main className="min-h-0 flex-1 overflow-auto">
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <Tabs active={activeTab} counts={counts} onChange={setActiveTab} />
-          <div className="p-5">
+          {/* Both panes own their own scrolling: Resumen fills the frame and
+              scrolls inside its feed cards, Registros inside its table. */}
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-5">
             {activeTab === "resumen" ? (
               <Summary
                 patient={patient}
@@ -232,6 +278,7 @@ export default function WorkspaceLayout() {
                 antropometria={antropometria}
                 interconsultas={interconsultas}
                 onEdit={setModal}
+                onOpenRecord={openRecord}
                 onToggleInterconsulta={(id) =>
                   setInterconsultas((current) =>
                     current.map((row) =>
@@ -249,23 +296,7 @@ export default function WorkspaceLayout() {
         </main>
       </div>
 
-      {modal ? (
-        <EditModal
-          target={modal}
-          patient={patient}
-          onClose={() => setModal(null)}
-          onSavePatient={(patch) => setPatient((current) => ({ ...current, ...patch }))}
-          onSaveEvolucion={(row) => setEvoluciones((current) => upsert(current, row))}
-          onSaveAntropometria={(row) =>
-            setAntropometria((current) =>
-              upsert(current, row).sort((a, b) => a.fecha.getTime() - b.fecha.getTime())
-            )
-          }
-          onSaveInterconsulta={(row) => setInterconsultas((current) => upsert(current, row))}
-          onSaveInternacion={(row) => setInternaciones((current) => upsert(current, row))}
-          onSaveArchivo={(row) => setArchivos((current) => upsert(current, row))}
-        />
-      ) : null}
+      {modalNode}
     </div>
   );
 }
