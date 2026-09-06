@@ -11,22 +11,21 @@
  */
 import { FIXTURES } from "../../fixtures";
 
-export type TabId =
-  | "resumen"
-  | "evoluciones"
-  | "antropometria"
-  | "interconsultas"
-  | "internaciones"
-  | "archivos";
+/** The workspace has two panes; record types are filters, not tabs. */
+export type TabId = "resumen" | "registros";
 
 export const TAB_META: Array<{ id: TabId; label: string }> = [
   { id: "resumen", label: "Resumen" },
-  { id: "evoluciones", label: "Evoluciones" },
-  { id: "antropometria", label: "Antropometría" },
-  { id: "interconsultas", label: "Interconsultas" },
-  { id: "internaciones", label: "Internaciones" },
-  { id: "archivos", label: "Archivos" },
+  { id: "registros", label: "Registros" },
 ];
+
+/** Every clinical record type, used for the unified table and its filters. */
+export type RecordKind =
+  | "evolucion"
+  | "antropometria"
+  | "interconsulta"
+  | "internacion"
+  | "archivo";
 
 function shiftDays(base: Date, days: number): Date {
   return new Date(base.getTime() - days * 24 * 60 * 60 * 1000);
@@ -174,15 +173,133 @@ export const initialArchivos: ArchivoRow[] = [
 export type Novedad = {
   id: string;
   fecha: Date;
-  tipo: TabId;
+  tipo: RecordKind;
   texto: string;
 };
 
 const novedadRows: Novedad[] = [
-  { id: "n1", fecha: initialEvoluciones[0].fecha, tipo: "evoluciones", texto: `Evolución: ${initialEvoluciones[0].motivo}` },
+  { id: "n1", fecha: initialEvoluciones[0].fecha, tipo: "evolucion", texto: `Evolución: ${initialEvoluciones[0].motivo}` },
   { id: "n2", fecha: initialAntropometria[initialAntropometria.length - 1].fecha, tipo: "antropometria", texto: `Antropometría registrada: IMC ${initialAntropometria[initialAntropometria.length - 1].imc}` },
-  { id: "n3", fecha: initialInterconsultas[0].fecha, tipo: "interconsultas", texto: `Interconsulta a ${initialInterconsultas[0].especialidad} (${initialInterconsultas[0].estado})` },
-  { id: "n4", fecha: initialArchivos[0].fecha, tipo: "archivos", texto: `Archivo adjuntado: ${initialArchivos[0].nombre}` },
+  { id: "n3", fecha: initialInterconsultas[0].fecha, tipo: "interconsulta", texto: `Interconsulta a ${initialInterconsultas[0].especialidad} (${initialInterconsultas[0].estado})` },
+  { id: "n4", fecha: initialArchivos[0].fecha, tipo: "archivo", texto: `Archivo adjuntado: ${initialArchivos[0].nombre}` },
 ];
 
 export const novedades = novedadRows.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+
+/**
+ * Patient demographics plus the two free-text clinical fields. Editable from
+ * the summary, so the layout keeps it in state rather than reading the
+ * fixture directly.
+ */
+export type PatientData = {
+  id: string;
+  nombre: string;
+  documento: string;
+  edad: number;
+  fechaNacimiento: Date;
+  telefono: string;
+  direccion: string;
+  email: string;
+  obraSocial: string;
+  numeroObraSocial: string;
+  antecedentes: string;
+  medicacionHabitual: string;
+};
+
+export const initialPatient: PatientData = {
+  id: FIXTURES.paciente.id,
+  nombre: FIXTURES.paciente.nombre,
+  documento: FIXTURES.paciente.documento,
+  edad: FIXTURES.paciente.edad,
+  fechaNacimiento: FIXTURES.paciente.fechaNacimiento,
+  telefono: FIXTURES.paciente.telefono,
+  direccion: FIXTURES.paciente.direccion,
+  email: FIXTURES.paciente.email,
+  obraSocial: FIXTURES.paciente.obraSocial,
+  numeroObraSocial: FIXTURES.paciente.numeroObraSocial,
+  antecedentes: FIXTURES.paciente.antecedentes,
+  medicacionHabitual: FIXTURES.paciente.medicacionHabitual,
+};
+
+/**
+ * One row of the unified records table. Every clinical type collapses into
+ * this shape so the table can show a single chronological history instead of
+ * one tab per type; `kind` + `id` addresses the original row for editing.
+ */
+export type UnifiedRecord = {
+  id: string;
+  kind: RecordKind;
+  fecha: Date;
+  titulo: string;
+  detalle: string;
+  pendiente: boolean;
+};
+
+export const KIND_META: Record<RecordKind, { label: string; singular: string; chip: string; dot: string }> = {
+  evolucion: { label: "Evoluciones", singular: "Evolución", chip: "bg-vessel-100 text-vessel-800", dot: "bg-vessel-600" },
+  antropometria: { label: "Antropometría", singular: "Antropometría", chip: "bg-leaf-100 text-leaf-800", dot: "bg-leaf-600" },
+  interconsulta: { label: "Interconsultas", singular: "Interconsulta", chip: "bg-brand-100 text-brand-800", dot: "bg-brand-600" },
+  internacion: { label: "Internaciones", singular: "Internación", chip: "bg-amber-100 text-amber-800", dot: "bg-amber-500" },
+  archivo: { label: "Archivos", singular: "Archivo", chip: "bg-stone-200 text-stone-700", dot: "bg-stone-500" },
+};
+
+export function toUnified(input: {
+  evoluciones: EvolucionRow[];
+  antropometria: AntropometriaRow[];
+  interconsultas: InterconsultaRow[];
+  internaciones: InternacionRow[];
+  archivos: ArchivoRow[];
+}): UnifiedRecord[] {
+  return [
+    ...input.evoluciones.map((row) => ({
+      id: row.id,
+      kind: "evolucion" as const,
+      fecha: row.fecha,
+      titulo: row.motivo,
+      detalle: row.plan,
+      pendiente: false,
+    })),
+    ...input.antropometria.map((row) => ({
+      id: row.id,
+      kind: "antropometria" as const,
+      fecha: row.fecha,
+      titulo: `IMC ${row.imc.toFixed(1)}`,
+      detalle: `Peso ${row.peso.toFixed(1)} kg · Talla ${row.talla.toFixed(2)} m`,
+      pendiente: false,
+    })),
+    ...input.interconsultas.map((row) => ({
+      id: row.id,
+      kind: "interconsulta" as const,
+      fecha: row.fecha,
+      titulo: row.especialidad,
+      detalle: row.notas,
+      pendiente: row.estado === "pendiente",
+    })),
+    ...input.internaciones.map((row) => ({
+      id: row.id,
+      kind: "internacion" as const,
+      fecha: row.ingreso,
+      titulo: row.motivo,
+      detalle: `${formatDate(row.ingreso)} → ${formatDate(row.egreso)} · ${row.notas}`,
+      pendiente: false,
+    })),
+    ...input.archivos.map((row) => ({
+      id: row.id,
+      kind: "archivo" as const,
+      fecha: row.fecha,
+      titulo: row.nombre,
+      detalle: `${row.tipo} · ${row.tamanioKb} KB`,
+      pendiente: false,
+    })),
+  ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+}
+
+/** Sections the export preview can include. */
+export type ExportSections = {
+  resumen: boolean;
+  evoluciones: boolean;
+  antropometria: boolean;
+  interconsultas: boolean;
+  internaciones: boolean;
+  archivos: boolean;
+};
