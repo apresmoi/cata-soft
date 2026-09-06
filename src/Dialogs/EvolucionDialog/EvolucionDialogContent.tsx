@@ -26,7 +26,7 @@ export function EvolucionDialogContent(
         label="FECHA"
         onChange={update("fecha")}
         value={data?.fecha}
-        className="max-w-[200px]"
+        className="max-w-[280px]"
         inline
       />
       <TabsContainer>

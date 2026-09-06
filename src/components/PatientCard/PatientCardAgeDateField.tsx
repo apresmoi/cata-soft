@@ -65,9 +65,10 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
       <div
         data-skip-autofocus
         className={cx(
-          "w-full min-w-0",
-          // Same fixed width as the other inline fields so they all line up.
-          props.inline && "ml-auto w-28 shrink-0"
+          "min-w-0",
+          // `w-full` and `w-28` conflict; emitting both let the picker take the
+          // whole row and squeezed the label out of existence.
+          props.inline ? "ml-auto w-28 shrink-0" : "w-full"
         )}
       >
         <DatePicker

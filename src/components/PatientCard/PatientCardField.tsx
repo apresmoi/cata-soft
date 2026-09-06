@@ -44,16 +44,23 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
       </div>
       <div
         className={cx(
-          "w-full min-w-0",
-          // Fixed width so every inline field lines up at the same size.
-          props.inline && "ml-auto w-28 shrink-0"
+          "min-w-0",
+          // Never emit `w-full` alongside `w-28`: the two conflict, `w-full`
+          // won, the input ate the whole row and the label collapsed to zero.
+          props.inline ? "ml-auto w-28 shrink-0" : "w-full"
         )}
       >
         <input
           className={cx(
-            "w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
+            "w-full rounded-md border px-3 py-2 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
             props.align === "center" && "text-center",
             props.align === "right" && "text-right",
+            // Chosen, not layered: `bg-stone-100` and `bg-white` have equal
+            // specificity, so adding one on top of the other left a derived
+            // field looking perfectly typeable.
+            props.disabled
+              ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-500"
+              : "border-stone-300 bg-white text-stone-800",
             // A ring is painted outside the box, so flagging a field does not
             // move anything around it.
             props.invalid && "ring-2 ring-red-500"

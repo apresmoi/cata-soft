@@ -23,20 +23,22 @@ export function HospitalizacionDialogContent(
 
   return (
     <div className="flex gap-2 flex-col p-4 h-[60vh]">
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-4">
         <PatientCardAgeDateField
           icon={<CalendarIcon />}
           label="FECHA INGRESO"
           onChange={update("fechaIngreso")}
           value={data?.fechaIngreso}
-          className="w-[200px]"
+          className="w-[300px]"
+          inline
         />
         <PatientCardAgeDateField
           icon={<CalendarIcon />}
           label="FECHA EGRESO"
           onChange={update("fechaEgreso")}
           value={data?.fechaEgreso}
-          className="w-[200px]"
+          className="w-[300px]"
+          inline
         />
       </div>
       <TabsContainer>

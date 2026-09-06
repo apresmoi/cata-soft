@@ -1,5 +1,5 @@
 import React from "react";
-import { PatientCard, PatientCardTextAreaField } from "../../components";
+import { PatientCardTextAreaField } from "../../components";
 import {
   Dialog,
   DialogButton,
@@ -46,12 +46,13 @@ export function EditPacienteNotasDialog(
       <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContainer>
         <DialogTitle>{TITLE_BY_FIELD[props.field]}</DialogTitle>
-        <PatientCard>
+        {/* A single long-text field: give it real room to write in. */}
+        <div className="h-[45vh] min-h-[16rem]">
           <PatientCardTextAreaField
             value={data?.[props.field] || ""}
             onChange={update(props.field)}
           />
-        </PatientCard>
+        </div>
 
         <DialogFooter>
           <DialogCancelButton />
