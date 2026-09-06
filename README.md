@@ -15,15 +15,25 @@ hospitalizaciones, and archivos adjuntos (attached files/documents).
 - Vite 5 bundles both the renderer and, via `vite-plugin-electron`, the
   main/preload scripts.
 - Tailwind CSS for styling.
+## Instalación
 
-## Prerequisites
+### Usuarios finales
+Para usar la aplicación, descarga la última versión desde la página de **Releases** en GitHub.
+- **Windows**: Descarga el instalador `.exe` e instálalo (requiere permisos de administrador).
+- **Mac**: Descarga el archivo `.dmg`.
+- **Linux**: Descarga el archivo `.AppImage`.
 
-- Node.js (see `package.json` engines/deps for compatible versions of the
-  listed tooling; no pinned Node version is currently declared).
+### Actualizaciones
+La aplicación cuenta con un sistema de **actualización automática**. Cuando haya una nueva versión publicada en GitHub Releases, CataSoft la detectará y la descargará en segundo plano. Te notificará para instalarla la próxima vez que cierres la aplicación, asegurando que siempre tengas las últimas funciones sin perder ningún dato.
+
+## Desarrollo
+
+### Requisitos
+
+- Node.js (v20 o superior).
 - `npm install`
 
-## Development
-
+### Iniciar la aplicación
 ```
 npm run dev
 ```
@@ -31,55 +41,29 @@ npm run dev
 This starts Vite and, through `vite-plugin-electron-simple`, automatically
 launches the Electron window pointed at the dev server. There is no separate
 "start Electron" step.
+### Compilar la aplicación
 
-## Build
+```bash
 
 ```
 npm run build
 ```
 
-Runs `tsc`, then `vite build`, then `electron-builder`. On Windows this
-produces an NSIS installer configured as a **per-machine, elevated** install
-(`win.requestedExecutionLevel: requireAdministrator`, `nsis.perMachine: true`,
-`nsis.allowElevation: true`). This is intentional: the app is already
-installed per-machine on production machines. Switching to a per-user
-install would create a second, parallel installation next to the existing
-one and orphan that machine's existing patient database. Do not change this
-without a deliberate migration plan for already-installed machines.
 
-## Database location at runtime
+## Seguridad de Datos y Base de Datos
 
-The database is not shipped as a fixed file bundled with the app. The main
-process resolves the SQLite database path under the OS per-user application
-data directory at runtime, separate from the installed application files, so
-that installing an update never overwrites or replaces an existing database.
-Automatic migration-on-startup, with a backup taken before any migration
-runs, is the intended behavior for handling schema changes across app
-versions; consult `electron/database.ts` and `electron/db.ts` for the
-current implementation rather than this document.
+**Los datos de los pacientes son irremplazables.** CataSoft está diseñado para protegerlos en cada actualización:
 
-Only `prisma/schema.prisma` and `prisma/migrations/**` are bundled into the
-packaged app (see `build.extraResources` in `package.json`) — the
-development database (`prisma/dev.db`) is never shipped.
+1. **Ubicación de la Base de Datos**: La base de datos (`catasoft.db`) se guarda en la carpeta de datos de usuario del sistema operativo (UserData), no en la carpeta de instalación. Las actualizaciones nunca sobrescriben tus datos.
+2. **Copias de Seguridad Automáticas**: Antes de aplicar cualquier actualización en la estructura de la base de datos (migraciones), el sistema realiza una copia de seguridad completa (`catasoft.db` -> `backups/`).
+3. **Recuperación Ante Fallos**: Si una migración falla, el sistema bloquea el inicio, restaura la copia de seguridad automáticamente y avisa del error, previniendo la corrupción de los registros clínicos.
 
-## UI reference
+*Solo se incluyen en el paquete compilado los esquemas y las instrucciones de migración, la base de datos de pruebas (`dev.db`) nunca se empaqueta.*
 
-`captures-actuales/` contains screenshots of the current production UI.
-These serve as the de facto visual/behavioral spec when implementing or
-reviewing UI changes — there is no separate design document.
+## Archivos Adjuntos
+Los archivos adjuntos de los pacientes se guardan en la subcarpeta `uploads` dentro del directorio UserData, bajo el ID de cada paciente. Solo se permite abrir extensiones seguras (PDF, imágenes, documentos Office, texto plano y DICOM).
+## Desarrollo UI
+`captures-actuales/` contiene capturas de pantalla de la interfaz de producción original. Sirven como especificación visual para futuros cambios.
+Además, puedes probar distintas variantes de diseño y layouts accediendo a:
+`http://localhost:5174/design.html` y `http://localhost:5174/design.html?mode=layouts`
 
-## Gaps / known missing tooling
-
-- No `test` script exists yet.
-- No `typecheck` script exists; use `npx tsc --noEmit` directly.
-- No `db:migrate` script exists; Prisma migrations are applied through
-  whatever mechanism `electron/database.ts` implements, not an npm script.
-
-## Data safety
-
-The database file must never live inside the application's installed
-directory or any path an installer/updater can overwrite or delete when
-installing a new version. Any change to packaging (`build` field in
-`package.json`) or to where the app resolves its database path must
-preserve this property, or an update will silently destroy or orphan a
-clinician's existing patient data.
