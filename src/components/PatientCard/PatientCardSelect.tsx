@@ -23,13 +23,13 @@ export function PatientCardSelect<T>(props: PatientCardSelectProps<T>) {
 
   return (
     <div className={cx("w-[100%] flex flex-col gap-2", props.className)}>
-      <div className={cx("flex items-center gap-2 select-none")}>
+      <div className={cx("flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500 select-none")}>
         {props.icon} {props.label}
       </div>
       <div className="w-full">
         <select
           className={cx(
-            "w-full bg-stone-600 outline-0 p-2 rounded-lg cursor-pointer"
+            "w-full border border-stone-300 bg-white text-stone-800 outline-0 p-2 rounded-lg cursor-pointer focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none"
           )}
           onChange={handleChange}
           value={props.value as string}

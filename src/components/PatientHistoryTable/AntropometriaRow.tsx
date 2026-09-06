@@ -26,7 +26,7 @@ export function AntropometriaRow(props: RowProps<Antropometrias>) {
         })}
       </TableCol>
       <TableCol>
-        <div className="flex items-center gap-2 bg-green-800 px-2 py-1 rounded-lg justify-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-leaf-100 px-2 py-1 text-xs font-semibold text-leaf-800">
           {"ANTROPOMETRIA"}
         </div>
       </TableCol>

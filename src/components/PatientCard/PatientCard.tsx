@@ -6,7 +6,7 @@ export function PatientCard(
   return (
     <div
       className={cx(
-        "w-full flex flex-col bg-stone-900 gap-2 p-4",
+        "w-full flex flex-col bg-white border border-stone-200 rounded-xl shadow-sm gap-2 p-4",
         props.className
       )}
     >

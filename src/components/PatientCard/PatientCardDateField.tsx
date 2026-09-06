@@ -22,7 +22,7 @@ export function PatientCardDateField(props: PatientCardDateFieldProps) {
         props.className
       )}
     >
-      <div className={cx("flex items-center gap-2")}>
+      <div className={cx("flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500")}>
         {props.icon} {props.label}
       </div>
       <div data-skip-autofocus className="w-full">
@@ -30,7 +30,7 @@ export function PatientCardDateField(props: PatientCardDateFieldProps) {
           selected={props.value}
           required
           onChange={(date) => props.onChange?.(date as Date)}
-          className="dark:text-stone-100 p-2 outline-none bg-stone-600 w-full rounded-lg"
+          className="border border-stone-300 bg-white text-stone-800 p-2 outline-none w-full rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none"
           dateFormat={"dd/MM/yyyy"}
           wrapperClassName="w-full"
           popperClassName="z-20"

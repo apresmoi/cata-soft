@@ -26,7 +26,7 @@ export function InterconsultaRow(props: RowProps<Interconsultas>) {
         })}
       </TableCol>
       <TableCol>
-        <div className="flex items-center gap-2 bg-yellow-800 px-2 py-1 rounded-lg justify-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-brand-100 px-2 py-1 text-xs font-semibold text-brand-800">
           {"INTERCONSULTA"}
         </div>
       </TableCol>

@@ -18,7 +18,7 @@ export function DialogContainer(
         className="absolute inset-0 z-50"
         onClick={(e) => e.stopPropagation()}
       >
-        <RadixDialog.Overlay className="absolute top-0 left-0 right-0 bottom-0 bg-black/60"></RadixDialog.Overlay>
+        <RadixDialog.Overlay className="absolute top-0 left-0 right-0 bottom-0 bg-stone-900/40"></RadixDialog.Overlay>
         <div className="z-50 h-full w-full overflow-y-auto flex">
           <RadixDialog.Content
             ref={contentRef}
@@ -32,7 +32,7 @@ export function DialogContainer(
             // No min-width here: `min-width` overrides `max-width` in CSS, so a
             // base min-w silently defeated every caller's width.
             className={cx(
-              "popover relative m-auto w-full bg-stone-800 rounded-lg",
+              "popover relative m-auto w-full bg-white border border-stone-200 rounded-xl shadow-xl",
               props.className
             )}
             style={{ maxWidth: props.maxWidth ?? 680 }}

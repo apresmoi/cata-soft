@@ -51,7 +51,7 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
         props.inline ? "flex-row" : "flex-col"
       )}
     >
-      <div className={cx("flex items-center gap-2  select-none")}>
+      <div className={cx("flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500")}>
         {props.icon} {props.label}
       </div>
       <div
@@ -67,7 +67,7 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
           required
           onChange={(date) => props.onChange?.(date as Date)}
           className={cx(
-            "dark:text-stone-100 p-2 outline-none bg-stone-600 w-full rounded-lg",
+            "border border-stone-300 bg-white text-stone-800 p-2 outline-none w-full rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
             props.align === "right" ? "text-right" : ""
           )}
           dateFormat={"dd/MM/yyyy"}

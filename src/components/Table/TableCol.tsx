@@ -9,7 +9,15 @@ export function TableCol(
   const Component = props.component || "td";
 
   return (
-    <Component className={classNames("p-3 whitespace-nowrap", props.className)}>
+    <Component
+      className={classNames(
+        "whitespace-nowrap",
+        Component === "th"
+          ? "bg-stone-100 p-3 text-xs font-semibold uppercase tracking-wide text-stone-500"
+          : "border-t border-stone-200 p-3 text-sm text-stone-700",
+        props.className
+      )}
+    >
       <div className="text-ellipsis overflow-hidden">{props.children}</div>
     </Component>
   );

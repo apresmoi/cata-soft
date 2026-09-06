@@ -14,7 +14,7 @@ export function PatientCardFieldContainer(
 ) {
   return (
     <div className={cx("w-[100%] flex flex-col gap-2", props.className)}>
-      <div className={cx("flex items-center gap-2 select-none")}>
+      <div className={cx("flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500 select-none")}>
         {props.icon} {props.label}
       </div>
       <div className="w-full">{props.children}</div>

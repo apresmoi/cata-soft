@@ -26,7 +26,7 @@ export function EvolucionRow(props: RowProps<Evoluciones>) {
         })}
       </TableCol>
       <TableCol>
-        <div className="flex items-center gap-2 bg-green-800 px-2 py-1 rounded-lg justify-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-vessel-100 px-2 py-1 text-xs font-semibold text-vessel-800">
           {"EVOLUCION"}
         </div>
       </TableCol>

@@ -29,7 +29,7 @@ export function ArchivoAdjuntoRow(props: ArchivosAdjuntos) {
         })}
       </TableCol>
       <TableCol>
-        <div className="flex items-center gap-2 bg-purple-800 px-2 py-1 rounded-lg justify-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-stone-200 px-2 py-1 text-xs font-semibold text-stone-700">
           <ImAttachment />
           {"ARCHIVO ADJUNTO"}
         </div>

@@ -32,7 +32,11 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
         props.className
       )}
     >
-      <div className={cx("flex items-center gap-2 select-none")}>
+      <div
+        className={cx(
+          "flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500 select-none"
+        )}
+      >
         {props.icon} {props.label}
       </div>
       <div
@@ -44,7 +48,7 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
       >
         <input
           className={cx(
-            "w-full bg-stone-600 outline-0 p-2 rounded-lg",
+            "w-full border border-stone-300 bg-white text-stone-800 outline-0 p-2 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
             props.align === "center" && "text-center",
             props.align === "right" && "text-right",
             // A ring is painted outside the box, so flagging a field does not
