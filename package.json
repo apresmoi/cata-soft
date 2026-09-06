@@ -1,12 +1,20 @@
 {
   "name": "cata-soft",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apresmoi/cata-soft.git"
+  },
   "type": "commonjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,7 +24,9 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "@tanstack/react-query": "^5.64.0",
     "@types/sequelize": "^4.28.20",
+    "archiver": "^8.0.0",
     "classnames": "^2.5.1",
+    "electron-updater": "^6.8.9",
     "electron-vite": "^2.3.0",
     "html-minifier-terser": "^7.2.0",
     "prisma": "^6.2.1",
@@ -28,6 +38,7 @@
     "sequelize": "^6.37.5"
   },
   "devDependencies": {
+    "@types/archiver": "^8.0.0",
     "@types/electron": "^1.6.12",
     "@types/html-minifier-terser": "^7.0.2",
     "@types/react": "^18.2.64",
@@ -35,6 +46,7 @@
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^2.1.9",
     "autoprefixer": "^10.4.20",
     "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
@@ -48,10 +60,17 @@
     "typescript": "^5.2.2",
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",
-    "vite-plugin-electron-renderer": "^0.14.5"
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vitest": "^2.1.9"
   },
   "main": "dist-electron/main.js",
   "build": {
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release"
+      }
+    ],
     "appId": "com.example.cata-soft",
     "productName": "CataSoft",
     "files": [
@@ -61,13 +80,22 @@
       "package.json",
       "dist-electron/**/*"
     ],
+    "asar": true,
     "extraResources": [
-      "prisma/**/*",
+      "prisma/schema.prisma",
+      "prisma/migrations/**/*",
       "node_modules/.prisma/**/*",
       "node_modules/@prisma/client/**/*"
     ],
     "directories": {
-      "buildResources": "build"
+      "buildResources": "build",
+      "output": "release/${version}"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
     },
     "win": {
       "requestedExecutionLevel": "requireAdministrator",
@@ -79,11 +107,18 @@
             "ia32"
           ]
         }
-      ]
+      ],
+      "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
     },
     "nsis": {
       "perMachine": true,
       "allowElevation": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "artifactName": "${productName}-Linux-${version}.${ext}"
     }
   }
 }

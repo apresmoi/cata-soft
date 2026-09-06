@@ -5,16 +5,9 @@ import {
   Hospitalizaciones,
   Interconsultas,
   Pacientes,
-  PrismaClient,
 } from "@prisma/client";
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: "file:./dev.db", // Replace with your database URL
-    },
-  },
-});
+import { prisma } from "./database";
 
 const computeAge = (date: Date) => {
   //to the day
@@ -361,6 +354,10 @@ export async function getHistorial(id: string) {
     })) || []),
     ...(paciente?.hospitalizaciones.map((hospitalizacion) => ({
       ...hospitalizacion,
+      // The admission date is this entry's clinical date. Without it the
+      // entry sorted by row-insertion time, so an old hospitalization could
+      // land anywhere in the timeline.
+      fecha: hospitalizacion.fechaIngreso,
       type: "hospitalizacion",
     })) || []),
     ...(paciente?.interconsultas.map((interconsulta) => ({
@@ -372,12 +369,16 @@ export async function getHistorial(id: string) {
       type: "archivoadjunto",
     })) || []),
   ].sort((a, b) => {
-    if ("fecha" in a && "fecha" in b)
-      return b.fecha.getTime() - a.fecha.getTime();
-    if ("fecha" in a) return b.createdAt.getTime() - a.fecha.getTime();
-    if ("fecha" in b) return b.fecha.getTime() - a.createdAt.getTime();
-    return b.createdAt.getTime() - a.createdAt.getTime();
+    // Newest first, by clinical date where the entry has one; attachments only
+    // carry the moment they were uploaded.
+    const dateA = "fecha" in a ? a.fecha : a.createdAt;
+    const dateB = "fecha" in b ? b.fecha : b.createdAt;
+    return dateB.getTime() - dateA.getTime();
   });
+}
+
+export async function getArchivoAdjunto(id: string) {
+  return await prisma.archivosAdjuntos.findUnique({ where: { id } });
 }
 
 export async function getArchivosAdjuntos(pacienteId: string) {

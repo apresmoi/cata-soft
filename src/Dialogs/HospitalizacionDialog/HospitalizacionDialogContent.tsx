@@ -13,12 +13,13 @@ interface HospitalizacionDialogContentProps {
   data?:
     | ReturnType<typeof useHospitalizacion>["data"]
     | ReturnType<typeof useNewHospitalizacion>["data"];
+  invalid?: string[];
 }
 
 export function HospitalizacionDialogContent(
   props: React.PropsWithChildren<HospitalizacionDialogContentProps>
 ) {
-  const { update, data } = props;
+  const { update, data, invalid = [] } = props;
 
   return (
     <div className="flex gap-2 flex-col p-4 h-[60vh]">
@@ -45,6 +46,7 @@ export function HospitalizacionDialogContent(
             onChange={update("motivo")}
             value={data?.motivo || ""}
             className="flex-1"
+            invalid={invalid.includes("motivo")}
           />
         </Tab>
         <Tab name="NOTAS">

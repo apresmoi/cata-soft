@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      CSP for the renderer. Dev-server HMR needs the ws:/localhost entries
+      (Vite websocket + module fetches); tighten those if the dev server is
+      ever removed from production builds.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ws: http://localhost:*; frame-src 'self'"
+    />
     <title>CataSoft v1.0.0</title>
   </head>
   <body

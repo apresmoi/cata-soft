@@ -120,6 +120,7 @@ export function PatientScreen() {
           variant="primary"
           icon={<UploadIcon />}
           onClick={handleSave}
+          disabled={!isModified}
         >
           GUARDAR
         </ToolbarButton>

@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "../../components/Dialog";
 import { useNewAntropometria } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { AntropometriaDialogContent } from "./AntropometriaDialogContent";
 
 interface NewAntropometriaDialogProps {
@@ -22,7 +23,16 @@ export function NewAntropometriaDialog(
 
   const [open, setOpen] = React.useState(false);
 
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([
+    { name: "peso", kind: "positiveNumber" },
+    { name: "talla", kind: "positiveNumber" },
+    { name: "imc", kind: "positiveNumber" },
+  ]);
+
   const handleSave = async () => {
+    if (!check(data)) return;
     try {
       await save();
       setOpen(false);
@@ -30,7 +40,10 @@ export function NewAntropometriaDialog(
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) clear();
+    if (!open) {
+      clear();
+      reset();
+    }
     setOpen(open);
   };
 
@@ -38,10 +51,14 @@ export function NewAntropometriaDialog(
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>{props.children}</DialogTrigger>
 
-      <DialogContainer className="w-[280px] min-w-[280px]">
+      <DialogContainer maxWidth={320}>
         <DialogTitle>NUEVA ANTROPOMETRIA</DialogTitle>
 
-        <AntropometriaDialogContent update={update} data={data} />
+        <AntropometriaDialogContent
+          update={update}
+          data={data}
+          invalid={invalid(data)}
+        />
 
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>

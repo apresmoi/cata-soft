@@ -12,13 +12,13 @@ interface EvolucionDialogContentProps {
   data?:
     | ReturnType<typeof useEvolution>["data"]
     | ReturnType<typeof useNewEvolution>["data"];
+  invalid?: string[];
 }
 
 export function EvolucionDialogContent(
   props: React.PropsWithChildren<EvolucionDialogContentProps>
 ) {
-  const { update, data } = props;
-
+  const { update, data, invalid = [] } = props;
   return (
     <div className="flex gap-2 flex-col p-4 h-[60vh]">
       <PatientCardAgeDateField
@@ -36,6 +36,7 @@ export function EvolucionDialogContent(
             onChange={update("motivo")}
             value={data?.motivo || ""}
             className="flex-1"
+            invalid={invalid.includes("motivo")}
           />
         </Tab>
         <Tab name="EXAMEN FISICO">

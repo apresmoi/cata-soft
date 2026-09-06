@@ -26,13 +26,20 @@ import {
 } from "../components/Dialog";
 import { useNavigate } from "react-router-dom";
 import { useNewPaciente } from "../hooks";
+import { useRequiredFields } from "../hooks/useRequiredFields";
 
 export function NewPatientDialog() {
   const { data, save, update, clear } = useNewPaciente();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
 
+  const { check, invalid, reset } = useRequiredFields<typeof data>([
+    { name: "nombre" },
+    { name: "documento" },
+  ]);
+
   const handleSave = async () => {
+    if (!check(data)) return;
     try {
       const newPaciente = await save();
       if (newPaciente) {
@@ -43,7 +50,10 @@ export function NewPatientDialog() {
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) clear();
+    if (!open) {
+      clear();
+      reset();
+    }
     setOpen(open);
   };
 
@@ -64,6 +74,7 @@ export function NewPatientDialog() {
             onChange={update("nombre")}
             value={data.nombre}
             className="flex-1"
+            invalid={invalid(data).includes("nombre")}
           />
           <div className="w-full flex gap-2">
             <PatientCardField
@@ -72,6 +83,7 @@ export function NewPatientDialog() {
               onChange={update("documento")}
               value={data.documento}
               className="flex-1"
+              invalid={invalid(data).includes("documento")}
             />
 
             <PatientCardAgeDateField

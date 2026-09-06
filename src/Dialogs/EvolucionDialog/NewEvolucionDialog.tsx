@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "../../components/Dialog";
 import { useNewEvolution } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { EvolucionDialogContent } from "./EvolucionDialogContent";
 
 interface NewEvolutionProps {
@@ -19,10 +20,16 @@ export function NewEvolucionDialog(
   props: React.PropsWithChildren<NewEvolutionProps>
 ) {
   const { data, save, update, clear } = useNewEvolution(props.patientId);
+  // Schema-nullable, but an evolución with nothing in it is not a record --
+  // this is a UI rule, not a schema constraint.
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([{ name: "motivo" }]);
 
   const [open, setOpen] = React.useState(false);
 
   const handleSave = async () => {
+    if (!check(data)) return;
     try {
       await save();
       setOpen(false);
@@ -30,7 +37,10 @@ export function NewEvolucionDialog(
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) clear();
+    if (!open) {
+      clear();
+      reset();
+    }
     setOpen(open);
   };
 
@@ -40,7 +50,7 @@ export function NewEvolucionDialog(
       <DialogContainer>
         <DialogTitle>NUEVA EVOLUCION</DialogTitle>
 
-        <EvolucionDialogContent update={update} data={data} />
+        <EvolucionDialogContent update={update} data={data} invalid={invalid(data)} />
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>
             GUARDAR

@@ -7,11 +7,13 @@ export function ToolbarButton(
     href?: string;
     icon?: React.ReactNode;
     variant?: "primary" | "secondary" | "warning" | "danger" | "info";
+    disabled?: boolean;
   }>
 ) {
   const navigate = useNavigate();
 
   const handleClick = () => {
+    if (props.disabled) return;
     if (props.onClick) return props.onClick();
     if (props.href) {
       navigate(props.href);
@@ -20,25 +22,29 @@ export function ToolbarButton(
 
   return (
     <button
+      disabled={props.disabled}
       className={classNames(
         "p-2 flex items-center gap-2 rounded-lg select-none transition-all duration-300",
 
-        !props.variant && "hover:bg-stone-900",
+        // Muted and click-through-proof, but the colour stays recognisable.
+        props.disabled && "opacity-40 cursor-not-allowed",
+
+        !props.variant && !props.disabled && "hover:bg-stone-900",
 
         props.variant === "primary" &&
-          "bg-green-800 hover:bg-green-900 hover:text-gray-200",
+          classNames("bg-green-800", !props.disabled && "hover:bg-green-900 hover:text-gray-200"),
 
         props.variant === "secondary" &&
-          "bg-purple-800 hover:bg-purple-900 hover:text-gray-200",
+          classNames("bg-purple-800", !props.disabled && "hover:bg-purple-900 hover:text-gray-200"),
 
         props.variant === "danger" &&
-          "bg-red-800 hover:bg-red-900 hover:text-gray-200",
+          classNames("bg-red-800", !props.disabled && "hover:bg-red-900 hover:text-gray-200"),
 
         props.variant === "warning" &&
-          "bg-yellow-800 hover:bg-yellow-900 hover:text-gray-200",
+          classNames("bg-yellow-800", !props.disabled && "hover:bg-yellow-900 hover:text-gray-200"),
 
         props.variant === "info" &&
-          "bg-blue-800 hover:bg-blue-900 hover:text-gray-200"
+          classNames("bg-blue-800", !props.disabled && "hover:bg-blue-900 hover:text-gray-200")
       )}
       onClick={handleClick}
     >

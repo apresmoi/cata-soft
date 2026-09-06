@@ -134,11 +134,28 @@ export function useCommonRegistry<T>(
 
   const [isModified, setHasChanged] = React.useState(false);
 
-  const { data, isFetching, refetch } = useQuery<T | null>({
+  /**
+   * Edits land in React state, not only in the query cache.
+   *
+   * Writing solely to the cache made the new value arrive a tick after the
+   * keystroke, so React committed the previous value first, restored it onto
+   * the input, and bounced the caret to the end of the text before the real
+   * value landed. Keeping a draft here means the input re-renders in the same
+   * commit as the keystroke: one paint, caret untouched.
+   */
+  const [draft, setDraft] = React.useState<Partial<T>>({});
+
+  const {
+    data: fetched,
+    isFetching,
+    refetch,
+  } = useQuery<T | null>({
     queryKey: [options.endpointKey, ...args],
     queryFn: async () => {
       try {
         setHasChanged(false);
+        // Server data is authoritative again; drop any local edits.
+        setDraft({});
         return window.ipcRenderer.invoke("get-" + options.endpointKey, ...args);
       } catch (e) {
         return null;
@@ -146,6 +163,11 @@ export function useCommonRegistry<T>(
     },
     enabled: options.enabled,
   });
+
+  const data = React.useMemo(
+    () => (fetched ? { ...fetched, ...draft } : fetched),
+    [fetched, draft]
+  );
 
   const save = async () => {
     try {
@@ -179,16 +201,17 @@ export function useCommonRegistry<T>(
     }
   ) => {
     return (value: T[K]) => {
+      const next = updateOptions?.uppercase
+        ? ((value as string).toUpperCase() as T[K])
+        : value;
+
       setHasChanged(true);
-      queryClient.setQueryData<T>([options.endpointKey, ...args], (oldData) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          [key]: updateOptions?.uppercase
-            ? (value as string).toUpperCase()
-            : value,
-        };
-      });
+      setDraft((oldDraft) => ({ ...oldDraft, [key]: next }));
+
+      // Keep the cache in step so a remount does not lose the edit.
+      queryClient.setQueryData<T>([options.endpointKey, ...args], (oldData) =>
+        oldData ? { ...oldData, [key]: next } : oldData
+      );
     };
   };
 

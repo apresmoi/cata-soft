@@ -1,0 +1,288 @@
+/* Paper Warm — a warm, low-glare light theme built for long reading and long
+   typing sessions: bone/cream page, a lighter panel for dialogs, a deeper
+   warm-tan band for structural chrome (toolbars, headers), ruled warm-grey
+   separators instead of hard borders, and generous reading measure on the
+   clinical note textareas. Filled buttons use muted earthy hues (olive,
+   brick, ochre, plum, slate-blue) that stay ≥4.5:1 against their cream text.
+   The shipped shell forces a dark theme (`dark` on <html>), so every dark
+   surface/text utility below is overridden explicitly. */
+
+[data-variant="paper"] {
+  /* Surfaces */
+  --paper-bg: #efe7d4; /* page */
+  --paper-panel: #f8f2e2; /* dialogs — a shade lighter than the page */
+  --paper-surface: #e6dabd; /* toolbars, side toolbar, patient card header, table header, tooltip */
+  --paper-hover: #ddcfa5; /* hover state for the surfaces above, and table rows */
+  --paper-input: #ece2c8; /* inputs, textareas, datepicker field — a touch darker than the panel */
+  --paper-input-border: #c7b688;
+  --paper-input-focus: #8a6d3b;
+
+  /* Ink */
+  --paper-ink: #2c2117; /* warm near-black, never pure black */
+  --paper-ink-mid: #6b5d47; /* labels */
+  --paper-ink-soft: #8d7f65; /* placeholders */
+  --paper-on-accent: #f8f3e6; /* text on filled accent buttons */
+
+  /* Rules */
+  --paper-border: #d8c9a0; /* table / panel separators */
+  --paper-border-soft: #ded2b3; /* inactive tab underline */
+
+  /* Earthy accents: fill / hover / outline-text, each fill ≥4.5:1 with --paper-on-accent */
+  --paper-green: #4b5a2e; /* save / primary */
+  --paper-green-hover: #3c4824;
+  --paper-green-outline: #3c5024;
+
+  --paper-red: #8a3b28; /* destructive */
+  --paper-red-hover: #6f2e1e;
+  --paper-red-outline: #7a3320;
+
+  --paper-yellow: #7a5c1f; /* interconsultas */
+  --paper-yellow-hover: #634917;
+  --paper-yellow-outline: #6b4f1a;
+
+  --paper-purple: #6b4a63; /* attachments */
+  --paper-purple-hover: #553a4f;
+  --paper-purple-outline: #5c3f56;
+
+  --paper-blue: #355a72; /* info / print */
+  --paper-blue-hover: #294859;
+  --paper-blue-outline: #2e4d63;
+
+  --paper-error: #b23a24; /* validation ring — kept unmistakably an error colour */
+
+  --paper-radius: 10px;
+
+  color: var(--paper-ink);
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+}
+
+/* Page background. The shell forces `dark:bg-stone-800 dark:text-stone-100`
+   on <body> — those compile to `.dark\:bg-stone-800:is(.dark *)`, a higher
+   specificity than a bare `body` selector, so they are targeted directly. */
+[data-variant="paper"] body,
+[data-variant="paper"] .dark\:bg-stone-800 {
+  background-color: var(--paper-bg) !important;
+}
+[data-variant="paper"] body,
+[data-variant="paper"] .dark\:text-stone-100 {
+  color: var(--paper-ink) !important;
+}
+
+/* ---------- Surfaces ---------- */
+
+/* Toolbars / side toolbar / patient-card header / tooltip / table header strip */
+[data-variant="paper"] .bg-stone-900 {
+  background-color: var(--paper-surface) !important;
+}
+[data-variant="paper"] .hover\:bg-stone-900:hover {
+  background-color: var(--paper-hover) !important;
+}
+
+/* Dialog surface — a shade lighter than the page, with a visible warm rule and soft lift */
+[data-variant="paper"] .bg-stone-800 {
+  background-color: var(--paper-panel) !important;
+}
+[data-variant="paper"] .popover.bg-stone-800 {
+  border: 1px solid var(--paper-border);
+  border-radius: var(--paper-radius) !important;
+  box-shadow: 0 8px 24px -12px rgb(44 33 23 / 0.25);
+}
+[data-variant="paper"] .hover\:bg-stone-800:hover {
+  background-color: var(--paper-hover) !important;
+}
+
+/* Table row hover reads as the same warm highlight as toolbar hover */
+[data-variant="paper"] .hover\:bg-stone-600:hover {
+  background-color: var(--paper-hover) !important;
+}
+
+/* ---------- Inputs: ruled form fields ---------- */
+
+[data-variant="paper"] .bg-stone-600 {
+  background-color: var(--paper-input) !important;
+  border: 1px solid var(--paper-input-border);
+  color: var(--paper-ink) !important;
+}
+[data-variant="paper"] .bg-stone-600:focus,
+[data-variant="paper"] .bg-stone-600:focus-within {
+  outline: none;
+  border-color: var(--paper-input-focus);
+  box-shadow: 0 0 0 3px rgb(138 109 59 / 0.18);
+}
+
+/* The clinical note textareas are the biggest surfaces on screen — the
+   single highest-value change here: a comfortable reading measure. */
+[data-variant="paper"] textarea.bg-stone-600 {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+[data-variant="paper"] .placeholder-stone-400::placeholder {
+  color: var(--paper-ink-soft);
+  opacity: 1;
+}
+
+/* Validation ring stays unmistakably an error colour, distinct from every accent fill */
+[data-variant="paper"] .ring-red-500 {
+  --tw-ring-color: var(--paper-error) !important;
+}
+
+/* ---------- Text colours ---------- */
+
+[data-variant="paper"] .text-gray-200,
+[data-variant="paper"] .text-gray-100,
+[data-variant="paper"] .text-stone-100,
+[data-variant="paper"] .dark\:text-stone-100,
+[data-variant="paper"] .text-white {
+  color: var(--paper-ink) !important;
+}
+
+/* Inputs, textareas, tables and buttons read clearly with a plain sans-serif;
+   serif is reserved for headings below. */
+[data-variant="paper"] input,
+[data-variant="paper"] textarea,
+[data-variant="paper"] select,
+[data-variant="paper"] table,
+[data-variant="paper"] button {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* ---------- Borders / separators: warm-grey rules instead of hard lines ---------- */
+
+[data-variant="paper"] .border-stone-700,
+[data-variant="paper"] .border-stone-600 {
+  border-color: var(--paper-border) !important;
+}
+[data-variant="paper"] .border-gray-200 {
+  border-color: var(--paper-border-soft) !important;
+}
+
+[data-variant="paper"] .rounded-lg,
+[data-variant="paper"] .rounded-md {
+  border-radius: var(--paper-radius) !important;
+}
+
+/* ---------- Headings: system serif, sparing use ---------- */
+
+[data-variant="paper"] .font-semibold,
+[data-variant="paper"] .font-bold.w-full.border-b.select-none,
+[data-variant="paper"] .text-center.pb-2.font-bold.select-none {
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  color: var(--paper-ink);
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Filled buttons / status badges: earthy, ≥4.5:1 with their text ---------- */
+
+/* Green — primary / save */
+[data-variant="paper"] .bg-green-800,
+[data-variant="paper"] .bg-green-900 {
+  background-color: var(--paper-green) !important;
+  color: var(--paper-on-accent) !important;
+}
+[data-variant="paper"] .hover\:bg-green-900:hover {
+  background-color: var(--paper-green-hover) !important;
+  color: var(--paper-on-accent) !important;
+}
+
+/* Red — destructive */
+[data-variant="paper"] .bg-red-800,
+[data-variant="paper"] .bg-red-900 {
+  background-color: var(--paper-red) !important;
+  color: var(--paper-on-accent) !important;
+}
+[data-variant="paper"] .hover\:bg-red-900:hover {
+  background-color: var(--paper-red-hover) !important;
+  color: var(--paper-on-accent) !important;
+}
+
+/* Yellow — interconsultas */
+[data-variant="paper"] .bg-yellow-800,
+[data-variant="paper"] .bg-yellow-900 {
+  background-color: var(--paper-yellow) !important;
+  color: var(--paper-on-accent) !important;
+}
+[data-variant="paper"] .hover\:bg-yellow-900:hover {
+  background-color: var(--paper-yellow-hover) !important;
+  color: var(--paper-on-accent) !important;
+}
+
+/* Purple — attachments */
+[data-variant="paper"] .bg-purple-800,
+[data-variant="paper"] .bg-purple-900 {
+  background-color: var(--paper-purple) !important;
+  color: var(--paper-on-accent) !important;
+}
+[data-variant="paper"] .hover\:bg-purple-900:hover {
+  background-color: var(--paper-purple-hover) !important;
+  color: var(--paper-on-accent) !important;
+}
+
+/* Blue — info / print */
+[data-variant="paper"] .bg-blue-800,
+[data-variant="paper"] .bg-blue-900 {
+  background-color: var(--paper-blue) !important;
+  color: var(--paper-on-accent) !important;
+}
+[data-variant="paper"] .hover\:bg-blue-900:hover {
+  background-color: var(--paper-blue-hover) !important;
+  color: var(--paper-on-accent) !important;
+}
+
+/* ---------- Side-toolbar outlined buttons ---------- */
+
+[data-variant="paper"] .text-green-600,
+[data-variant="paper"] .border-green-600 {
+  color: var(--paper-green-outline) !important;
+  border-color: var(--paper-green-outline) !important;
+}
+[data-variant="paper"] .text-red-600,
+[data-variant="paper"] .border-red-600 {
+  color: var(--paper-red-outline) !important;
+  border-color: var(--paper-red-outline) !important;
+}
+[data-variant="paper"] .text-yellow-600,
+[data-variant="paper"] .border-yellow-600 {
+  color: var(--paper-yellow-outline) !important;
+  border-color: var(--paper-yellow-outline) !important;
+}
+[data-variant="paper"] .text-purple-600,
+[data-variant="paper"] .border-purple-600 {
+  color: var(--paper-purple-outline) !important;
+  border-color: var(--paper-purple-outline) !important;
+}
+[data-variant="paper"] .text-blue-600,
+[data-variant="paper"] .border-blue-600,
+[data-variant="paper"] .text-blue-500 {
+  color: var(--paper-blue-outline) !important;
+  border-color: var(--paper-blue-outline) !important;
+}
+
+/* These buttons fill solid on hover; keep the label readable against the fill */
+[data-variant="paper"] .hover\:text-gray-200:hover {
+  color: var(--paper-on-accent) !important;
+}
+
+/* ---------- react-datepicker re-skin (fair game: source uses !important) ---------- */
+
+[data-variant="paper"] .react-datepicker-popper.custom-styles .react-datepicker {
+  background-color: var(--paper-panel) !important;
+  border: 1px solid var(--paper-border);
+  border-radius: var(--paper-radius);
+}
+[data-variant="paper"] .react-datepicker-popper.custom-styles .react-datepicker__current-month,
+[data-variant="paper"] .react-datepicker-popper.custom-styles .react-datepicker__day-name,
+[data-variant="paper"] .react-datepicker-popper.custom-styles .react-datepicker__day {
+  color: var(--paper-ink) !important;
+}
+[data-variant="paper"] .react-datepicker-popper.custom-styles .react-datepicker__day:hover {
+  background-color: var(--paper-hover) !important;
+}
+[data-variant="paper"] .react-datepicker-popper.custom-styles .react-datepicker__day--selected {
+  background-color: var(--paper-green) !important;
+  color: var(--paper-on-accent) !important;
+}
+[data-variant="paper"] .react-datepicker__header {
+  background-color: var(--paper-surface) !important;
+}

@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "../../components/Dialog";
 import { useNewHospitalizacion } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { HospitalizacionDialogContent } from "./HospitalizacionDialogContent";
 
 interface NewHospitalizacionDialogProps {
@@ -19,10 +20,14 @@ export function NewHospitalizacionDialogDialog(
   props: React.PropsWithChildren<NewHospitalizacionDialogProps>
 ) {
   const { data, save, update, clear } = useNewHospitalizacion(props.patientId);
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([{ name: "motivo" }]);
 
   const [open, setOpen] = React.useState(false);
 
   const handleSave = async () => {
+    if (!check(data)) return;
     try {
       await save();
       setOpen(false);
@@ -30,7 +35,10 @@ export function NewHospitalizacionDialogDialog(
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) clear();
+    if (!open) {
+      clear();
+      reset();
+    }
     setOpen(open);
   };
 
@@ -40,7 +48,7 @@ export function NewHospitalizacionDialogDialog(
       <DialogContainer>
         <DialogTitle>NUEVA HOSPITALIZACION</DialogTitle>
 
-        <HospitalizacionDialogContent update={update} data={data} />
+        <HospitalizacionDialogContent update={update} data={data} invalid={invalid(data)} />
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>
             GUARDAR

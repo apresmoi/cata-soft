@@ -1,0 +1,10 @@
+/*
+ * One import per variant. Each file scopes everything under
+ * [data-variant="<id>"] so variants never leak into each other or into the
+ * real app.
+ */
+@import "./variants/slate.css";
+@import "./variants/clinical.css";
+@import "./variants/teal.css";
+@import "./variants/paper.css";
+@import "./variants/dense.css";

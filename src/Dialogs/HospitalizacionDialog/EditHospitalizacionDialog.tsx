@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "../../components/Dialog";
 import { useHospitalizacion } from "../../hooks";
+import { useRequiredFields } from "../../hooks/useRequiredFields";
 import { HospitalizacionDialogContent } from "./HospitalizacionDialogContent";
 
 interface EditHospitalizacionDialogProps {
@@ -21,20 +22,29 @@ export function EditHospitalizacionDialog(
   const { data, save, update } = useHospitalizacion(props.id, {
     enabled: !!props.id,
   });
+  const { check, invalid, reset } = useRequiredFields<
+    NonNullable<typeof data>
+  >([{ name: "motivo" }]);
+
+  const handleClose = () => {
+    reset();
+    props.onClose?.();
+  };
 
   const handleSave = async () => {
+    if (!check(data ?? undefined)) return;
     try {
       await save();
-      props.onClose?.();
+      handleClose();
     } catch (e) {}
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && props.onClose?.()}>
+    <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
       <DialogContainer>
         <DialogTitle>EDITAR HOSPITALIZACION</DialogTitle>
 
-        <HospitalizacionDialogContent update={update} data={data} />
+        <HospitalizacionDialogContent update={update} data={data} invalid={invalid(data ?? undefined)} />
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>
             GUARDAR

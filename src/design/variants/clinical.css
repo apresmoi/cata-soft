@@ -1,0 +1,316 @@
+/* Clinical Light — reads like a well-set printed medical record: soft
+   off-white page, pure-white panels lifted with a hairline + shadow, near-
+   black ink for data, calm mid-grey uppercase labels, and print-safe accent
+   hues darkened just enough to keep white button text legible. */
+
+[data-variant="clinical"] {
+  --cs-bg: #f2efe8;
+  --cs-panel: #ffffff;
+  --cs-panel-tint: #ece7dc;
+  --cs-panel-tint-hover: #e2dbc9;
+  --cs-row-hover: #eef1e6;
+  --cs-ink: #1c1a17;
+  --cs-ink-soft: #4a463f;
+  --cs-label: #6b675c;
+  --cs-border: #ddd6c7;
+  --cs-border-strong: #b3a892;
+  --cs-focus: #1d4ed8;
+
+  --cs-green: #166534;
+  --cs-green-hover: #14532d;
+  --cs-red: #991b1b;
+  --cs-red-hover: #7f1d1d;
+  --cs-yellow: #92400e;
+  --cs-yellow-hover: #78350f;
+  --cs-purple: #6b21a8;
+  --cs-purple-hover: #581c87;
+  --cs-blue: #1e40af;
+  --cs-blue-hover: #1e3a8a;
+
+  --cs-green-outline: #15803d;
+  --cs-purple-outline: #7e22ce;
+  --cs-red-outline: #b91c1c;
+  --cs-yellow-outline: #a16207;
+  --cs-blue-outline: #1d4ed8;
+
+  --cs-invalid: #dc2626;
+
+  font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: var(--cs-ink);
+}
+
+/* ---- page + dark-mode escape hatches ----
+   `<html>` always carries `dark`, so `dark:bg-stone-800` / `dark:text-stone-100`
+   on <body> compile to a `.dark .dark\:…` descendant rule (two classes,
+   0-2-0). `!important` wins outright regardless of exact Tailwind output. */
+
+[data-variant="clinical"] body,
+[data-variant="clinical"] .dark\:bg-stone-800 {
+  background-color: var(--cs-bg) !important;
+}
+
+[data-variant="clinical"] body,
+[data-variant="clinical"] .dark\:text-stone-100 {
+  color: var(--cs-ink) !important;
+}
+
+[data-variant="clinical"] .dark\:border-white\/10 {
+  border-color: var(--cs-border) !important;
+}
+
+/* ---- surfaces ---- */
+
+/* Dialog panel: pure white, lifted off the off-white page. */
+[data-variant="clinical"] .bg-stone-800 {
+  background-color: var(--cs-panel) !important;
+  box-shadow: 0 8px 28px rgb(28 26 23 / 0.14);
+}
+
+/* Top toolbar / side toolbar / table-header strip: a warm light tint so
+   panels still read as pure white by contrast. */
+[data-variant="clinical"] .bg-stone-900 {
+  background-color: var(--cs-panel-tint) !important;
+}
+
+[data-variant="clinical"] .hover\:bg-stone-900:hover {
+  background-color: var(--cs-panel-tint-hover) !important;
+}
+
+/* Inputs, textareas, selects, datepicker field: white with a real border. */
+[data-variant="clinical"] .bg-stone-600 {
+  background-color: var(--cs-panel) !important;
+  border: 1px solid var(--cs-border-strong);
+}
+
+[data-variant="clinical"] .bg-stone-600:focus,
+[data-variant="clinical"] .bg-stone-600:focus-within {
+  outline: none;
+  border-color: var(--cs-focus);
+  box-shadow: 0 0 0 3px rgb(29 78 216 / 0.18);
+}
+
+/* Datepicker header nav buttons use hover:bg-stone-800 as a pressed state,
+   distinct from the pure-white panel colour above. */
+[data-variant="clinical"] .hover\:bg-stone-800:hover {
+  background-color: var(--cs-row-hover) !important;
+}
+
+/* Table row hover. */
+[data-variant="clinical"] .hover\:bg-stone-600:hover {
+  background-color: var(--cs-row-hover) !important;
+}
+
+[data-variant="clinical"] .border-stone-600,
+[data-variant="clinical"] .border-stone-700 {
+  border-color: var(--cs-border) !important;
+}
+
+[data-variant="clinical"] .placeholder-stone-400::placeholder {
+  color: var(--cs-label);
+}
+
+/* ---- typography ---- */
+
+/* Body/button/input copy that was tuned for a dark surface: repoint to ink.
+   (Filled buttons force white back on top of this, below, and win the tie
+   because those rules come later in the cascade at equal specificity.) */
+[data-variant="clinical"] .text-stone-100,
+[data-variant="clinical"] .text-gray-200,
+[data-variant="clinical"] .text-gray-100,
+[data-variant="clinical"] .text-white {
+  color: var(--cs-ink) !important;
+}
+
+[data-variant="clinical"] .border-gray-200 {
+  border-color: var(--cs-border) !important;
+}
+
+[data-variant="clinical"] .text-blue-500 {
+  color: var(--cs-focus) !important;
+}
+[data-variant="clinical"] .border-blue-500 {
+  border-color: var(--cs-focus) !important;
+}
+
+/* Field/column labels: dim, tracked, out of the data's way. Scoped to the
+   exact label-wrapper shapes used across PatientCard fields and dialog
+   section dividers -- NOT the generic `.select-none` used on layout shells
+   (Table, SideToolbar, buttons). */
+[data-variant="clinical"] .flex.items-center.gap-2.select-none,
+[data-variant="clinical"] .flex.items-center.gap-2.select-none.p-1,
+[data-variant="clinical"] .font-bold.w-full.border-b.select-none,
+[data-variant="clinical"] .text-center.pb-2.font-bold.select-none {
+  color: var(--cs-label) !important;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+[data-variant="clinical"] .font-bold.w-full.border-b.select-none {
+  border-color: var(--cs-border) !important;
+  padding-bottom: 6px;
+}
+
+/* Actual field values must not inherit the label treatment. */
+[data-variant="clinical"] input,
+[data-variant="clinical"] textarea,
+[data-variant="clinical"] select,
+[data-variant="clinical"] td,
+[data-variant="clinical"] th {
+  color: var(--cs-ink);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-variant="clinical"] th {
+  color: var(--cs-label);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---- table: comfortable row height, subtle separators ---- */
+
+[data-variant="clinical"] td,
+[data-variant="clinical"] th {
+  border-bottom: 1px solid var(--cs-border);
+}
+
+[data-variant="clinical"] thead th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* ---- filled buttons: keep semantic hues, print-safe and legible ---- */
+
+[data-variant="clinical"] .bg-green-800,
+[data-variant="clinical"] .bg-green-900 {
+  background-color: var(--cs-green) !important;
+  color: #ffffff !important;
+}
+[data-variant="clinical"] .hover\:bg-green-900:hover {
+  background-color: var(--cs-green-hover) !important;
+}
+
+[data-variant="clinical"] .bg-red-800,
+[data-variant="clinical"] .bg-red-900 {
+  background-color: var(--cs-red) !important;
+  color: #ffffff !important;
+}
+[data-variant="clinical"] .hover\:bg-red-900:hover {
+  background-color: var(--cs-red-hover) !important;
+}
+
+[data-variant="clinical"] .bg-yellow-800,
+[data-variant="clinical"] .bg-yellow-900 {
+  background-color: var(--cs-yellow) !important;
+  color: #ffffff !important;
+}
+[data-variant="clinical"] .hover\:bg-yellow-900:hover {
+  background-color: var(--cs-yellow-hover) !important;
+}
+
+[data-variant="clinical"] .bg-purple-800,
+[data-variant="clinical"] .bg-purple-900 {
+  background-color: var(--cs-purple) !important;
+  color: #ffffff !important;
+}
+[data-variant="clinical"] .hover\:bg-purple-900:hover {
+  background-color: var(--cs-purple-hover) !important;
+}
+
+[data-variant="clinical"] .bg-blue-800,
+[data-variant="clinical"] .bg-blue-900 {
+  background-color: var(--cs-blue) !important;
+  color: #ffffff !important;
+}
+[data-variant="clinical"] .hover\:bg-blue-900:hover {
+  background-color: var(--cs-blue-hover) !important;
+}
+
+/* ---- side-toolbar outlined buttons: solid accent border + text on white,
+   filled with the matching -800 colour (and white text, from above) on
+   hover -- state never rides on hue alone since the border/fill also
+   changes shape (outline -> solid). ---- */
+
+[data-variant="clinical"] .text-green-600 {
+  color: var(--cs-green-outline) !important;
+}
+[data-variant="clinical"] .border-green-600 {
+  border-color: var(--cs-green-outline) !important;
+}
+
+[data-variant="clinical"] .text-purple-600 {
+  color: var(--cs-purple-outline) !important;
+}
+[data-variant="clinical"] .border-purple-600 {
+  border-color: var(--cs-purple-outline) !important;
+}
+
+[data-variant="clinical"] .text-red-600 {
+  color: var(--cs-red-outline) !important;
+}
+[data-variant="clinical"] .border-red-600 {
+  border-color: var(--cs-red-outline) !important;
+}
+
+[data-variant="clinical"] .text-yellow-600 {
+  color: var(--cs-yellow-outline) !important;
+}
+[data-variant="clinical"] .border-yellow-600 {
+  border-color: var(--cs-yellow-outline) !important;
+}
+
+[data-variant="clinical"] .text-blue-600 {
+  color: var(--cs-blue-outline) !important;
+}
+[data-variant="clinical"] .border-blue-600 {
+  border-color: var(--cs-blue-outline) !important;
+}
+
+/* Keep validation red unmistakably an error colour, never faded. */
+[data-variant="clinical"] .ring-red-500 {
+  --tw-ring-color: var(--cs-invalid) !important;
+  box-shadow: 0 0 0 2px var(--cs-invalid) !important;
+}
+
+/* ---- toolbar chrome ---- */
+
+[data-variant="clinical"] .toolbar {
+  background: var(--cs-panel);
+  border-bottom: 1px solid var(--cs-border);
+}
+
+/* ---- react-datepicker popover: dark theme hard-coded with !important in
+   src/index.css -- override every one of those rules so the calendar is
+   never a dark box on this light page. ---- */
+
+[data-variant="clinical"] .react-datepicker-popper.custom-styles .react-datepicker {
+  background-color: var(--cs-panel) !important;
+  border: 1px solid var(--cs-border);
+  box-shadow: 0 8px 24px rgb(28 26 23 / 0.16);
+}
+
+[data-variant="clinical"] .react-datepicker-popper.custom-styles .react-datepicker__current-month,
+[data-variant="clinical"] .react-datepicker-popper.custom-styles .react-datepicker__day-name,
+[data-variant="clinical"] .react-datepicker-popper.custom-styles .react-datepicker__day {
+  color: var(--cs-ink) !important;
+}
+
+[data-variant="clinical"] .react-datepicker-popper.custom-styles .react-datepicker__day:hover {
+  background-color: var(--cs-row-hover) !important;
+}
+
+[data-variant="clinical"] .react-datepicker-popper.custom-styles .react-datepicker__day--selected {
+  background-color: var(--cs-blue) !important;
+  color: #ffffff !important;
+}
+
+[data-variant="clinical"] .react-datepicker__header {
+  background-color: var(--cs-panel-tint) !important;
+  border-bottom: 1px solid var(--cs-border);
+}

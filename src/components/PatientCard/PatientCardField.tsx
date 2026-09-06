@@ -13,7 +13,8 @@ interface PatientCardFieldProps<T> {
 
   disabled?: boolean;
   inline?: boolean;
-  inlineFieldMaxWidth?: number;
+  /** Draw a red ring: a required field left empty on save. */
+  invalid?: boolean;
 }
 
 export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
@@ -37,16 +38,18 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
       <div
         className={cx(
           "w-full",
-          props.inlineFieldMaxWidth
-            ? `max-w-[${props.inlineFieldMaxWidth}%] ml-auto`
-            : ""
+          // Fixed width so every inline field lines up at the same size.
+          props.inline && "ml-auto w-28 shrink-0"
         )}
       >
         <input
           className={cx(
             "w-full bg-stone-600 outline-0 p-2 rounded-lg",
             props.align === "center" && "text-center",
-            props.align === "right" && "text-right"
+            props.align === "right" && "text-right",
+            // A ring is painted outside the box, so flagging a field does not
+            // move anything around it.
+            props.invalid && "ring-2 ring-red-500"
           )}
           onChange={handleChange}
           value={props.value as string}
