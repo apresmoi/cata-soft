@@ -11,7 +11,7 @@ export function DialogButton(
     <button
       disabled={props.disabled}
       className={cx(
-        "px-4 py-2 flex items-center gap-2 rounded-lg select-none transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400",
+        "inline-flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium select-none transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2",
 
         !props.variant &&
           "border border-stone-300 bg-white text-stone-700 hover:bg-stone-50",

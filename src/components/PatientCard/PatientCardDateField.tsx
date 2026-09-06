@@ -17,17 +17,21 @@ interface PatientCardDateFieldProps {
 export function PatientCardDateField(props: PatientCardDateFieldProps) {
   return (
     <div
-      className={cx("flex w-full flex-col gap-1.5 select-none", props.className)}
+      className={cx("flex min-w-0 w-full flex-col gap-1 select-none", props.className)}
     >
       <div className={cx("flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500")}>
         {props.icon} {props.label}
       </div>
-      <div data-skip-autofocus className="w-full">
+      <div data-skip-autofocus className="min-w-0 w-full">
         <DatePicker
           selected={props.value}
           required
           onChange={(date) => props.onChange?.(date as Date)}
-          className="border border-stone-300 bg-white text-stone-800 p-2 outline-none w-full rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none"
+          className={cx(
+            "box-border h-9 min-w-0 w-full rounded-md border border-stone-400 bg-white px-3 py-0 text-sm leading-5 text-stone-900 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-1",
+            props.align === "center" && "text-center",
+            props.align === "right" && "text-right"
+          )}
           dateFormat={"dd/MM/yyyy"}
           wrapperClassName="w-full"
           popperClassName="z-20"

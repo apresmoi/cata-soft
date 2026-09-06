@@ -97,10 +97,10 @@ export function NewArchivoAdjuntoDialog(
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>{props.children}</DialogTrigger>
-      <DialogContainer>
+      <DialogContainer maxWidth={560}>
         <DialogTitle>SUBIR ARCHIVO ADJUNTO</DialogTitle>
 
-        <div className="flex gap-2 flex-col p-4 h-[60vh]">
+        <div className="flex min-w-0 flex-col gap-3">
           <input
             ref={fileInputRef}
             id="archivo-adjunto-file"
@@ -113,7 +113,7 @@ export function NewArchivoAdjuntoDialog(
           <label
             htmlFor="archivo-adjunto-file"
             className={cx(
-              "flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 p-6 text-center transition-colors hover:border-brand-400 hover:bg-brand-50",
+              "flex min-h-20 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-stone-400 bg-stone-50 px-3 py-3 text-center transition-colors hover:border-brand-400 hover:bg-brand-50",
               invalid(data).includes("file") && "ring-2 ring-red-500"
             )}
           >
@@ -149,12 +149,14 @@ export function NewArchivoAdjuntoDialog(
             value={data?.nombre || ""}
             invalid={invalid(data).includes("nombre")}
           />
-          <PatientCardTextAreaField
-            label="NOTAS"
-            onChange={update("notas")}
-            value={data?.notas || ""}
-            className="flex-1"
-          />
+          <div className="h-32">
+            <PatientCardTextAreaField
+              label="NOTAS"
+              onChange={update("notas")}
+              value={data?.notas || ""}
+              className="h-full"
+            />
+          </div>
         </div>
         <DialogFooter>
           <DialogButton variant="primary" onClick={handleSave}>

@@ -22,14 +22,13 @@ export function HospitalizacionDialogContent(
   const { update, data, invalid = [] } = props;
 
   return (
-    <div className="flex gap-2 flex-col p-4 h-[60vh]">
-      <div className="flex flex-wrap gap-4">
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <PatientCardAgeDateField
           icon={<CalendarIcon />}
           label="FECHA INGRESO"
           onChange={update("fechaIngreso")}
           value={data?.fechaIngreso}
-          className="w-[300px]"
           inline
         />
         <PatientCardAgeDateField
@@ -37,7 +36,6 @@ export function HospitalizacionDialogContent(
           label="FECHA EGRESO"
           onChange={update("fechaEgreso")}
           value={data?.fechaEgreso}
-          className="w-[300px]"
           inline
         />
       </div>

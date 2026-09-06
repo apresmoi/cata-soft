@@ -41,7 +41,7 @@ export function EditHospitalizacionDialog(
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContainer>
+      <DialogContainer maxWidth={640}>
         <DialogTitle>EDITAR HOSPITALIZACION</DialogTitle>
 
         <HospitalizacionDialogContent update={update} data={data} invalid={invalid(data ?? undefined)} />

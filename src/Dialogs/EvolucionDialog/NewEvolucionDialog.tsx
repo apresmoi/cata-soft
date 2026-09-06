@@ -47,7 +47,7 @@ export function NewEvolucionDialog(
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>{props.children}</DialogTrigger>
-      <DialogContainer>
+      <DialogContainer maxWidth={640}>
         <DialogTitle>NUEVA EVOLUCION</DialogTitle>
 
         <EvolucionDialogContent update={update} data={data} invalid={invalid(data)} />

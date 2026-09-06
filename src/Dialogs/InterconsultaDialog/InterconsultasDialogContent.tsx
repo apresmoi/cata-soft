@@ -22,13 +22,13 @@ export function InterconsultasDialogContent(
   const { update, data, invalid = [] } = props;
 
   return (
-    <div className="flex gap-2 flex-col p-4 h-[60vh]">
+    <div className="flex min-w-0 flex-col gap-3">
       <PatientCardAgeDateField
         icon={<CalendarIcon />}
         label="FECHA"
         onChange={update("fecha")}
         value={data?.fecha}
-        className="max-w-[280px]"
+        className="max-w-[288px]"
         inline
       />
       <TabsContainer>

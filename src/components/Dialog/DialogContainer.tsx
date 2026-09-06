@@ -35,8 +35,8 @@ export function DialogContainer(
         className="absolute inset-0 z-50"
         onClick={(e) => e.stopPropagation()}
       >
-        <RadixDialog.Overlay className="absolute top-0 left-0 right-0 bottom-0 bg-stone-900/40"></RadixDialog.Overlay>
-        <div className="z-50 h-full w-full overflow-y-auto flex">
+        <RadixDialog.Overlay className="fixed inset-0 bg-stone-900/30"></RadixDialog.Overlay>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
           <RadixDialog.Content
             ref={contentRef}
             // Radix focuses the first focusable element (a button) on open, and
@@ -49,13 +49,15 @@ export function DialogContainer(
             // No min-width here: `min-width` overrides `max-width` in CSS, so a
             // base min-w silently defeated every caller's width.
             className={cx(
-              "popover relative m-auto flex w-full flex-col bg-white border border-stone-200 rounded-xl shadow-xl",
+              "popover relative flex max-h-[calc(100dvh-32px)] w-full min-h-0 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xl",
               props.className
             )}
             style={{ maxWidth: props.maxWidth ?? 680 }}
           >
             {title}
-            <div className="max-h-[70vh] overflow-y-auto p-5">{body}</div>
+            {/* No padding here: every dialog body brings its own, and having
+                both double-padded each form. */}
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">{body}</div>
             {footer}
           </RadixDialog.Content>
         </div>

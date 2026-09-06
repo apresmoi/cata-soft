@@ -46,8 +46,8 @@ export function EditPacienteNotasDialog(
       <DialogTrigger asChild>{props.children}</DialogTrigger>
       <DialogContainer>
         <DialogTitle>{TITLE_BY_FIELD[props.field]}</DialogTitle>
-        {/* A single long-text field: give it real room to write in. */}
-        <div className="h-[45vh] min-h-[16rem]">
+        {/* Flex column, so the field's `flex-1` textarea actually fills it. */}
+        <div className="flex h-[45vh] min-h-[16rem] flex-col p-5">
           <PatientCardTextAreaField
             value={data?.[props.field] || ""}
             onChange={update(props.field)}

@@ -40,7 +40,7 @@ export function ConfiguracionDialog(
         <DialogTitle>
           <GearIcon /> Configuración
         </DialogTitle>
-        <div className="flex flex-col gap-4 p-4">
+        <div className="flex flex-col gap-5 p-4">
           <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500">
               Copia de seguridad

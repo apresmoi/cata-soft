@@ -46,37 +46,27 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
   return (
     <div
       className={cx(
-        "flex w-full gap-1.5",
-        props.className,
-        props.inline ? "flex-row" : "flex-col"
+        props.inline
+          ? "grid min-w-0 grid-cols-[64px_minmax(0,1fr)] items-center gap-x-2"
+          : "flex min-w-0 flex-col gap-1",
+        props.className
       )}
     >
       <div
         className={cx(
           "flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500",
-          // `flex-1` so the label keeps its share of the row: `min-w-0` with
-          // `truncate` alone let it shrink to nothing next to the fixed-width
-          // input, and the label disappeared entirely.
-          props.inline && "min-w-0 flex-1 truncate"
+          props.inline && "truncate"
         )}
       >
         {props.icon} {props.label}
       </div>
-      <div
-        data-skip-autofocus
-        className={cx(
-          "min-w-0",
-          // `w-full` and `w-28` conflict; emitting both let the picker take the
-          // whole row and squeezed the label out of existence.
-          props.inline ? "ml-auto w-28 shrink-0" : "w-full"
-        )}
-      >
+      <div data-skip-autofocus className="min-w-0 w-full">
         <DatePicker
           selected={value}
           required
           onChange={(date) => props.onChange?.(date as Date)}
           className={cx(
-            "border border-stone-300 bg-white text-stone-800 p-2 outline-none w-full rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
+            "box-border h-9 min-w-0 w-full rounded-md border border-stone-400 bg-white px-3 py-0 text-sm leading-5 text-stone-900 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-1",
             props.align === "right" ? "text-right" : ""
           )}
           dateFormat={"dd/MM/yyyy"}

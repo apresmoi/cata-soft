@@ -23,7 +23,7 @@ export function Tab(props: React.PropsWithChildren<TabProps>) {
   if (currentTab !== name) return null;
 
   return (
-    <div ref={contentRef} className="flex flex-col gap-2 h-full">
+    <div ref={contentRef} className="h-[clamp(224px,32vh,320px)] min-w-0 flex flex-col">
       {props.children}
     </div>
   );
