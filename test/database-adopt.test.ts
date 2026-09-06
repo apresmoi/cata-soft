@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { PrismaClient } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -10,17 +11,16 @@ import { describe, expect, it } from "vitest";
  * it instead of starting empty.
  *
  * `legacyDbCandidates()` checks `process.cwd()/dev.db` first, so this test runs
- * from a temp directory holding a seeded legacy database. Both cwd and
- * CATASOFT_DB_PATH must be set before `electron/database` is loaded, because
- * that module builds its Prisma client at evaluation time -- a static import
- * would be hoisted above this setup, so the import is dynamic.
+ * from a temp directory holding a seeded legacy database. CATASOFT_DB_PATH must
+ * be set before `electron/database` is loaded, because that module builds its
+ * Prisma client at evaluation time -- a static import would be hoisted above
+ * this setup, so the import is dynamic.
  *
- * The legacy file is a byte copy of the repo's development database, which is
- * already fully migrated and holds a small amount of dummy data. That keeps the
- * fixture honest without needing the migration runner before it is imported.
+ * The legacy file is seeded here rather than copied from prisma/dev.db, which
+ * is gitignored and absent in CI.
  */
 
-const SOURCE_DB = path.resolve(__dirname, "..", "prisma", "dev.db");
+const MIGRATIONS = path.resolve(__dirname, "..", "prisma", "migrations");
 
 // macOS resolves /var -> /private/var, and the code under test reads
 // process.cwd(), which is already canonical. Compare like with like.
@@ -31,16 +31,35 @@ const legacyPath = path.join(workDir, "dev.db");
 const managedPath = path.join(workDir, "managed", "catasoft.db");
 
 fs.mkdirSync(path.dirname(managedPath), { recursive: true });
-fs.copyFileSync(SOURCE_DB, legacyPath);
+fs.writeFileSync(legacyPath, "");
+
+process.env.CATASOFT_DB_PATH = managedPath;
+
+const { initDatabase, getDataDir, prisma, migrateDatabase } = await import(
+  "../electron/database"
+);
+
+const seed = new PrismaClient({
+  datasources: { db: { url: `file:${legacyPath}` } },
+});
+await migrateDatabase(seed, MIGRATIONS);
+const now = new Date().toISOString();
+await seed.$executeRawUnsafe(
+  `INSERT INTO "Pacientes"
+     ("id","nombre","documento","fechaNacimiento","createdAt","updatedAt")
+   VALUES (?,?,?,?,?,?)`,
+  "clzzzlegacy000000000001",
+  "Paciente Heredado",
+  "DOC-HEREDADO",
+  now,
+  now,
+  now
+);
+await seed.$disconnect();
 const legacyBytes = fs.statSync(legacyPath).size;
 
 const originalCwd = process.cwd();
 process.chdir(workDir);
-process.env.CATASOFT_DB_PATH = managedPath;
-
-const { initDatabase, getDataDir, prisma } = await import(
-  "../electron/database"
-);
 
 /** Row counts, so no patient field value is ever read into the test output. */
 async function patientCount() {
