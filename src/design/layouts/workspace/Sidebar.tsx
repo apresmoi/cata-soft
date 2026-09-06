@@ -6,6 +6,7 @@ import {
   FiThermometer,
   FiTrash2,
   FiUsers,
+  FiChevronLeft,
 } from "react-icons/fi";
 import { type RecordKind } from "./data";
 
@@ -78,13 +79,19 @@ function RailButton(props: {
 }
 
 export default function Sidebar(props: {
+  onBack: () => void;
   onCreate: (kind: RecordKind) => void;
   onExport: () => void;
   onDelete: () => void;
 }) {
   return (
     <aside className="flex w-16 shrink-0 flex-col items-center gap-2 border-r border-stone-200 bg-white py-4">
-      <img src="/icon.png" alt="CataSoft" className="mb-2 h-8 w-8" />
+      {/* No logo here: the mark belongs to the patients landing page. On a
+          patient the back arrow owns the top slot, always in the same place. */}
+      <RailButton label="Volver al listado de pacientes" tone="stone" onClick={props.onBack}>
+        <FiChevronLeft />
+      </RailButton>
+
       <div className="mb-1 h-px w-8 bg-stone-200" />
 
       {KIND_ACTIONS.map((action) => (

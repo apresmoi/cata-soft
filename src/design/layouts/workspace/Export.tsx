@@ -90,8 +90,11 @@ export default function ExportPreview(props: {
           {props.sections.evoluciones ? (
             <section className="mt-8">
               <h2 className="text-lg font-bold text-stone-950">Evoluciones</h2>
+              {/* The sheet stays greyscale: colour costs ink, photocopies badly,
+                  and carries no clinical meaning on paper. Brand colour belongs
+                  to the app chrome, not the document. */}
               {props.evoluciones.slice(0, 3).map((row) => (
-                <div key={row.id} className="mt-3 border-l-2 border-brand-500 pl-4 text-sm leading-6">
+                <div key={row.id} className="mt-3 border-l-2 border-stone-400 pl-4 text-sm leading-6">
                   <div className="font-semibold">{formatDate(row.fecha)} · {row.motivo}</div>
                   <div>{row.plan}</div>
                 </div>

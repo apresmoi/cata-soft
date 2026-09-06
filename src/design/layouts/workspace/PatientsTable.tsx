@@ -22,10 +22,10 @@ export default function PatientsTable(props: { onOpenPatient: (id: string) => vo
     <div className="flex h-full min-h-screen flex-col bg-stone-100">
       <header className="flex items-center justify-between border-b border-stone-200 bg-white px-6 py-4">
         <div className="flex items-center gap-3">
-          <img src="/icon.png" alt="CataSoft" className="h-8 w-8" />
+          <img src="/icon.png" alt="CataSoft" className="h-10 w-10" />
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">CataSoft</p>
-            <h1 className="text-lg font-semibold text-stone-900">
+            <h1 className="text-xl font-bold tracking-tight text-stone-900">
               Pacientes <span className="font-normal text-stone-500">({FIXTURES.pacientes.length})</span>
             </h1>
           </div>

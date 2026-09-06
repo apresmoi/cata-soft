@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FiArrowLeft, FiEdit3, FiPrinter } from "react-icons/fi";
+import { FiEdit3, FiPrinter } from "react-icons/fi";
 import Summary from "./Summary";
 import Records from "./Records";
 import Sidebar from "./Sidebar";
@@ -45,7 +45,6 @@ function upsert<T extends { id: string }>(rows: T[], row: T): T[] {
 
 function Header(props: {
   patient: PatientData;
-  onBack: () => void;
   onEditPatient: () => void;
   onExport: () => void;
 }) {
@@ -53,14 +52,6 @@ function Header(props: {
     <header className="sticky top-0 z-30 border-b border-stone-200 bg-white/95 px-5 py-3 shadow-sm backdrop-blur">
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
-          <button
-            onClick={props.onBack}
-            title="Volver al listado de pacientes"
-            aria-label="Volver al listado de pacientes"
-            className="inline-flex shrink-0 items-center gap-2 rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-200"
-          >
-            <FiArrowLeft /> Pacientes
-          </button>
           <div className="min-w-0">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h1 className="truncate text-xl font-bold tracking-tight text-stone-950">
@@ -218,22 +209,22 @@ export default function WorkspaceLayout() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-stone-100 text-stone-900">
-      <Header
-        patient={patient}
+    <div className="flex h-screen w-screen overflow-hidden bg-stone-100 text-stone-900">
+      <Sidebar
         onBack={() => setOpenPatient(null)}
-        onEditPatient={() => setModal({ kind: "paciente" })}
+        onCreate={(kind) => setModal({ kind } as ModalTarget)}
         onExport={() => setExportMode(true)}
+        onDelete={() => undefined}
       />
-      <div className="flex min-h-0 flex-1">
-        <Sidebar
-          onCreate={(kind) => setModal({ kind } as ModalTarget)}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Header
+          patient={patient}
+          onEditPatient={() => setModal({ kind: "paciente" })}
           onExport={() => setExportMode(true)}
-          onDelete={() => undefined}
         />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <main className="min-h-0 flex-1 overflow-auto">
           <Tabs active={activeTab} counts={counts} onChange={setActiveTab} />
-          <main className="min-h-0 flex-1 overflow-auto p-5">
+          <div className="p-5">
             {activeTab === "resumen" ? (
               <Summary
                 patient={patient}
@@ -254,8 +245,8 @@ export default function WorkspaceLayout() {
             ) : (
               <Records records={records} onOpen={openRecord} />
             )}
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
 
       {modal ? (
