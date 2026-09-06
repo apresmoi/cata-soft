@@ -1,7 +1,7 @@
 {
   "name": "cata-soft",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/apresmoi/cata-soft.git"
@@ -67,7 +67,8 @@
   "build": {
     "publish": [
       {
-        "provider": "github"
+        "provider": "github",
+        "releaseType": "release"
       }
     ],
     "appId": "com.example.cata-soft",
