@@ -37,18 +37,24 @@ export function AntropometriaDialogContent(
   }, [peso, talla]);
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-4">
+    // One field per row, label beside its input: four short scalars read as a
+    // list, not a grid.
+    <div className="flex flex-col gap-3 p-4">
       <PatientCardAgeDateField
         icon={<CalendarIcon />}
         label="FECHA"
         onChange={update("fecha")}
         value={data?.fecha}
+        align="right"
+        inline
       />
       <PatientCardField
         icon={<PinBottomIcon />}
         label="PESO"
         onChange={update("peso")}
         value={data?.peso || 0}
+        align="right"
+        inline
         invalid={invalid?.includes("peso")}
       />
       <PatientCardField
@@ -56,6 +62,8 @@ export function AntropometriaDialogContent(
         label="TALLA"
         onChange={update("talla")}
         value={data?.talla || 0}
+        align="right"
+        inline
         invalid={invalid?.includes("talla")}
       />
       <PatientCardField
@@ -63,6 +71,8 @@ export function AntropometriaDialogContent(
         label="IMC"
         onChange={update("imc")}
         value={data?.imc || 0}
+        align="right"
+        inline
         disabled
         invalid={invalid?.includes("imc")}
       />

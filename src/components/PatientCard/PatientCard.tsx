@@ -4,12 +4,12 @@ export function PatientCard(
   props: React.PropsWithChildren<{ className?: string }>
 ) {
   return (
-    <div
-      className={cx(
-        "w-full flex flex-col bg-white border border-stone-200 rounded-xl shadow-sm gap-2 p-4",
-        props.className
-      )}
-    >
+    /*
+     * Layout only: no border, background or shadow. Every caller is inside a
+     * dialog body, which is already the white panel, and each field draws its
+     * own border -- wrapping them in a bordered card double-framed every form.
+     */
+    <div className={cx("flex w-full flex-col gap-3", props.className)}>
       {props.children}
     </div>
   );

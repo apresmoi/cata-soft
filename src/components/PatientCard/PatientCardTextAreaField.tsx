@@ -20,7 +20,7 @@ export function PatientCardTextAreaField(props: PatientCardTextAreaFieldProps) {
   };
 
   return (
-    <div className={cx("flex w-full flex-col gap-1.5", props.className)}>
+    <div className={cx("flex min-h-0 w-full flex-1 flex-col gap-1.5", props.className)}>
       {props.label && (
         <div className="pb-2 text-center text-xs font-semibold uppercase tracking-wide text-stone-500 select-none">
           {props.label}
@@ -28,7 +28,10 @@ export function PatientCardTextAreaField(props: PatientCardTextAreaFieldProps) {
       )}
       <textarea
         className={cx(
-          "min-h-[8rem] w-full resize-y rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
+          // `flex-1` so the box fills the panel it is given -- a bare
+          // `min-h` left a tall tabbed dialog mostly empty under a short
+          // textarea. `min-h-0` lets it shrink inside a flex column too.
+          "min-h-0 w-full flex-1 resize-y rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none",
           // Painted outside the box, so flagging a field shifts no layout.
           props.invalid && "ring-2 ring-red-500"
         )}
