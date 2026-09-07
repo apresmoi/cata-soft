@@ -81,6 +81,27 @@ p {
   break-after: auto;
 }
 
+/*
+ * Everything after the front matter flows continuously. A page per section
+ * left most of them a third full, since a section that needs 1.3 pages spills
+ * and the next one still starts fresh.
+ */
+.flow {
+  margin-bottom: 12mm;
+}
+
+.flow:last-child {
+  margin-bottom: 0;
+}
+
+/* A heading must never be the last thing on a page. */
+h2,
+h3,
+.section-title {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
 /* --- Cover --- */
 
 .cover {
@@ -211,14 +232,21 @@ p {
 }
 
 figure.screen {
-  margin: 0 0 8mm;
+  margin: 0 0 6mm;
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
 figure.screen img {
   display: block;
-  width: 100%;
+  /*
+   * Sized so a heading plus two captures fit one page: the text block is
+   * 255mm, a section heading and its body run ~44mm, so each figure must stay
+   * under ~105mm including its caption and margin. At full width a 1500x950
+   * capture is 113mm on its own and every page held exactly one.
+   */
+  width: 80%;
+  margin: 0 auto;
   border: 1px solid var(--line);
   border-radius: 4px;
 }

@@ -124,7 +124,7 @@ function renderChangelog(changelog) {
     )
     .join("\n");
   return `
-    <section class="page">
+    <section class="flow">
       <h2>Changelog</h2>
       <ul class="changelog-list">${items}</ul>
     </section>
@@ -134,7 +134,7 @@ function renderChangelog(changelog) {
 function renderIntro(intro) {
   const paragraphs = intro.map((paragraph) => `<p>${paragraph}</p>`).join("\n");
   return `
-    <section class="page">
+    <section class="flow">
       <h2>Introducción</h2>
       ${paragraphs}
     </section>
@@ -156,7 +156,7 @@ function renderSections(sections) {
   return sections
     .map(
       (section) => `
-      <section class="page">
+      <section class="flow">
         <h2 class="section-title">${section.title}</h2>
         <div class="section-body">${section.body}</div>
         <div class="screens">
@@ -178,7 +178,7 @@ function renderEntryList(title, entries) {
     )
     .join("\n");
   return `
-    <section class="page">
+    <section class="flow">
       <h2>${escapeHtml(title)}</h2>
       <div class="entry-list">${items}</div>
     </section>
@@ -188,7 +188,7 @@ function renderEntryList(title, entries) {
 function renderPlainList(title, paragraphs) {
   const items = paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("\n");
   return `
-    <section class="page">
+    <section class="flow">
       <h2>${escapeHtml(title)}</h2>
       <div class="plain-list">${items}</div>
     </section>
