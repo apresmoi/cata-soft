@@ -31,7 +31,16 @@ export function InterconsultaRow(props: RowProps<Interconsultas>) {
           {"INTERCONSULTA"}
         </div>
       </TableCol>
-      <TableCol>{richTextToPlainText(props.motivo)}</TableCol>
+      <TableCol>
+        <div className="flex items-center gap-2">
+          {richTextToPlainText(props.motivo)}
+          {props.estado !== "respondida" ? (
+            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">
+              Pendiente
+            </span>
+          ) : null}
+        </div>
+      </TableCol>
       <TableCol>
         <Tooltip tooltip="Eliminar">
           <DeleteDialog asChild onDelete={handleRemove}>

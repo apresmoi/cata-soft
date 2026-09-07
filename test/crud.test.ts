@@ -286,13 +286,17 @@ describe("interconsulta", () => {
     )) as InterconsultaRecord;
     expect(fetched.motivo).toBe("Cardiologia");
     expect(fetched.notas).toBe("Pendiente");
+    // A new interconsulta is unanswered until someone says otherwise; the
+    // summary's "Items abiertos" panel reads exactly this field.
+    expect(fetched.estado).toBe("pendiente");
 
     const updated = (await invokeHandler(
       "update-interconsulta",
-      { notas: "Resuelta" },
+      { notas: "Resuelta", estado: "respondida" },
       created.id
     )) as InterconsultaRecord;
     expect(updated.notas).toBe("Resuelta");
+    expect(updated.estado).toBe("respondida");
 
     await invokeHandler("delete-interconsulta", created.id);
     const afterDelete = await invokeHandler("get-interconsulta", created.id);

@@ -66,6 +66,17 @@ describe("sanitizeRichText", () => {
     expect(sanitizeRichText(undefined)).toBe("");
     expect(sanitizeRichText("")).toBe("");
   });
+
+  it("escapes an unterminated tag instead of guessing where it ends", () => {
+    // A truncated paste must not silently swallow the rest of a note.
+    expect(sanitizeRichText("<p>dosis <strong")).toBe("<p>dosis &lt;strong</p>");
+    expect(sanitizeRichText("<p>ok</p><script")).toBe("<p>ok</p>&lt;script");
+  });
+
+  it("drops an unterminated script to the end of the input", () => {
+    // No closing tag to scan to: everything after it must go, not be emitted.
+    expect(sanitizeRichText("<p>ok</p><script>alert(1)")).toBe("<p>ok</p>");
+  });
 });
 
 describe("richTextToPlainText", () => {

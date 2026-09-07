@@ -1,8 +1,10 @@
+import React from "react";
 import { FiArrowDown, FiArrowUp, FiEdit3, FiPlus } from "react-icons/fi";
 import { NewAntropometriaDialog } from "../Dialogs/AntropometriaDialog";
+import { NewInterconsultaDialog } from "../Dialogs/InterconsultaDialog";
 import { EditPacienteNotasDialog } from "../Dialogs/EditPacienteNotasDialog";
 import Sparkline from "../components/Sparkline";
-import { usePaciente, type PacienteHistoryItem } from "../hooks";
+import { usePaciente, useInterconsulta, type PacienteHistoryItem } from "../hooks";
 import { isRichTextEmpty, richTextToHtml, richTextToPlainText } from "../richText";
 
 const cardBase = "rounded-xl border border-stone-200 bg-white p-4 shadow-sm transition hover:border-brand-300 hover:shadow";
@@ -131,6 +133,7 @@ export function PatientSummary(props: {
     .filter((item): item is Extract<PacienteHistoryItem, { type: "interconsulta" }> => item.type === "interconsulta")
     .slice()
     .sort((a, b) => itemDate(b).getTime() - itemDate(a).getTime());
+  const pendingInterconsultas = interconsultas.filter((item) => item.estado !== "respondida");
 
   const novedades = props.history
     .slice()
@@ -171,10 +174,17 @@ export function PatientSummary(props: {
           patientId={props.patientId}
         />
 
-        <div className={cardBase}>
-          <div className={kpiLabel}>Registros</div>
-          <div className={kpiValue}>{props.history.length}</div>
-          <div className={kpiHint}>Registros en la historia</div>
+        <div className={`relative ${cardBase}`}>
+          <div className="absolute right-3 top-3">
+            <NewInterconsultaDialog patientId={props.patientId}>
+              <span className={iconButton} title="Nueva interconsulta" aria-label="Nueva interconsulta">
+                <FiPlus />
+              </span>
+            </NewInterconsultaDialog>
+          </div>
+          <div className={kpiLabel}>Pendientes</div>
+          <div className={kpiValue}>{pendingInterconsultas.length}</div>
+          <div className={kpiHint}>Interconsultas sin respuesta</div>
         </div>
       </div>
 
@@ -183,12 +193,6 @@ export function PatientSummary(props: {
         <EditableInfoCard title="Medicación habitual" field="medicacionHabitual" patientId={props.patientId} text={data?.medicacionHabitual} />
       </div>
 
-      {/*
-       * Two panes side by side. The design board had "Items abiertos" here,
-       * listing pending interconsultas -- but `Interconsultas` has no `estado`
-       * column, so there is nothing to mark one pending with. This shows the
-       * interconsultas themselves rather than inventing a status.
-       */}
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
         <section className="flex min-h-0 flex-col rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
           <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-stone-500">Últimas novedades</h3>
@@ -214,48 +218,77 @@ export function PatientSummary(props: {
           </div>
         </section>
 
-        {/*
-         * Same treatment as the design board's pane in this slot: a tinted
-         * panel holding white record cards, each with a chip, its notes and an
-         * explicit edit action. The design's chip read "Pendiente" and carried
-         * a "Marcar respuesta recibida" button; both need an `estado` column
-         * that `Interconsultas` does not have, so the chip states the
-         * speciality's date instead of inventing a status.
-         */}
         <section className="flex min-h-0 flex-col rounded-xl border border-brand-200 bg-brand-50/50 p-4 shadow-sm">
           <h3 className="shrink-0 text-sm font-bold uppercase tracking-wide text-brand-800">
-            Interconsultas
+            Items abiertos
           </h3>
           <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-auto pr-2">
-            {interconsultas.length === 0 ? (
-              <p className="text-sm text-brand-800">Sin interconsultas cargadas.</p>
+            {pendingInterconsultas.length === 0 ? (
+              <p className="text-sm text-brand-800">Sin items abiertos.</p>
             ) : (
-              interconsultas.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-lg border border-brand-200 bg-white p-4"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="font-semibold text-stone-800">{richTextToPlainText(item.motivo)}</div>
-                    <span className="shrink-0 rounded-full bg-brand-100 px-2 py-1 text-xs font-bold text-brand-800">
-                      {formatDate(itemDate(item))}
-                    </span>
-                  </div>
-                  {item.notas ? (
-                    <p className="mt-2 text-sm leading-6 text-stone-600">{richTextToPlainText(item.notas)}</p>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => props.onOpenRecord(item)}
-                    className="mt-3 rounded-md border border-brand-300 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-900 hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
-                  >
-                    Editar
-                  </button>
-                </div>
+              pendingInterconsultas.map((item) => (
+                <OpenInterconsultaCard key={item.id} item={item} onOpenRecord={props.onOpenRecord} />
               ))
             )}
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * One card in the "Items abiertos" panel. Owns its own `useInterconsulta`
+ * hook instance so marking a reply received can update and save that single
+ * record without disturbing the shared history query that drives the list.
+ */
+function OpenInterconsultaCard(props: {
+  item: Extract<PacienteHistoryItem, { type: "interconsulta" }>;
+  onOpenRecord: (item: PacienteHistoryItem) => void;
+}): JSX.Element {
+  const { item } = props;
+  const { update, save } = useInterconsulta(item.id);
+  const [marking, setMarking] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!marking) return;
+    // `update` already committed the new draft in the same batch that set
+    // `marking`, so this render's `save` closure carries it.
+    save().finally(() => setMarking(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marking]);
+
+  const handleMarkAnswered = () => {
+    update("estado")("respondida");
+    setMarking(true);
+  };
+
+  return (
+    <div className="rounded-lg border border-brand-200 bg-white p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="font-semibold text-stone-800">{richTextToPlainText(item.motivo)}</div>
+        <span className="shrink-0 rounded-full bg-amber-100 px-2 py-1 text-xs font-bold text-amber-800">
+          Pendiente
+        </span>
+      </div>
+      <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-stone-400">{formatDate(itemDate(item))}</div>
+      {item.notas ? <p className="mt-2 text-sm leading-6 text-stone-600">{richTextToPlainText(item.notas)}</p> : null}
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={() => props.onOpenRecord(item)}
+          className="rounded-md border border-brand-300 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-900 hover:bg-brand-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+        >
+          Editar
+        </button>
+        <button
+          type="button"
+          onClick={handleMarkAnswered}
+          disabled={marking}
+          className="rounded-md border border-leaf-300 bg-leaf-50 px-3 py-1.5 text-xs font-semibold text-leaf-900 hover:bg-leaf-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf-400 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Marcar respuesta recibida
+        </button>
       </div>
     </div>
   );

@@ -132,7 +132,11 @@ with rows and asserts they survive — that is the regression net for data loss.
 ## Testing
 
 Main-process code only. **The React UI is deliberately not unit-tested** —
-verify UI work by running the app.
+verify UI work by running the app. `npm run test:ui` automates the coarse half
+of that: it serves the app against the fixture bridge, drives all seventeen
+screens and dialogs in a real browser, and fails if any of them stops
+rendering. It catches a screen that no longer paints, not a screen that paints
+wrongly — for that, still look at it.
 
 `vitest.config.ts` aliases the `electron` module to `test/electron-stub.ts`,
 which records `ipcMain.handle` registrations so tests drive the real handlers

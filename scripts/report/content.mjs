@@ -50,6 +50,13 @@ export const REPORT = {
     },
     {
       tag: "Nuevo",
+      text: `Las interconsultas ahora tienen estado: pendiente o respondida. El
+        Resumen muestra un panel de items abiertos con las que esperan
+        respuesta y se marcan como recibidas desde ahí. Las interconsultas ya
+        cargadas quedan como pendientes.`,
+    },
+    {
+      tag: "Nuevo",
       text: `Pantalla de Resumen con indicadores de última visita, peso e IMC,
         líneas de tendencia, antecedentes y medicación editables en el lugar, y
         novedades consultables.`,
@@ -301,21 +308,16 @@ export const REPORT = {
   ],
 
   pending: [
-    `<strong>Interconsultas pendientes.</strong> El diseño preveía un panel de
-     "items abiertos" con las interconsultas sin responder, pero la tabla
-     <code>Interconsultas</code> no tiene columna de estado: no hay dato con el
-     que marcar una como pendiente. En ese lugar se muestran las interconsultas
-     cargadas. Implementarlo de verdad requiere una columna nueva y su
-     migración.`,
-    `<strong>Datos de prueba.</strong> Para poder ver las líneas de tendencia de
-     peso e IMC se cargaron seis mediciones de prueba en la base local
-     (identificadores que empiezan con <code>SEED-</code>), con copia de
-     seguridad previa. Hay que quitarlas antes de publicar.`,
-    `<strong>Código sin uso.</strong> El componente de área de texto plana ya no
-     tiene ningún consumidor después del cambio al editor enriquecido.`,
+    `<strong>Sin cifrado ni usuarios.</strong> Sigue siendo el punto abierto más
+     importante y no es un descuido de esta iteración: la base no está cifrada y
+     la aplicación no distingue quién la usa. Resolverlo es un trabajo en sí
+     mismo, con su propia migración y su propia decisión sobre dónde vive la
+     clave.`,
     `<strong>Cobertura de la interfaz.</strong> Por decisión del proyecto la
-     interfaz no se prueba de forma unitaria: se verifica ejecutando la
-     aplicación. La cobertura informada corresponde al proceso principal.`,
+     interfaz no se prueba de forma unitaria. Lo que sí quedó automatizado es
+     <code>npm run test:ui</code>: levanta la aplicación real y la recorre por
+     las diecisiete pantallas de este reporte, y falla si alguna deja de
+     dibujarse. La cobertura numérica sigue midiendo el proceso principal.`,
   ],
 
   releases: [

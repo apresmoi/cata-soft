@@ -6,11 +6,12 @@ import { PrismaClient } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
 const MIGRATIONS = path.resolve(__dirname, "..", "prisma", "migrations");
-const ALL = [
-  "20250113040249_init",
-  "20250114033738_agregar_edad",
-  "20250117023259_pacientes",
-];
+// Read off disk in timestamp order rather than restated here: a hardcoded copy
+// makes every new migration look like a test failure.
+const ALL = fs
+  .readdirSync(MIGRATIONS)
+  .filter((name) => /^\d{14}_/.test(name))
+  .sort();
 
 // Simulate an already-installed copy that is one migration behind, then let
 // startup upgrade it. The database path must exist before
@@ -68,7 +69,9 @@ describe("initDatabase on an existing installation", () => {
     const result = await initDatabase();
 
     expect(result.dbPath).toBe(dbPath);
-    expect(result.applied).toEqual([ALL[2]]);
+    // Whatever migrations postdate the seeded pair, not a hardcoded one: this
+    // assertion used to break every time a migration was added.
+    expect(result.applied).toEqual(ALL.slice(2));
 
     // A snapshot must exist before a schema change touches patient data.
     expect(result.backup).not.toBeNull();
