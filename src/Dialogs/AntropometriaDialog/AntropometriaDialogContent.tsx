@@ -22,14 +22,31 @@ export function AntropometriaDialogContent(
 ) {
   const { update, data, invalid } = props;
 
+  // IMC is derived from peso and talla (kg / m^2), never typed directly, and
+  // rounded to one decimal: that is the precision the value is read at, and
+  // storing 24.671201814058956 would only render as noise.
+  const peso = Number(data?.peso) || 0;
+  const talla = Number(data?.talla) || 0;
+  const imc = talla > 0 ? Math.round((peso / (talla * talla)) * 10) / 10 : 0;
+
+  React.useEffect(() => {
+    // Keep the saved value in sync with the computed one so the save path
+    // still persists whatever `update("imc")` receives.
+    update("imc")(imc);
+    // Only recompute when the source values change -- `update` is a fresh
+    // closure every render and would otherwise re-fire this every time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peso, talla]);
+
   return (
-    <div className="flex gap-2 flex-col p-4 h-[auto]">
+    // One field per row, label beside its input: four short scalars read as a
+    // list, not a grid.
+    <div className="flex min-w-0 flex-col gap-3">
       <PatientCardAgeDateField
         icon={<CalendarIcon />}
         label="FECHA"
         onChange={update("fecha")}
         value={data?.fecha}
-        align="right"
         inline
       />
       <PatientCardField
@@ -37,7 +54,7 @@ export function AntropometriaDialogContent(
         label="PESO"
         onChange={update("peso")}
         value={data?.peso || 0}
-        align="right"
+        numeric
         inline
         invalid={invalid?.includes("peso")}
       />
@@ -46,7 +63,7 @@ export function AntropometriaDialogContent(
         label="TALLA"
         onChange={update("talla")}
         value={data?.talla || 0}
-        align="right"
+        numeric
         inline
         invalid={invalid?.includes("talla")}
       />
@@ -55,8 +72,9 @@ export function AntropometriaDialogContent(
         label="IMC"
         onChange={update("imc")}
         value={data?.imc || 0}
-        align="right"
+        numeric
         inline
+        disabled
         invalid={invalid?.includes("imc")}
       />
     </div>

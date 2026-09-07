@@ -25,6 +25,10 @@ release/
 dist/mac-arm64/
 coverage/
 
+# Development report build output
+docs/*.pdf
+scripts/report/captures/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -45,7 +45,7 @@ export function NewHospitalizacionDialogDialog(
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger>{props.children}</DialogTrigger>
-      <DialogContainer>
+      <DialogContainer maxWidth={640}>
         <DialogTitle>NUEVA HOSPITALIZACION</DialogTitle>
 
         <HospitalizacionDialogContent update={update} data={data} invalid={invalid(data)} />

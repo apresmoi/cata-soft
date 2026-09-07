@@ -1,6 +1,12 @@
 import React from "react";
 
-const FIELD_SELECTOR = "input, textarea, select";
+/*
+ * `[contenteditable]` is in here because the clinical free-text fields are a
+ * Lexical editor, not a `<textarea>`. Without it, swapping those fields over
+ * silently disabled both the focus-on-open and the focus-on-tab-switch this
+ * hook exists to provide.
+ */
+const FIELD_SELECTOR = 'input, textarea, select, [contenteditable="true"]';
 
 /**
  * Put the cursor in the first data-entry field inside `container`.
@@ -38,6 +44,16 @@ export function focusFirstField(container: HTMLElement | null): boolean {
     } catch {
       // Focus alone is enough for those.
     }
+  } else if (field.isContentEditable) {
+    // A rich-text editor has no `value`/`setSelectionRange`, so collapse a
+    // range onto the end of its content to get the same caret-at-the-end
+    // behaviour.
+    const range = document.createRange();
+    range.selectNodeContents(field);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
   }
 
   return true;

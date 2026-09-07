@@ -1,31 +1,23 @@
 import React from "react";
-import { LAYOUTS, SCREENS, VARIANTS, type ScreenId } from "./variants";
+import { LAYOUTS } from "./variants";
 
 const FRAME_WIDTH = 1440;
 const FRAME_HEIGHT = 900;
 
 /**
- * Comparison board. Two modes:
- *  - "variants": the same screens re-skinned by CSS only.
- *  - "layouts":  full alternative designs, free to restructure anything.
+ * Layout gallery. Full alternative designs, free to restructure anything.
  *
  * Each entry renders in an iframe at a real desktop viewport, scaled to fit.
  * Click a title to open it full size.
  */
-export function Gallery(props: { mode: "variants" | "layouts" }) {
-  const layouts = props.mode === "layouts";
-  const [screen, setScreen] = React.useState<ScreenId>("patient");
+export function Gallery() {
   const [columns, setColumns] = React.useState(2);
   const [only, setOnly] = React.useState<string | null>(null);
 
-  const entries = layouts ? LAYOUTS : VARIANTS;
-  const shown = only ? entries.filter((entry) => entry.id === only) : entries;
+  const shown = only ? LAYOUTS.filter((entry) => entry.id === only) : LAYOUTS;
   const scale = 1 / columns;
 
-  const url = (id: string) =>
-    layouts
-      ? `/design.html?layout=${id}`
-      : `/design.html?variant=${id}&screen=${screen}`;
+  const url = (id: string) => `/design.html?layout=${id}`;
 
   const tab = (active: boolean) =>
     "rounded-md px-3 py-1 text-sm transition-colors " +
@@ -34,32 +26,7 @@ export function Gallery(props: { mode: "variants" | "layouts" }) {
   return (
     <div className="min-h-screen bg-stone-900 text-stone-100">
       <header className="sticky top-0 z-10 flex flex-wrap items-center gap-4 border-b border-stone-700 bg-stone-900/95 px-6 py-4 backdrop-blur">
-        <h1 className="text-lg font-bold">
-          CataSoft — {layouts ? "rediseños de layout" : "variantes de color"}
-        </h1>
-
-        <div className="flex items-center gap-1 rounded-lg bg-stone-800 p-1">
-          <a href="/design.html" className={tab(!layouts)}>
-            Color
-          </a>
-          <a href="/design.html?mode=layouts" className={tab(layouts)}>
-            Layout
-          </a>
-        </div>
-
-        {!layouts && (
-          <div className="flex items-center gap-1 rounded-lg bg-stone-800 p-1">
-            {SCREENS.map((entry) => (
-              <button
-                key={entry.id}
-                onClick={() => setScreen(entry.id)}
-                className={tab(screen === entry.id)}
-              >
-                {entry.label}
-              </button>
-            ))}
-          </div>
-        )}
+        <h1 className="text-lg font-bold">CataSoft — rediseños de layout</h1>
 
         <div className="flex items-center gap-1 rounded-lg bg-stone-800 p-1">
           {[1, 2, 3].map((count) => (
@@ -79,7 +46,7 @@ export function Gallery(props: { mode: "variants" | "layouts" }) {
           className="rounded-lg bg-stone-800 px-3 py-1.5 text-sm outline-none"
         >
           <option value="">Todas</option>
-          {entries.map((entry) => (
+          {LAYOUTS.map((entry) => (
             <option key={entry.id} value={entry.id}>
               {entry.label}
             </option>
@@ -87,9 +54,7 @@ export function Gallery(props: { mode: "variants" | "layouts" }) {
         </select>
 
         <p className="ml-auto text-sm text-stone-400">
-          {layouts
-            ? "Rediseños completos: tablas, modales, navegación y export."
-            : "Componentes reales, solo cambian los estilos."}
+          Rediseños completos: tablas, modales, navegación y export.
         </p>
       </header>
 

@@ -1,9 +1,10 @@
 import React from "react";
 import {
   PatientCardAgeDateField,
-  PatientCardTextAreaField,
+  PatientCardSelect,
+  RichTextField,
 } from "../../components";
-import { CalendarIcon } from "@radix-ui/react-icons";
+import { CalendarIcon, CheckCircledIcon } from "@radix-ui/react-icons";
 import { useInterconsulta, useNewInterconsulta } from "../../hooks";
 import { Tab } from "../../components/Tabs";
 import { TabsContainer } from "../../components/Tabs";
@@ -22,17 +23,32 @@ export function InterconsultasDialogContent(
   const { update, data, invalid = [] } = props;
 
   return (
-    <div className="flex gap-2 flex-col p-4 h-[60vh]">
-      <PatientCardAgeDateField
-        icon={<CalendarIcon />}
-        label="FECHA"
-        onChange={update("fecha")}
-        value={data?.fecha}
-        className="max-w-[200px]"
-      />
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex flex-wrap items-start gap-3">
+        <PatientCardAgeDateField
+          icon={<CalendarIcon />}
+          label="FECHA"
+          onChange={update("fecha")}
+          value={data?.fecha}
+          className="max-w-[288px]"
+          inline
+        />
+        <PatientCardSelect
+          icon={<CheckCircledIcon />}
+          label="ESTADO"
+          onChange={update("estado")}
+          value={data?.estado ?? "pendiente"}
+          options={[
+            { value: "pendiente", label: "Pendiente" },
+            { value: "respondida", label: "Respondida" },
+          ]}
+          className="max-w-[220px]"
+          inline
+        />
+      </div>
       <TabsContainer>
         <Tab name="MOTIVO">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="MOTIVO"
             onChange={update("motivo")}
             value={data?.motivo || ""}
@@ -41,7 +57,7 @@ export function InterconsultasDialogContent(
           />
         </Tab>
         <Tab name="NOTAS">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="NOTAS"
             onChange={update("notas")}
             value={data?.notas || ""}

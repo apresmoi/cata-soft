@@ -11,24 +11,23 @@ export function DialogButton(
     <button
       disabled={props.disabled}
       className={cx(
-        "p-2 flex items-center gap-2 rounded-lg select-none transition-all duration-300",
+        "inline-flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium select-none transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2",
 
-        !props.variant && "hover:bg-stone-900",
+        !props.variant &&
+          "border border-stone-300 bg-white text-stone-700 hover:bg-stone-50",
 
-        props.variant === "primary" &&
-          "bg-green-800 hover:bg-green-900 hover:text-gray-200",
+        props.variant === "primary" && "bg-brand-600 text-white hover:bg-brand-700",
 
         props.variant === "secondary" &&
-          "bg-purple-800 hover:bg-purple-900 hover:text-gray-200",
+          "bg-stone-600 text-white hover:bg-stone-700",
 
-        props.variant === "danger" &&
-          "bg-red-800 hover:bg-red-900 hover:text-gray-200",
+        props.variant === "danger" && "bg-red-600 text-white hover:bg-red-700",
 
         props.variant === "warning" &&
-          "bg-yellow-800 hover:bg-yellow-900 hover:text-gray-200",
+          "bg-amber-600 text-white hover:bg-amber-700",
 
         props.variant === "info" &&
-          "bg-blue-800 hover:bg-blue-900 hover:text-gray-200",
+          "bg-vessel-600 text-white hover:bg-vessel-700",
 
         props.disabled && "opacity-50 cursor-not-allowed"
       )}

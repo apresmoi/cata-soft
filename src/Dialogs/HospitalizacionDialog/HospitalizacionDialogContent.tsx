@@ -1,7 +1,7 @@
 import React from "react";
 import {
   PatientCardAgeDateField,
-  PatientCardTextAreaField,
+  RichTextField,
 } from "../../components";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { useHospitalizacion, useNewHospitalizacion } from "../../hooks";
@@ -22,26 +22,26 @@ export function HospitalizacionDialogContent(
   const { update, data, invalid = [] } = props;
 
   return (
-    <div className="flex gap-2 flex-col p-4 h-[60vh]">
-      <div className="flex gap-2">
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <PatientCardAgeDateField
           icon={<CalendarIcon />}
           label="FECHA INGRESO"
           onChange={update("fechaIngreso")}
           value={data?.fechaIngreso}
-          className="w-[200px]"
+          inline
         />
         <PatientCardAgeDateField
           icon={<CalendarIcon />}
           label="FECHA EGRESO"
           onChange={update("fechaEgreso")}
           value={data?.fechaEgreso}
-          className="w-[200px]"
+          inline
         />
       </div>
       <TabsContainer>
         <Tab name="MOTIVO">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="MOTIVO"
             onChange={update("motivo")}
             value={data?.motivo || ""}
@@ -50,7 +50,7 @@ export function HospitalizacionDialogContent(
           />
         </Tab>
         <Tab name="NOTAS">
-          <PatientCardTextAreaField
+          <RichTextField
             // label="NOTAS"
             onChange={update("notas")}
             value={data?.notas || ""}

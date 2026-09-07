@@ -64,6 +64,14 @@ export const dialog = {
   showErrorBox(title: string, content: string) {
     dialog.errors.push({ title, content });
   },
+  /** Tests set this to steer the next save dialog. */
+  saveResult: { canceled: true, filePath: undefined } as {
+    canceled: boolean;
+    filePath?: string;
+  },
+  async showSaveDialog() {
+    return dialog.saveResult;
+  },
 };
 
 export const BrowserWindow = class {};

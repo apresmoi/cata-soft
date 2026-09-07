@@ -46,33 +46,41 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
   return (
     <div
       className={cx(
-        "w-[100%] flex gap-2",
-        props.className,
-        props.inline ? "flex-row" : "flex-col"
+        props.inline
+          ? "grid min-w-0 grid-cols-[64px_minmax(0,1fr)] items-center gap-x-2"
+          : "flex min-w-0 flex-col gap-1",
+        props.className
       )}
     >
-      <div className={cx("flex items-center gap-2  select-none")}>
-        {props.icon} {props.label}
-      </div>
       <div
-        data-skip-autofocus
         className={cx(
-          "w-full",
-          // Same fixed width as the other inline fields so they all line up.
-          props.inline && "ml-auto w-28 shrink-0"
+          "flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500",
+          props.inline && "truncate"
         )}
       >
+        {props.icon} {props.label}
+      </div>
+      <div data-skip-autofocus className="min-w-0 w-full">
         <DatePicker
           selected={value}
           required
           onChange={(date) => props.onChange?.(date as Date)}
           className={cx(
-            "dark:text-stone-100 p-2 outline-none bg-stone-600 w-full rounded-lg",
+            "box-border h-9 min-w-0 w-full rounded-md border border-stone-400 bg-white px-3 py-0 text-sm leading-5 text-stone-900 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-1",
             props.align === "right" ? "text-right" : ""
           )}
           dateFormat={"dd/MM/yyyy"}
-          wrapperClassName="custom-styles w-full"
-          popperClassName="custom-styles z-20"
+          wrapperClassName="w-full"
+          popperClassName="z-20"
+          calendarClassName="bg-white border border-stone-200 rounded-lg shadow-lg text-stone-800"
+          weekDayClassName={() => "text-stone-500"}
+          monthClassName={() => "text-stone-800"}
+          dayClassName={(date) =>
+            cx("rounded-md hover:bg-brand-50", {
+              "bg-brand-600 text-white hover:bg-brand-600":
+                date.toDateString() === value?.toDateString(),
+            })
+          }
           renderCustomHeader={({
             date,
             changeYear,
@@ -82,18 +90,18 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
             prevMonthButtonDisabled,
             nextMonthButtonDisabled,
           }) => (
-            <div className="flex justify-between px-2">
+            <div className="flex justify-between px-2 py-2">
               <button
                 onClick={decreaseMonth}
                 disabled={prevMonthButtonDisabled}
-                className="outline-none bg-stone-600 text-stone-100 hover:bg-stone-800 rounded-lg p-2 transition-all duration-300"
+                className="outline-none bg-white text-stone-700 hover:bg-brand-50 rounded-lg p-2 transition-all duration-300"
               >
                 <ChevronLeftIcon />
               </button>
               <select
                 value={getYear(date)}
                 onChange={({ target: { value } }) => changeYear(Number(value))}
-                className="outline-none bg-stone-600 text-stone-100  rounded-sm px-2"
+                className="outline-none bg-white text-stone-800 rounded-sm px-2"
               >
                 {years.map((option) => (
                   <option key={option} value={option}>
@@ -107,7 +115,7 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
                 onChange={({ target: { value } }) =>
                   changeMonth(months.indexOf(value))
                 }
-                className="outline-none bg-stone-600 text-stone-100  rounded-sm px-4"
+                className="outline-none bg-white text-stone-800 rounded-sm px-4"
               >
                 {months.map((option) => (
                   <option key={option} value={option}>
@@ -119,7 +127,7 @@ export function PatientCardAgeDateField(props: PatientCardDateFieldProps) {
               <button
                 onClick={increaseMonth}
                 disabled={nextMonthButtonDisabled}
-                className="outline-none bg-stone-600 text-stone-100 hover:bg-stone-800 rounded-lg p-2"
+                className="outline-none bg-white text-stone-700 hover:bg-brand-50 rounded-lg p-2"
               >
                 <ChevronRightIcon />
               </button>

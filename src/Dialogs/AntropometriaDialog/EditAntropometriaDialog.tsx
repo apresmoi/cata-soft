@@ -46,7 +46,7 @@ export function EditAntropometriaDialog(
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContainer maxWidth={320}>
+      <DialogContainer maxWidth={288}>
         <DialogTitle>EDITAR ANTROPOMETRIA</DialogTitle>
 
         <AntropometriaDialogContent

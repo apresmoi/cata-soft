@@ -1,22 +1,9 @@
-import { createRequire } from "node:module";
 import { getDbPath, getUploadsDir } from "./database";
 import { dialog, ipcMain, shell } from "electron";
+import archiver from "archiver";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
-
-// archiver is CJS; Vite cannot default-import it into the main-process bundle.
-const archiver = createRequire(import.meta.url)("archiver") as (
-  format: string,
-  opts?: { zlib?: { level: number } }
-) => {
-  on(event: string, cb: (err?: Error) => void): unknown;
-  pipe(stream: NodeJS.WritableStream): unknown;
-  file(src: string, opts: { name: string }): unknown;
-  directory(src: string, dest: string): unknown;
-  finalize(): unknown;
-};
-
 
 import {
   getPacientes,

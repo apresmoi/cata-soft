@@ -4,16 +4,16 @@ export function TabsHeader() {
   const { tabs, currentTab, setCurrentTab } = useTabs();
 
   return (
-    <div className="flex flex-row">
+    <div className="flex h-8 shrink-0 items-stretch gap-1 overflow-x-auto border-b border-stone-200">
       {tabs.map((tab) => (
         <button
           key={tab}
           onClick={() => setCurrentTab(tab)}
           className={cx(
-            "px-4 py-2 border-b w-full whitespace-nowrap hover:bg-gray-500/10 transition-all duration-300",
+            "inline-flex h-8 shrink-0 items-center border-b-2 px-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400",
             currentTab === tab
-              ? "border-blue-500 text-blue-500"
-              : "border-gray-200 text-white"
+              ? "border-brand-600 text-brand-600"
+              : "border-transparent text-stone-600 hover:bg-stone-50 hover:text-stone-900"
           )}
         >
           {tab}

@@ -43,7 +43,7 @@ export function EditEvolucionDialog(
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContainer>
+      <DialogContainer maxWidth={640}>
         <DialogTitle>EDITAR EVOLUCION</DialogTitle>
 
         <EvolucionDialogContent update={update} data={data} invalid={invalid(data ?? undefined)} />

@@ -12,7 +12,12 @@ import {
 } from "../electron/database";
 
 const REAL_MIGRATIONS = path.resolve(__dirname, "..", "prisma", "migrations");
-const ALL = ["20250113040249_init", "20250114033738_agregar_edad", "20250117023259_pacientes"];
+// Read off disk in timestamp order rather than restated here: a hardcoded copy
+// makes every new migration look like a test failure.
+const ALL = fs
+  .readdirSync(REAL_MIGRATIONS)
+  .filter((name) => /^\d{14}_/.test(name))
+  .sort();
 
 const clients: PrismaClient[] = [];
 
@@ -93,7 +98,7 @@ describe("migrateDatabase", () => {
 
     // Ship the update: the third migration rebuilds the Pacientes table.
     const upgraded = await migrateDatabase(client, REAL_MIGRATIONS);
-    expect(upgraded).toEqual([ALL[2]]);
+    expect(upgraded).toEqual(ALL.slice(2));
 
     const pacientes = await client.$queryRawUnsafe<
       { id: string; nombre: string; documento: string; antecedentes: string | null }[]
@@ -177,7 +182,7 @@ describe("migrateDatabase", () => {
     >(`SELECT migration_name, checksum, applied_steps_count, finished_at, rolled_back_at
        FROM "_prisma_migrations" ORDER BY started_at`);
 
-    expect(rows).toHaveLength(3);
+    expect(rows).toHaveLength(4);
     for (const row of rows) {
       const sql = fs.readFileSync(
         path.join(REAL_MIGRATIONS, row.migration_name, "migration.sql"),
@@ -210,6 +215,58 @@ describe("migrateDatabase", () => {
     const applied = await appliedMigrationNames(client);
     expect(applied.has(ALL[0])).toBe(true);
     expect(applied.has("20260101000000_broken")).toBe(false);
+  });
+
+  it("preserves an existing interconsulta and marks it pendiente after the estado migration", async () => {
+    // An installed copy that only ever saw the three pre-existing migrations.
+    const { client } = newDatabase();
+    const applied = await migrateDatabase(client, migrationsSubset(ALL.slice(0, 3)));
+    expect(applied).toEqual(ALL.slice(0, 3));
+
+    const pacienteId = await insertPatientWithHistory(client);
+    const interconsultaId = crypto.randomUUID();
+    const fecha = new Date("2024-03-01T00:00:00.000Z").toISOString();
+    const now = new Date().toISOString();
+
+    await client.$executeRawUnsafe(
+      `INSERT INTO "Interconsultas"
+         ("id","pacienteId","fecha","motivo","notas","createdAt","updatedAt")
+       VALUES (?,?,?,?,?,?,?)`,
+      interconsultaId,
+      pacienteId,
+      fecha,
+      "Evaluación cardiológica",
+      "Paciente con antecedentes de hipertensión",
+      now,
+      now
+    );
+
+    // Ship the update: the fourth migration adds the estado column.
+    const upgraded = await migrateDatabase(client, REAL_MIGRATIONS);
+    expect(upgraded).toEqual([ALL[3]]);
+
+    const interconsultas = await client.$queryRawUnsafe<
+      {
+        id: string;
+        pacienteId: string;
+        fecha: string;
+        motivo: string;
+        notas: string | null;
+        estado: string;
+      }[]
+    >(
+      `SELECT id, pacienteId, fecha, motivo, notas, estado FROM "Interconsultas"`
+    );
+
+    expect(interconsultas).toHaveLength(1);
+    expect(interconsultas[0]).toMatchObject({
+      id: interconsultaId,
+      pacienteId,
+      motivo: "Evaluación cardiológica",
+      notas: "Paciente con antecedentes de hipertensión",
+      estado: "pendiente",
+    });
+    expect(new Date(interconsultas[0].fecha).toISOString()).toBe(fecha);
   });
 });
 

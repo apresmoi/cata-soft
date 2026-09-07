@@ -15,6 +15,8 @@ interface PatientCardFieldProps<T> {
   inline?: boolean;
   /** Draw a red ring: a required field left empty on save. */
   invalid?: boolean;
+  /** Cap the control at 144px and right-align digits; unit stays outside. */
+  numeric?: boolean;
 }
 
 export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
@@ -27,26 +29,45 @@ export function PatientCardField<T>(props: PatientCardFieldProps<T>) {
   return (
     <div
       className={cx(
-        "w-[100%] flex gap-2",
-        props.inline ? "flex-row" : "flex-col",
+        // Inline rows are a fixed 64px label column plus a filling control
+        // column; a flex row here previously let the label collapse to 0px
+        // and the control drift to the far edge.
+        props.inline
+          ? "grid min-w-0 grid-cols-[64px_minmax(0,1fr)] items-center gap-x-2"
+          : "flex min-w-0 flex-col gap-1",
         props.className
       )}
     >
-      <div className={cx("flex items-center gap-2 select-none")}>
-        {props.icon} {props.label}
-      </div>
       <div
         className={cx(
-          "w-full",
-          // Fixed width so every inline field lines up at the same size.
-          props.inline && "ml-auto w-28 shrink-0"
+          "flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500 select-none",
+          props.inline && "truncate"
         )}
       >
+        {props.icon} {props.label}
+      </div>
+      {/*
+       * A capped numeric box is pushed to the row's right edge so it shares
+       * that edge with the full-width controls above and below it, instead of
+       * ending short of them.
+       */}
+      <div className={cx("flex min-w-0 w-full", props.numeric && "justify-end")}>
         <input
           className={cx(
-            "w-full bg-stone-600 outline-0 p-2 rounded-lg",
+            "box-border h-9 min-w-0 w-full rounded-md border px-3 py-0 text-sm leading-5 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-1",
+            // A three-digit measurement does not need 256px, and a number
+            // belongs right-aligned so the digits line up column-wise. An
+            // explicit `align` still overrides, since it comes after.
+            props.numeric && "max-w-[144px] text-right tabular-nums",
             props.align === "center" && "text-center",
             props.align === "right" && "text-right",
+            props.align === "left" && "text-left",
+            // Chosen, not layered: `bg-stone-50` and `bg-white` have equal
+            // specificity, so adding one on top of the other left a derived
+            // field looking perfectly typeable.
+            props.disabled
+              ? "cursor-not-allowed border-stone-300 bg-stone-50 text-stone-700"
+              : "border-stone-400 bg-white text-stone-900",
             // A ring is painted outside the box, so flagging a field does not
             // move anything around it.
             props.invalid && "ring-2 ring-red-500"

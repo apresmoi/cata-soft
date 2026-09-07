@@ -39,7 +39,7 @@ export function CloseWithoutSavingDialog(
           <ExclamationTriangleIcon />
           Tenes cambios sin guardar!
         </DialogTitle>
-        <div className="flex gap-2 flex-col p-4">
+        <div className="flex gap-2 flex-col p-5">
           CATAAAAAA, hiciste algunos cambios en el paciente
           <br />
           <br />

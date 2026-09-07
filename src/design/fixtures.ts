@@ -84,8 +84,21 @@ const interconsulta = {
   fecha: daysAgo(21),
   motivo: "Cardiologia",
   notas: "Se solicita ecocardiograma y evaluacion de riesgo cardiovascular.",
+  estado: "pendiente",
   createdAt: daysAgo(21),
   updatedAt: daysAgo(21),
+};
+
+// An answered one, so "Items abiertos" is seen filtering rather than just listing.
+const interconsultaRespondida = {
+  id: "i2",
+  pacienteId: "p1",
+  fecha: daysAgo(45),
+  motivo: "Nutricion",
+  notas: "Plan alimentario entregado.",
+  estado: "respondida",
+  createdAt: daysAgo(45),
+  updatedAt: daysAgo(40),
 };
 
 const antropometria = {
@@ -125,6 +138,7 @@ const historial = [
   { ...evolucion, type: "evolucion" },
   { ...antropometria, type: "antropometria" },
   { ...interconsulta, type: "interconsulta" },
+  { ...interconsultaRespondida, type: "interconsulta" },
   { ...archivo, type: "archivoadjunto" },
   { ...hospitalizacion, fecha: hospitalizacion.fechaIngreso, type: "hospitalizacion" },
 ];

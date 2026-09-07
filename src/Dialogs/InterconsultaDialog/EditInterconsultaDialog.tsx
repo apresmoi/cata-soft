@@ -43,7 +43,7 @@ export function EditInterconsultaDialog(
   return (
     <Dialog open={true} onOpenChange={(open) => !open && handleClose()}>
       <DialogTrigger>{props.children}</DialogTrigger>
-      <DialogContainer>
+      <DialogContainer maxWidth={640}>
         <DialogTitle>EDITAR INTERCONSULTA</DialogTitle>
 
         <InterconsultasDialogContent update={update} data={data} invalid={invalid(data ?? undefined)} />

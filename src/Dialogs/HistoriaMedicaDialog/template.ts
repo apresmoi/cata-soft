@@ -5,6 +5,7 @@ import {
   Interconsultas,
 } from "@prisma/client";
 import { PacienteHistoryItem, usePaciente } from "../../hooks";
+import { richTextToHtml } from "../../richText";
 
 // Escapes values interpolated into the printable HTML template. Every value
 // that originates from the database (patient demographics, history notes)
@@ -19,6 +20,14 @@ const esc = (v: unknown): string =>
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+
+// The clinical free-text fields (antecedentes, medicacionHabitual, motivo,
+// examenFisico, plan, notas) store editor-produced HTML instead of plain
+// text, so escaping them here would print the literal tag text on paper.
+// `richTextToHtml` sanitises against the closed allowlist in `richText.ts`
+// (`p br strong b em i u s ul ol li`, no attributes) and escapes+wraps
+// legacy plain text, so it is the one interpolation path allowed to emit
+// markup instead of `esc`. Every other value below stays on `esc`.
 
 const head = `<head>
     <meta charset="UTF-8" />
@@ -186,14 +195,14 @@ const headerFormatter = (paciente: ReturnType<typeof usePaciente>["data"]) => {
     <div class="section">
       <div class="section-title">ANTECEDENTES</div>
       <div class="section-content">
-        ${esc(paciente?.antecedentes)}
+        ${richTextToHtml(paciente?.antecedentes)}
       </div>
     </div>
 
     <div class="section">
       <div class="section-title">MEDICACION HABITUAL</div>
       <div class="section-content">
-        ${esc(paciente?.medicacionHabitual)}
+        ${richTextToHtml(paciente?.medicacionHabitual)}
       </div>
     </div>
   </div>`;
@@ -237,11 +246,11 @@ const hospitalizacionFormatter = (history: Hospitalizaciones) => {
                 </div>
                 <div class="history-field">
                     <span class="history-label">MOTIVO:</span>
-                    <span class="history-value">${esc(history.motivo || "")}</span>
+                    <span class="history-value">${richTextToHtml(history.motivo || "")}</span>
                 </div>
                 <div class="history-field">
                     <span class="history-label">NOTAS:</span>
-                    <span class="history-value">${esc(history.notas || "")}</span>
+                    <span class="history-value">${richTextToHtml(history.notas || "")}</span>
                 </div>
             </div>`;
 };
@@ -253,13 +262,13 @@ const interconsultaFormatter = (history: Interconsultas) => {
                     )}</div>
                     <div class="history-field">
                         <span class="history-label">MOTIVO:</span>
-                        <span class="history-value">${esc(
+                        <span class="history-value">${richTextToHtml(
                           history.motivo || ""
                         )}</span>
                     </div>
                     <div class="history-field">
                         <span class="history-label">NOTAS:</span>
-                        <span class="history-value">${esc(
+                        <span class="history-value">${richTextToHtml(
                           history.notas || ""
                         )}</span>
                     </div>
@@ -273,19 +282,19 @@ const evolucionFormatter = (history: Evoluciones) => {
                         )}</div>
                         <div class="history-field">
                             <span class="history-label">MOTIVO:</span>
-                            <span class="history-value">${esc(
+                            <span class="history-value">${richTextToHtml(
                               history.motivo || ""
                             )}</span>
                         </div>
                         <div class="history-field">
                             <span class="history-label">EXAMEN FÍSICO:</span>
-                            <span class="history-value">${esc(
+                            <span class="history-value">${richTextToHtml(
                               history.examenFisico || ""
                             )}</span>
                         </div>
                         <div class="history-field">
                             <span class="history-label">PLAN:</span>
-                            <span class="history-value">${esc(
+                            <span class="history-value">${richTextToHtml(
                               history.plan || ""
                             )}</span>
                         </div>

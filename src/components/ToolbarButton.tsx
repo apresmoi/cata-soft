@@ -24,27 +24,27 @@ export function ToolbarButton(
     <button
       disabled={props.disabled}
       className={classNames(
-        "p-2 flex items-center gap-2 rounded-lg select-none transition-all duration-300",
+        "p-2 flex items-center gap-2 rounded-lg select-none transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400",
 
         // Muted and click-through-proof, but the colour stays recognisable.
         props.disabled && "opacity-40 cursor-not-allowed",
 
-        !props.variant && !props.disabled && "hover:bg-stone-900",
+        !props.variant && classNames("text-stone-700", !props.disabled && "hover:bg-stone-100"),
 
         props.variant === "primary" &&
-          classNames("bg-green-800", !props.disabled && "hover:bg-green-900 hover:text-gray-200"),
+          classNames("bg-brand-600 text-white", !props.disabled && "hover:bg-brand-700"),
 
         props.variant === "secondary" &&
-          classNames("bg-purple-800", !props.disabled && "hover:bg-purple-900 hover:text-gray-200"),
+          classNames("bg-vessel-600 text-white", !props.disabled && "hover:bg-vessel-700"),
 
         props.variant === "danger" &&
-          classNames("bg-red-800", !props.disabled && "hover:bg-red-900 hover:text-gray-200"),
+          classNames("bg-red-600 text-white", !props.disabled && "hover:bg-red-700"),
 
         props.variant === "warning" &&
-          classNames("bg-yellow-800", !props.disabled && "hover:bg-yellow-900 hover:text-gray-200"),
+          classNames("bg-amber-500 text-white", !props.disabled && "hover:bg-amber-600"),
 
         props.variant === "info" &&
-          classNames("bg-blue-800", !props.disabled && "hover:bg-blue-900 hover:text-gray-200")
+          classNames("bg-stone-700 text-white", !props.disabled && "hover:bg-stone-800")
       )}
       onClick={handleClick}
     >

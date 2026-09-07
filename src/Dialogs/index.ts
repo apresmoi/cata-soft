@@ -6,3 +6,6 @@ export * from "./HospitalizacionDialog";
 export * from "./CloseWithoutSavingDialog";
 export * from "./ArchivoAdjuntoDialog";
 export * from "./HistoriaMedicaDialog/HistoriaMedicaDialog";
+export * from "./EditPacienteDialog";
+export * from "./EditPacienteNotasDialog";
+export * from "./ConfiguracionDialog";

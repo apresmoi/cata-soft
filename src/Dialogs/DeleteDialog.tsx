@@ -30,7 +30,7 @@ export function DeleteDialog(
         <DialogTitle>
           <ExclamationTriangleIcon /> ¿Estás segura?
         </DialogTitle>
-        <div className="flex gap-2 flex-col p-4">
+        <div className="flex gap-2 flex-col p-5">
           Vas a eliminar un registro, despues ya no va a existir, y no lo vas a
           poder ver mas. ¿Estás segura de que querés hacerlo?
           <br />

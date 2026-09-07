@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CataSoft — Vista previa para el reporte</title>
+  </head>
+  <body class="overflow-hidden bg-stone-100 text-stone-900">
+    <!--
+      This harness exists only so scripts/report/capture.mjs can screenshot
+      the real app UI from a plain browser. A plain browser has no
+      window.ipcRenderer (that bridge is Electron-only), so it renders App
+      against the design-board fixture bridge instead of the live app. It is
+      not part of the shipped app: index.html remains the app's only entry.
+    -->
+    <div id="root" class="h-screen w-screen"></div>
+    <script type="module">
+      import "/src/index.css";
+      import React from "react";
+      import { createRoot } from "react-dom/client";
+      import { installFixtureBridge } from "/src/design/fixtures.ts";
+      import { Providers } from "/src/Providers.tsx";
+      import App from "/src/App.tsx";
+
+      // Must run before App renders: the app's hooks call
+      // window.ipcRenderer.invoke on mount.
+      installFixtureBridge();
+
+      createRoot(document.getElementById("root")).render(
+        React.createElement(Providers, null, React.createElement(App))
+      );
+    </script>
+  </body>
+</html>
