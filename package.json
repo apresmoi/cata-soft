@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "report": "node scripts/report/capture.mjs && node scripts/report/build.mjs"
   },
   "dependencies": {
     "@lexical/html": "0.21.0",
